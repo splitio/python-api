@@ -3,7 +3,8 @@ from functools import partial
 import requests
 from identify.clients import base_client
 from identify.util.logger import LOGGER
-from identify.util.exceptions import HTTPResponseError
+from identify.util.exceptions import HTTPResponseError, HTTPNotFoundError, \
+    HTTPIncorrectParametersError, HTTPUnauthorizedError
 
 
 class SyncHttpClient(base_client.BaseHttpClient):
@@ -11,21 +12,6 @@ class SyncHttpClient(base_client.BaseHttpClient):
     Synchronous API client.
     This client will block on every http request until a response is received.
     '''
-
-    def __init__(self, baseurl, auth_token):
-        '''
-        Class constructor. Sotores basic connection information.
-
-        :param baseurl: string. Identify host and base url.
-        :param auth_token: string. Authentication token needed to make API
-            calls.
-        '''
-        self.config = {
-            'base_url': baseurl,
-            'base_args': {
-                'Authorization': auth_token
-            }
-        }
 
     def setup_method(self, method, body=None):
         '''
@@ -46,6 +32,22 @@ class SyncHttpClient(base_client.BaseHttpClient):
         }
 
         return methods[method]
+
+    def _handle_invalid_response(self, response):
+        '''
+        TODO
+        '''
+        status_codes_exceptions = {
+            404: HTTPNotFoundError,
+            401: HTTPUnauthorizedError,
+            400: HTTPIncorrectParametersError,
+        }
+
+        exc = status_codes_exceptions.get(response.status_code)
+        if exc:
+            raise exc()
+        else:
+            raise HTTPResponseError
 
     def make_request(self, endpoint, body=None, **kwargs):
         '''
@@ -83,7 +85,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
 
         if not response.status_code == 200:
             LOGGER.warning('RESPONSE CODE: %s' % response.status_code)
-            raise HTTPResponseError('Status code is not 200', response)
+            self._handle_invalid_response(response)
 
         if endpoint.get('response', False):
             return json.loads(response.text)

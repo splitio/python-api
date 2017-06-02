@@ -5,15 +5,15 @@ from os import path
 from sys import version_info
 
 install_requires = [
-    'argparse>=1.2.1'
-    'colorlog>=2.10.0'
-    'requests>=2.14.2'
-    'six>=1.10.0'
-    'wsgiref>=0.1.2'
+    'argparse>=1.2.1',
+    'colorlog>=2.10.0',
+    'requests>=2.14.2',
+    'six>=1.10.0',
+    'wsgiref>=0.1.2',
 ]
 
 with open(path.join(path.abspath(path.dirname(__file__)),
-                    'splitio', 'version.py')) as f:
+                    'identify', 'version.py')) as f:
     exec(f.read())
 
 setup(
@@ -28,7 +28,6 @@ setup(
     ),
     license='Apache License 2.0',
     install_requires=install_requires,
-    setup_requires=['nose'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

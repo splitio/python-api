@@ -1,6 +1,6 @@
 import abc
 import re
-
+from identify.util.exceptions import MissingParametersException
 
 class BaseHttpClient:
     '''
@@ -9,6 +9,21 @@ class BaseHttpClient:
     '''
 
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self, baseurl, auth_token):
+        '''
+        Class constructor. Sotores basic connection information.
+
+        :param baseurl: string. Identify host and base url.
+        :param auth_token: string. Authentication token needed to make API
+            calls.
+        '''
+        self.config = {
+            'base_url': baseurl,
+            'base_args': {
+                'Authorization': auth_token
+            }
+        }
 
     @abc.abstractmethod
     def make_request(self, method, body=None, **kwargs):
@@ -37,9 +52,10 @@ class BaseHttpClient:
         '''
         regex = '{([\w-]+)}*'
         url_params = re.findall(regex, url)
-        return url_params if url_params else []
+        return list(set(url_params)) if url_params else []
 
-    def _process_single_header(self, header, value):
+    @staticmethod
+    def _process_single_header(header, value):
         '''
         Checks if the header's value is a templated string. If that is the case,
         the template is instantiated with the correct value. Otherwise the
@@ -56,7 +72,8 @@ class BaseHttpClient:
         else:
             return value
 
-    def _setup_headers(self, endpoint, params):
+    @staticmethod
+    def _setup_headers(endpoint, params):
         '''
         Returns a dictionary with header_name: value format.
         Mandatory headers are always added and an exception will be thrown
@@ -69,16 +86,16 @@ class BaseHttpClient:
         :rtype: dict.
         '''
         headers = {
-            header['name']: self._process_single_header(
+            header['name']: BaseHttpClient._process_single_header(
                 header, params[header['name']]
             )
             for header in endpoint['headers']
-            if header['required']
+            if header.get('required', False)
         }
 
         # add optional headers
         headers.update({
-            header['name']: self._process_single_header(
+            header['name']: BaseHttpClient._process_single_header(
                 header, params[header['name']]
             )
             for header in endpoint['headers']
@@ -101,7 +118,9 @@ class BaseHttpClient:
             endpoint=endpoint['url_template']
         )
 
-        params_for_url = self.get_params_from_url_template(base_template)
+        params_for_url = BaseHttpClient.get_params_from_url_template(
+            base_template
+        )
 
         parameter_values = {
             param: params[param]
@@ -111,7 +130,8 @@ class BaseHttpClient:
 
         return base_template.format(**parameter_values)
 
-    def validate_params(cls, endpoint, all_arguments):
+    @staticmethod
+    def validate_params(endpoint, all_arguments):
         '''
         Checks that all the required parameters are supplied. Raises an
         exception otherwise.
@@ -122,7 +142,7 @@ class BaseHttpClient:
         :rtype: None
         '''
         required_params = (
-            cls.get_params_from_url_template(endpoint['url_template']) +
+            BaseHttpClient.get_params_from_url_template(endpoint['url_template']) +
             [i['name'] for i in endpoint['headers'] if i['required']] +
             [i['name'] for i in endpoint['query_string'] if i['required']]
         )
@@ -130,7 +150,7 @@ class BaseHttpClient:
         missing = [p for p in required_params if p not in all_arguments]
 
         if missing:
-            raise Exception(
+            raise MissingParametersException(
                 'The following required parameters are missing: {missing}'
                 .format(missing=', '.join(missing))
             )
