@@ -12,6 +12,8 @@ install_requires = [
     'wsgiref>=0.1.2',
 ]
 
+tests_requires = ['pytest', 'pytest-mock']
+
 with open(path.join(path.abspath(path.dirname(__file__)),
                     'identify', 'version.py')) as f:
     exec(f.read())
@@ -28,6 +30,9 @@ setup(
     ),
     license='Apache License 2.0',
     install_requires=install_requires,
+    extras_requires= {
+        'tests': tests_requires,
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

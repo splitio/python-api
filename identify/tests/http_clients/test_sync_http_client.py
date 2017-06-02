@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-
 import pytest
 from identify.clients import sync_client
 from identify.clients.sync_client import SyncHttpClient
