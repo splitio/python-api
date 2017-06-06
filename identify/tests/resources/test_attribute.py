@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 from identify.resources.attribute import Attribute
-from identify.clients.sync_client import SyncHttpClient
+from identify.http_clients.sync_client import SyncHttpClient
 
 
 class TestTrafficType:
@@ -54,7 +54,7 @@ class TestTrafficType:
     def test_create(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Attribute.create(sc, '123', '456', 'name', 'desc', 'dt')
         SyncHttpClient.make_request.assert_called_once_with(
@@ -72,7 +72,7 @@ class TestTrafficType:
     def test_delete(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Attribute.delete(sc, '123', '456')
         sc.make_request.assert_called_once_with(

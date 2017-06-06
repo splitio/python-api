@@ -1,7 +1,7 @@
 import json
 from functools import partial
 import requests
-from identify.clients import base_client
+from identify.http_clients import base_client
 from identify.util.logger import LOGGER
 from identify.util.exceptions import HTTPResponseError, HTTPNotFoundError, \
     HTTPIncorrectParametersError, HTTPUnauthorizedError

@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 import pytest
-from identify.clients import sync_client
-from identify.clients.sync_client import SyncHttpClient
+from identify.http_clients import sync_client
+from identify.http_clients.sync_client import SyncHttpClient
 from identify.util.exceptions import HTTPUnauthorizedError, \
     HTTPNotFoundError,  HTTPIncorrectParametersError
 
@@ -27,11 +27,11 @@ class TestSyncHttpClient:
         '''
         c1 = SyncHttpClient('http://a.b.com', 'fake_api_key')
 
-        mocker.patch('identify.clients.sync_client.requests.get')
-        mocker.patch('identify.clients.sync_client.requests.post')
-        mocker.patch('identify.clients.sync_client.requests.put')
-        mocker.patch('identify.clients.sync_client.requests.patch')
-        mocker.patch('identify.clients.sync_client.requests.delete')
+        mocker.patch('identify.http_clients.sync_client.requests.get')
+        mocker.patch('identify.http_clients.sync_client.requests.post')
+        mocker.patch('identify.http_clients.sync_client.requests.put')
+        mocker.patch('identify.http_clients.sync_client.requests.patch')
+        mocker.patch('identify.http_clients.sync_client.requests.delete')
 
         c1.setup_method('GET', None)()
         sync_client.requests.get.assert_called_once_with()
@@ -84,11 +84,11 @@ class TestSyncHttpClient:
         '''
         c1 = SyncHttpClient('http://a.b.com', 'fake_api_key')
 
-        mocker.patch('identify.clients.sync_client.requests.get')
-        mocker.patch('identify.clients.sync_client.requests.post')
-        mocker.patch('identify.clients.sync_client.requests.put')
-        mocker.patch('identify.clients.sync_client.requests.patch')
-        mocker.patch('identify.clients.sync_client.requests.delete')
+        mocker.patch('identify.http_clients.sync_client.requests.get')
+        mocker.patch('identify.http_clients.sync_client.requests.post')
+        mocker.patch('identify.http_clients.sync_client.requests.put')
+        mocker.patch('identify.http_clients.sync_client.requests.patch')
+        mocker.patch('identify.http_clients.sync_client.requests.delete')
 
         cases = [{  # Successful GET
             'endpoint': {

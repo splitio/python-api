@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, \
 
 import pytest
 from identify.resources.identity import Identity
-from identify.clients.sync_client import SyncHttpClient
+from identify.http_clients.sync_client import SyncHttpClient
 from identify.util.exceptions import MethodNotApplicable
 
 
@@ -42,7 +42,7 @@ class TestIdentity:
     def test_create(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Identity.create(sc, 'key', '123', '456', {'asd': 1})
         SyncHttpClient.make_request.assert_called_once_with(
@@ -61,7 +61,7 @@ class TestIdentity:
     def test_create_many(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         entities = {
             'key1': { 'asd': 1},
@@ -90,7 +90,7 @@ class TestIdentity:
     def test_update(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Identity.update(sc, 'key', '123', '456', {'asd': 1})
         SyncHttpClient.make_request.assert_called_once_with(
@@ -109,7 +109,7 @@ class TestIdentity:
     def test_patch(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Identity.patch(sc, 'key', '123', '456', {'asd': 1})
         SyncHttpClient.make_request.assert_called_once_with(
@@ -128,7 +128,7 @@ class TestIdentity:
     def test_delete_all_attributes(self, mocker):
         '''
         '''
-        mocker.patch('identify.clients.sync_client.SyncHttpClient.make_request')
+        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         Identity.delete_all_attributes(sc, '123', '456', 'key')
         SyncHttpClient.make_request.assert_called_once_with(

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 import pytest
-from identify.clients.base_client import BaseHttpClient
+from identify.http_clients.base_client import BaseHttpClient
 from identify.util.exceptions import MissingParametersException
 
 
@@ -62,7 +62,7 @@ class TestBaseHTTPClient:
             'params': {'a': 'test'},
             'expected': ({'name': 'a', 'required': True}, 'test')
         }]
-        with mocker.patch('identify.clients.base_client.BaseHttpClient._process_single_header'):
+        with mocker.patch('identify.http_clients.base_client.BaseHttpClient._process_single_header'):
             for case in cases:
                 BaseHttpClient._setup_headers(case['endpoint'], case['params'])
                 BaseHttpClient._process_single_header.assert_called_once_with(
