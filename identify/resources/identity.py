@@ -80,7 +80,7 @@ class Identity(BaseResource):
                  values=None):
         '''
         '''
-        BaseResource.__init__(self, client, id)
+        BaseResource.__init__(self, client, key)
         self._traffic_type_id = traffic_type_id
         self._key = key
         self._environment_id = environment_id
@@ -257,5 +257,5 @@ class Identity(BaseResource):
         '''
         '''
         return Identity.delete_all_attributes(
-            self.client, self.key, self.traffic_type_id, self.environment_id
+            self._client, self.traffic_type_id, self.environment_id, self.key
         )
