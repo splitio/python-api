@@ -127,9 +127,8 @@ class Attribute(BaseResource):
                          'returning empty result.')
             return None
 
-
     @classmethod
-    def delete(cls, client, traffic_type_id, attribute_id):
+    def delete(cls, client, attribute_id, traffic_type_id):
         '''
         '''
         try:
@@ -144,4 +143,4 @@ class Attribute(BaseResource):
     def delete_this(self):
         '''
         '''
-        return Attribute.delete(self._client, self.traffic_type_id, self._id)
+        return Attribute.delete(self._client, self._id, self.traffic_type_id)

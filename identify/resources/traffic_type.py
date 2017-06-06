@@ -56,6 +56,7 @@ class TrafficType(BaseResource):
         '''
         '''
         return Attribute.create(
+            self._client,
             id,
             self._id,
             display_name,
