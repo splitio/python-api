@@ -65,7 +65,7 @@ class Identity(BaseResource):
                 'required': True,
             }],
             'query_string': [],
-            'response': True,
+            'response': False,
         },
     }
 
