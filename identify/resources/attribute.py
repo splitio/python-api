@@ -1,6 +1,7 @@
 from identify.resources.base_resource import BaseResource
 from identify.util.logger import LOGGER
-from identify.util.exceptions import HTTPResponseError
+from identify.util.exceptions import HTTPResponseError, \
+    UnknownIdentifyClientError
 
 
 class Attribute(BaseResource):
@@ -122,10 +123,12 @@ class Attribute(BaseResource):
                 },
                 trafficTypeId=traffic_type_id
             )
-        except HTTPResponseError:
-            LOGGER.error('Call to Identify API failed. Attribute not created. '
-                         'returning empty result.')
-            return None
+        except HTTPResponseError as e:
+            LOGGER.error('Call to Identify API failed. Attribute not created.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
     @classmethod
     def delete(cls, client, attribute_id, traffic_type_id):
@@ -137,8 +140,12 @@ class Attribute(BaseResource):
                 trafficTypeId=traffic_type_id,
                 attributeId=attribute_id
             )
-        except HTTPResponseError:
+        except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Attribute not deleted.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
     def delete_this(self):
         '''

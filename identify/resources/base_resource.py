@@ -3,7 +3,8 @@ import six
 from identify.util import validation
 from identify.util.logger import LOGGER
 from identify.util.abstract_extra import classabstract_v2
-from identify.util.exceptions import HTTPResponseError, EndpointNotImplemented
+from identify.util.exceptions import HTTPResponseError, \
+    EndpointNotImplemented, UnknownIdentifyClientError
 
 
 class BaseResource:
@@ -47,7 +48,7 @@ class BaseResource:
         LOGGER.debug("Proccesing {n} items".format(n=len(response)))
         return [
             cls._build_single_from_collection_response(client, item)
-            for item in response # .get('objects', [])
+            for item in response
         ]
 
     @classabstract_v2
@@ -88,14 +89,12 @@ class BaseResource:
         try:
             response = client.make_request(endpoint, **kwargs)
             return cls._process_all_response(client, response)
-        except HTTPResponseError:
-            LOGGER.error('Call to Identify API failed, returning empty result')
-            return []
-        except:
-            LOGGER.error('Unknown failure. Returning empty result')
-            import traceback
-            traceback.print_exc()
-            return []
+        except HTTPResponseError as e:
+            LOGGER.error('Error retrieving items')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
     @classmethod
     def _validate(cls, response_item):

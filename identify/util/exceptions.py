@@ -60,3 +60,11 @@ class InsufficientConfigArgumentsException(IdentifyException):
     required arguments (currently `base_url` and `apikey`.
     '''
     pass
+
+
+class UnknownIdentifyClientError(IdentifyException):
+    '''
+    Exception to be thrown when an unexpected error (most probably a bug)
+    happens
+    '''
+    pass

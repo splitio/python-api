@@ -1,5 +1,6 @@
 import subprocess
 import time
+import os
 import os.path
 from identify.main import get_client
 
@@ -11,8 +12,9 @@ class TestEndToEnd:
         '''
         Start mock server
         '''
+        dir_path = os.path.dirname(os.path.realpath(__file__))
         cls.mock_server_subprocess = subprocess.Popen(
-            ['python', os.path.join('identify', 'tests', 'e2e', 'server.py')]
+            ['python', os.path.join(dir_path, 'server.py')]
         )
         time.sleep(5)
 

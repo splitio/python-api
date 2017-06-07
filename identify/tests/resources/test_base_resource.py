@@ -73,6 +73,7 @@ class TestBaseResource:
             }, {
                 'resource': HasAllItemsEndpoint,
                 'client': failed_client,
+                'raises': HTTPResponseError
             }, {
                 'resource': DoesntHaveAllItemsEndpoint,
                 'client': failed_client,
@@ -92,5 +93,3 @@ class TestBaseResource:
                          case['client'],
                          case['process_call_args']
                      ))
-                else:
-                    assert case['resource'].retrieve_all(case['client']) == []

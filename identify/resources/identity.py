@@ -1,5 +1,6 @@
 from identify.resources.base_resource import BaseResource
-from identify.util.exceptions import HTTPResponseError, MethodNotApplicable
+from identify.util.exceptions import HTTPResponseError, MethodNotApplicable, \
+    UnknownIdentifyClientError
 from identify.util.logger import LOGGER
 
 
@@ -125,10 +126,12 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-        except HTTPResponseError:
-            LOGGER.error('Call to Identify API failed. Identity not created. '
-                         'returning empty result.')
-            return None
+        except HTTPResponseError as e:
+            LOGGER.error('Call to Identify API failed. Identity not created.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
         return Identity(
             client,
@@ -159,8 +162,12 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-        except HTTPResponseError:
+        except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Identities not created.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
     @classmethod
     def update(cls, client, key, traffic_type_id, environment_id, values):
@@ -179,10 +186,12 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-        except HTTPResponseError:
-            LOGGER.error('Call to Identify API failed. Identity not updated. '
-                         'Returning empty result')
-            return None
+        except HTTPResponseError as e:
+            LOGGER.error('Call to Identify API failed. Identity not updated.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
         return Identity(
             client,
@@ -209,10 +218,12 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-        except HTTPResponseError:
-            LOGGER.error('Call to Identify API failed. Identity not patched. '
-                         'Returning empty result')
-            return None
+        except HTTPResponseError as e:
+            LOGGER.error('Call to Identify API failed. Identity not patched.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
         return Identity(
             client,
@@ -234,8 +245,12 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-        except HTTPResponseError:
+        except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Identity not patched.')
+            raise e
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError()
 
     def update_this(self, values):
         '''
