@@ -30,6 +30,7 @@ setup(
     ),
     license='Apache License 2.0',
     install_requires=install_requires,
+    setup_requires=['pytest-runner'],
     extras_requires= {
         'tests': tests_requires,
     },
