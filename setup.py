@@ -12,7 +12,7 @@ install_requires = [
     'wsgiref>=0.1.2',
 ]
 
-tests_requires = ['pytest', 'pytest-mock']
+tests_requires = ['pytest', 'pytest-mock', 'tornado']
 
 with open(path.join(path.abspath(path.dirname(__file__)),
                     'identify', 'version.py')) as f:
