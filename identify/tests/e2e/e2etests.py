@@ -147,9 +147,17 @@ class TestEndToEnd:
                 'key2': {'b1': 'c', 'c2': 'c'},
             }
         )
-        assert res_add_identities is None
         assert isinstance(res_add_identities, list)
         assert all(isinstance(i, Identity) for i in res_add_identities)
+        assert all(
+            {
+                'key': i.key,
+                'trafficTypeId': i.traffic_type_id,
+                'environmentId': i.environment_id,
+                'values': i.values,
+            } == i.to_dict()
+            for i in res_add_identities
+        )
 
         res_delete_attr = c.delete_attributes_from_key('1',  '1', 'keycita')
         assert res_delete_attr is None

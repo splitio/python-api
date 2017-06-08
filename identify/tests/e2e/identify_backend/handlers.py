@@ -113,6 +113,5 @@ class MultiIdentityHandler(tornado.web.RequestHandler):
         '''
         '''
         jbody = tornado.escape.json_decode(self.request.body)
-        for entity in jbody:
-            print entity
+        self.write(json.dumps(jbody))
         self.finish()
