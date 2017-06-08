@@ -3,6 +3,10 @@ import time
 import os
 import os.path
 from identify.main import get_client
+from identify.resources.traffic_type import TrafficType
+from identify.resources.environment import Environment
+from identify.resources.attribute import Attribute
+from identify.resources.identity import Identity
 
 
 class TestEndToEnd:
@@ -16,12 +20,10 @@ class TestEndToEnd:
         cls.mock_server_subprocess = subprocess.Popen(
             ['python', os.path.join(dir_path, 'server.py')]
         )
-        time.sleep(5)
+        time.sleep(3)
 
-    def test_successful_command_sequence(self):
+    def test_traffic_type_endpoint(self):
         '''
-        Test a basic command sequence using the get_client entry point function,
-        issuing calls to a mocked API running in background.
         '''
         c = get_client({
             'base_url': 'http://localhost:8888',
@@ -30,39 +32,112 @@ class TestEndToEnd:
 
         tts = c.get_traffic_types()
         assert isinstance(tts, list)
+        assert all(isinstance(tt, TrafficType) for tt in tts)
+        assert all(
+            {
+                'id': tt.id,
+                'name': tt.name,
+                'displayAttributeId': tt.display_attribute_id
+            } == tt.to_dict()
+            for tt in tts
+        )
+
+    def test_environments_endpoint(self):
+        '''
+        '''
+        c = get_client({
+            'base_url': 'http://localhost:8888',
+            'apikey': 'Admin'
+        })
 
         envs = c.get_environments()
         assert isinstance(envs, list)
+        assert all(isinstance(env, Environment) for env in envs)
+        assert all(
+            {
+                'id': env.id,
+                'name': env.name,
+            } == env.to_dict()
+            for env in envs
+        )
 
-        attrs = c.get_attributes_for_traffic_type(tts[0].id)
+    def test_attribute_endpoints(self):
+        '''
+        '''
+        c = get_client({
+            'base_url': 'http://localhost:8888',
+            'apikey': 'Admin'
+        })
+
+        attrs = c.get_attributes_for_traffic_type('1')
         assert isinstance(attrs, list)
+        assert all(isinstance(attr, Attribute) for attr in attrs)
+        assert all(
+            {
+                'id': attr.id,
+                'trafficTypeId': attr.traffic_type_id,
+                'displayName': attr.display_name,
+                'description': attr.description,
+                'dataType': attr.data_type,
+            } == attr.to_dict()
+            for attr in attrs
+        )
 
+        new_attr_props = {
+            'id': 'aa',
+            'trafficTypeId': '1',
+            'displayName': 'AA',
+            'description': 'DESC',
+            'dataType': 'STRING'
+        }
         new_attr = c.create_attribute_for_traffic_type(
-            1,
+            '1',
             {
                 'id': 'aa',
-                'display_name': 'AA',
+                'displayName': 'AA',
                 'description': 'DESC',
-                'data_type': 'STRING'
+                'dataType': 'STRING'
             }
         )
-        assert isinstance(new_attr, object)
+        assert new_attr_props == new_attr.to_dict()
 
-        attrs_2 = c.get_attributes_for_traffic_type(tts[0].id)
-        assert isinstance(attrs_2, list)
+        res_delete = c.delete_attribute_from_schema(1, 'aa')
+        assert res_delete is None
 
-        c.delete_attribute_from_schema(1, 'aa')
-        attrs_3 = c.get_attributes_for_traffic_type(tts[0].id)
-        assert isinstance(attrs_3, list)
+    def test_identity_endpoints(self):
+        '''
+        '''
+        c = get_client({
+            'base_url': 'http://localhost:8888',
+            'apikey': 'Admin'
+        })
 
         i1 = c.add_identity('1',  '1', 'keycita', {'a1': 'qwe'})
-        assert isinstance(i1, object)
+        assert isinstance(i1, Identity)
+        assert {
+            'key': i1.key,
+            'environmentId': i1.environment_id,
+            'trafficTypeId': i1.traffic_type_id,
+            'values': i1.values
+        } == i1.to_dict()
 
         i2 = c.update_identity('1',  '1', 'keycita', {'a1': 'qwe2'})
-        assert isinstance(i2, object)
+        assert isinstance(i2, Identity)
+        assert {
+            'key': i2.key,
+            'environmentId': i2.environment_id,
+            'trafficTypeId': i2.traffic_type_id,
+            'values': i2.values
+        } == i2.to_dict()
 
         i3 = c.patch_identity('1',  '1', 'keycita', {'a1': 'qwe3'})
-        assert isinstance(i3, object)
+        assert isinstance(i3, Identity)
+        assert {
+            'key': i3.key,
+            'environmentId': i3.environment_id,
+            'trafficTypeId': i3.traffic_type_id,
+            'values': i3.values
+        } == i3.to_dict()
 
         res_add_identities = c.add_identities(
             '1',
@@ -73,6 +148,8 @@ class TestEndToEnd:
             }
         )
         assert res_add_identities is None
+        assert isinstance(res_add_identities, list)
+        assert all(isinstance(i, Identity) for i in res_add_identities)
 
         res_delete_attr = c.delete_attributes_from_key('1',  '1', 'keycita')
         assert res_delete_attr is None

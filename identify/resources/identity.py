@@ -148,7 +148,7 @@ class Identity(BaseResource):
         '''
         # TODO: Validate!
         try:
-            client.make_request(
+            response = client.make_request(
                 cls._endpoint['create_many'],
                 [
                     {
@@ -162,6 +162,13 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
+            return [
+                Identity(
+                    client, i['key'], i['trafficTypeId'],
+                    i['environmentId'], i['values']
+                ) for i in response
+            ]
+
         except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Identities not created.')
             raise e

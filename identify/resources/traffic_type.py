@@ -28,12 +28,12 @@ class TrafficType(BaseResource):
         'displayAttributeId': 'string'
     }
 
-    def __init__(self, client, id, name=None, display_name=None):
+    def __init__(self, client, id, name=None, display_attribute_id=None):
         '''
         '''
         BaseResource.__init__(self, client, id)
         self._name = name
-        self._display_name = display_name
+        self._display_attribute_id = display_attribute_id
 
     @property
     def id(self):
@@ -44,22 +44,22 @@ class TrafficType(BaseResource):
         return self._name
 
     @property
-    def display_name(self):
-        return self._display_name
+    def display_attribute_id(self):
+        return self._display_attribute_id
 
     def fetch_attributes(self):
         '''
         '''
         return Attribute.retrieve_all(self._client, trafficTypeId=self._id)
 
-    def add_attribute(self, id, display_name, description, data_type):
+    def add_attribute(self, id, display_attribute_id, description, data_type):
         '''
         '''
         return Attribute.create(
             self._client,
             id,
             self._id,
-            display_name,
+            display_attribute_id,
             description,
             data_type
         )

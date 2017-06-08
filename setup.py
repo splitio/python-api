@@ -7,7 +7,6 @@ import pkg_resources
 from setuptools import setup, find_packages
 from os import path
 from distutils.cmd import Command
-from sys import version_info
 
 
 @contextlib.contextmanager
@@ -68,7 +67,7 @@ class E2ETests(Command):
             'e2e',
             'e2etests.py'
         )
-        return ['pytest'] + [le2e_test_file] + self.addopts
+        return ['pytest', '-v'] + [le2e_test_file] + self.addopts
 
     def run(self):
         '''
@@ -102,10 +101,11 @@ locale2e_requires = [
 ]
 
 
-# Setup execution
+# Get version number
 with open(path.join(path.abspath(path.dirname(__file__)),
                     'identify', 'version.py')) as f:
     exec(f.read())
+# Run setup!
 setup(
     name='identify_client',
     version=__version__,  # noqa

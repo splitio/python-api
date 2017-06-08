@@ -94,17 +94,6 @@ class Attribute(BaseResource):
             response['dataType']
         )
 
-    def to_dict(self):
-        temp = {
-            'id': self.id,
-            'trafficTypeId': self.traffic_type_id,
-            'displayName': self.display_name,
-            'description': self.description,
-            'dataType': self.data_type
-        }
-
-        return temp
-
     @classmethod
     def create(cls, client, id, traffic_type_id, display_name, description,
                data_type):
@@ -112,7 +101,7 @@ class Attribute(BaseResource):
         '''
         # TODO: Validate!
         try:
-            client.make_request(
+            response = client.make_request(
                 cls._endpoint['create'],
                 {
                     'id': id,
@@ -123,6 +112,16 @@ class Attribute(BaseResource):
                 },
                 trafficTypeId=traffic_type_id
             )
+
+            return Attribute(
+                client,
+                response['id'],
+                response['trafficTypeId'],
+                response['displayName'],
+                response['description'],
+                response['dataType']
+            )
+
         except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Attribute not created.')
             raise e

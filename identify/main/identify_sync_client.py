@@ -66,17 +66,17 @@ class SyncIdentifyClient(BaseIdentifyClient):
         :param attr_data: Dictionary with the the data to create the new
             attribute. Should include the followind fields:
                 - 'id': Id of the new attribute
-                - 'display_name': Display Name of the new attribute
+                - 'displayName': Display Name of the new attribute
                 - 'description': Description of the new attribute
-                - 'data_type': Data type of the new attribute
+                - 'dataType': Data type of the new attribute
         '''
         return Attribute.create(
             self._client,
             attr_data.get('id'),
             traffic_type_id,
-            attr_data.get('display_name'),
+            attr_data.get('displayName'),
             attr_data.get('description'),
-            attr_data.get('data_type')
+            attr_data.get('dataType')
         )
 
     def delete_attribute_from_schema(self, traffic_type_id, attribute_id):

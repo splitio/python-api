@@ -113,13 +113,15 @@ class BaseResource:
 
     def to_dict(self):
         '''
+        Returns a dictionary with the property names in camelCase, in compliance
+        with the Identify backend
         '''
         try:
             temp = {
                 attribute: getattr(
                     self, '_' + camelcase.to_underscore(attribute),
-                    None)
-                for attribute in self._schema
+                    None
+                ) for attribute in self._schema
             }
             return temp
         except Exception as e:

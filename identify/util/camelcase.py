@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 import re
 
 
@@ -11,10 +13,14 @@ def to_underscore(name):
 
 
 def from_underscore(name):
-    def camelcase():
-        yield str.lower
-        while True:
-            yield str.capitalize
 
-    c = camelcase()
-    return ''.join(c.next()(x) if x else '_' for x in name.split("_"))
+    if not name:
+        return ''
+
+    def camelcase_func_it():
+        yield 'lower'
+        while True:
+            yield 'capitalize'
+
+    c = camelcase_func_it()
+    return ''.join(getattr(x, next(c))() if x else '_' for x in name.split("_"))
