@@ -3,6 +3,7 @@ import six
 from identify.util import validation
 from identify.util.logger import LOGGER
 from identify.util.abstract_extra import classabstract_v2
+from identify.util import camelcase
 from identify.util.exceptions import HTTPResponseError, \
     EndpointNotImplemented, UnknownIdentifyClientError
 
@@ -109,3 +110,18 @@ class BaseResource:
             validation.is_correct_type(value, cls._schema.get(key))
             for key, value in six.iteritems(response_item)
         )
+
+    def to_dict(self):
+        '''
+        '''
+        try:
+            temp = {
+                attribute: getattr(
+                    self, '_' + camelcase.to_underscore(attribute),
+                    None)
+                for attribute in self._schema
+            }
+            return temp
+        except Exception as e:
+            LOGGER.debug(e)
+            raise UnknownIdentifyClientError
