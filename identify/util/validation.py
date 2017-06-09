@@ -14,7 +14,7 @@ _validators = {
 def is_correct_type(value, schema_type):
     '''
     '''
-    validator = _validators.get(schema_type)
+    validator = _validators.get(schema_type.lower())
     if validator is not None:
         return validator(value)
     else:

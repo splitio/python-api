@@ -4,7 +4,7 @@ import abc
 import six
 from identify.util import validation
 from identify.util.logger import LOGGER
-from identify.util.abstract_extra import classabstract, staticabstract
+from identify.util.abstract_extra import classabstract
 from identify.util import camelcase
 from identify.util.exceptions import HTTPResponseError, \
     EndpointNotImplemented, UnknownIdentifyClientError

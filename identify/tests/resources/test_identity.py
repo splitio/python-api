@@ -64,28 +64,44 @@ class TestIdentity:
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         entities = {
-            'key1': { 'asd': 1},
-            'key2': { 'asd': 2},
+            'key1': {'asd': 1},
+            'key2': {'asd': 2},
         }
         Identity.create_many(sc, '123', '456', entities)
-        SyncHttpClient.make_request.assert_called_once_with(
-            Identity._endpoint['create_many'],
-            [{
-                'key': 'key2',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 2},
 
-            },
-            {
-                'key': 'key1',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 1},
-            }],
+        # Because Python2 & Python3 use different hash functions to bucket
+        # dictionary keys, any identity may come first, so we need to assert
+        # that make_request has been called with either the 'key1' identity
+        # first or the 'key2' identity first
+
+        ikey1 = {
+            'key': 'key1',
+            'trafficTypeId': '123',
+            'environmentId': '456',
+            'values': {'asd': 1},
+        }
+        ikey2 = {
+            'key': 'key2',
+            'trafficTypeId': '123',
+            'environmentId': '456',
+            'values': {'asd': 2},
+        }
+
+        call1 = mocker.call(
+            Identity._endpoint['create_many'],
+            [ikey1, ikey2],
             trafficTypeId='123',
-            environmentId='456',
+            environmentId='456'
         )
+        call2 = mocker.call(
+            Identity._endpoint['create_many'],
+            [ikey2, ikey1],
+            trafficTypeId='123',
+            environmentId='456'
+        )
+
+        assert ((call1 == SyncHttpClient.make_request.call_args) or
+                (call2 == SyncHttpClient.make_request.call_args))
 
     def test_update(self, mocker):
         '''
@@ -144,7 +160,7 @@ class TestIdentity:
         mocker.patch('identify.resources.identity.Identity.update')
         sc = SyncHttpClient('abc', 'abc')
         attr = Identity(sc, 'key', '123', '456', {'asd': '1'})
-        attr.update_this({'asd':'2'})
+        attr.update_this({'asd': '2'})
         Identity.update.assert_called_once_with(
             sc,
             'key',
@@ -159,7 +175,7 @@ class TestIdentity:
         mocker.patch('identify.resources.identity.Identity.patch')
         sc = SyncHttpClient('abc', 'abc')
         attr = Identity(sc, 'key', '123', '456', {'asd': '1'})
-        attr.patch_this({'qwe':'3'})
+        attr.patch_this({'qwe': '3'})
         Identity.patch.assert_called_once_with(
             sc,
             'key',
