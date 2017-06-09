@@ -20,7 +20,7 @@ handler.setFormatter(colorlog.ColoredFormatter(
 
 LOGGER = colorlog.getLogger('IDENTIFY')
 LOGGER.addHandler(handler)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.CRITICAL)
 
 
 def set_level(strlevel):
