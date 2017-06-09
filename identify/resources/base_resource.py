@@ -119,7 +119,7 @@ class BaseResource(six.with_metaclass(abc.ABCMeta)):
         try:
             temp = {
                 attribute: getattr(
-                    self, '_' + camelcase.to_underscore(attribute),
+                    self, camelcase.to_underscore(attribute),
                     None
                 ) for attribute in self._schema
             }
