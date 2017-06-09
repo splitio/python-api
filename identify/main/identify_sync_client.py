@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 from identify.main.identify_client import BaseIdentifyClient
 from identify.http_clients.sync_client import SyncHttpClient
 from identify.resources.traffic_type import TrafficType

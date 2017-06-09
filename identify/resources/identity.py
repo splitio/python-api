@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 from identify.resources.base_resource import BaseResource
 from identify.util.exceptions import HTTPResponseError, MethodNotApplicable, \
     UnknownIdentifyClientError

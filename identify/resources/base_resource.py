@@ -1,19 +1,19 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 import abc
 import six
 from identify.util import validation
 from identify.util.logger import LOGGER
-from identify.util.abstract_extra import classabstract_v2
+from identify.util.abstract_extra import classabstract, staticabstract
 from identify.util import camelcase
 from identify.util.exceptions import HTTPResponseError, \
     EndpointNotImplemented, UnknownIdentifyClientError
 
 
-class BaseResource:
+class BaseResource(six.with_metaclass(abc.ABCMeta)):
     '''
     Abstract class to handle resources uniformely.
     '''
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, client, id):
         '''
@@ -52,7 +52,7 @@ class BaseResource:
             for item in response
         ]
 
-    @classabstract_v2
+    @classabstract
     def _build_single_from_collection_response(cls, client, response):
         '''
         Abstract Class method to construct a resource instance from a single

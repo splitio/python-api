@@ -28,8 +28,8 @@ class TestBaseHTTPClient:
 
         for case in cases:
             assert (
-                BaseHttpClient.get_params_from_url_template(case['url']) ==
-                case['params']
+                set(BaseHttpClient.get_params_from_url_template(case['url'])) ==
+                set(case['params'])
             )
 
     def test_process_single_header(self):

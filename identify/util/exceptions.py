@@ -1,3 +1,7 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
+
+
 class IdentifyException(Exception):
     '''
     Identify Base Exception class that can be used to catch all identify-related

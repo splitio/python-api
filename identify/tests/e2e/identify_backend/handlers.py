@@ -1,29 +1,30 @@
 import json
 import tornado.web
 import tornado.escape
-from types import MethodType
 from identify_backend import responses
 
 
-def auth(self):
-    if not self.request.headers.get('Authorization') == 'Bearer Admin':
-        self.set_status(401)
-        self.finish()
+class BaseHandler(tornado.web.RequestHandler):
+    def auth(self):
+        if not self.request.headers.get('Authorization') == 'Bearer Admin':
+            self.set_status(401)
+            self.finish()
+            return False
+        return True
 
 
-class TrafficTypesHandler(tornado.web.RequestHandler):
+class TrafficTypesHandler(BaseHandler):
     def get(self):
-        bound_auth = MethodType(auth, self, TrafficTypesHandler)
-        bound_auth()
-        self.write(json.dumps(responses.traffic_types_all))
+        if self.auth():
+            self.write(json.dumps(responses.traffic_types_all))
 
 
-class EnvironmentsHandler(tornado.web.RequestHandler):
+class EnvironmentsHandler(BaseHandler):
     def get(self):
         self.write(json.dumps(responses.environments_all))
 
 
-class TrafficTypeAttributesHandler(tornado.web.RequestHandler):
+class TrafficTypeAttributesHandler(BaseHandler):
     def get(self, traffic_type_id):
         attrs = responses.traffic_type_attributes.get(traffic_type_id)
         if attrs:
@@ -63,7 +64,7 @@ class TrafficTypeAttributesHandler(tornado.web.RequestHandler):
             self.finish()
 
 
-class IdentityHandler(tornado.web.RequestHandler):
+class IdentityHandler(BaseHandler):
     '''
     '''
     def put(self, traffic_type_id, environment_id, key):
@@ -106,7 +107,7 @@ class IdentityHandler(tornado.web.RequestHandler):
         self.finish()
 
 
-class MultiIdentityHandler(tornado.web.RequestHandler):
+class MultiIdentityHandler(BaseHandler):
     '''
     '''
     def put(self, traffic_type_id, environment_id):

@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 import tornado.ioloop
 import tornado.web
 from identify_backend.handlers import EnvironmentsHandler, IdentityHandler, \

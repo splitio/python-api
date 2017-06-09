@@ -1,14 +1,15 @@
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 import abc
 import re
+import six
 from identify.util.exceptions import MissingParametersException
 
-class BaseHttpClient:
+class BaseHttpClient(six.with_metaclass(abc.ABCMeta)):
     '''
     Abstrac class providing an interface and generic methods of the HTTP client
     responsible for interacting with the Identify APIs
     '''
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, baseurl, auth_token):
         '''
