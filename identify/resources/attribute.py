@@ -110,7 +110,7 @@ class Attribute(BaseResource):
                     'trafficTypeId': traffic_type_id,
                     'displayName': display_name,
                     'description': description,
-                    'dataType': data_type.upper()
+                    'dataType': None if data_type is None else data_type.upper()
                 },
                 trafficTypeId=traffic_type_id
             )

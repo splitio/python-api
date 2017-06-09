@@ -90,3 +90,6 @@ ENV/
 
 #vim backup files
 *.swp
+
+#IDE
+.idea
