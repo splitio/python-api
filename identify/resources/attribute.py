@@ -50,11 +50,12 @@ class Attribute(BaseResource):
         'trafficTypeId': 'string',
         'displayName': 'string',
         'description': 'string',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': 'string',
     }
 
     def __init__(self, client, id, traffic_type_id, display_name=None,
-                 description=None, data_type=None):
+                 description=None, data_type=None, is_searchable=None):
         '''
         '''
         BaseResource.__init__(self, client, id)
@@ -62,6 +63,7 @@ class Attribute(BaseResource):
         self._display_name = display_name
         self._description = description
         self._data_type = data_type
+        self._is_searchable = is_searchable
 
     @property
     def id(self):
@@ -83,6 +85,10 @@ class Attribute(BaseResource):
     def data_type(self):
         return self._data_type
 
+    @property
+    def is_searchable(self):
+        return self._is_searchable
+
     @classmethod
     def _build_single_from_collection_response(cls, client, response):
         '''
@@ -93,12 +99,13 @@ class Attribute(BaseResource):
             response['trafficTypeId'],
             response['displayName'],
             response['description'],
-            response['dataType']
+            response['dataType'],
+            response.get('isSearchable')
         )
 
     @classmethod
     def create(cls, client, id, traffic_type_id, display_name, description,
-               data_type):
+               data_type, is_searchable):
         '''
         '''
         # TODO: Validate!
@@ -110,6 +117,7 @@ class Attribute(BaseResource):
                     'trafficTypeId': traffic_type_id,
                     'displayName': display_name,
                     'description': description,
+                    'isSearchable': is_searchable,
                     'dataType': None if data_type is None else data_type.upper()
                 },
                 trafficTypeId=traffic_type_id
@@ -121,7 +129,8 @@ class Attribute(BaseResource):
                 response['trafficTypeId'],
                 response['displayName'],
                 response['description'],
-                response['dataType']
+                response['dataType'],
+                response.get('isSearchable')
             )
 
         except HTTPResponseError as e:

@@ -78,7 +78,8 @@ class SyncIdentifyClient(BaseIdentifyClient):
             traffic_type_id,
             attr_data.get('displayName'),
             attr_data.get('description'),
-            attr_data.get('dataType')
+            attr_data.get('dataType'),
+            attr_data.get('isSearchable')
         )
 
     def delete_attribute_from_schema(self, traffic_type_id, attribute_id):

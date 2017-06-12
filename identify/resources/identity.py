@@ -144,7 +144,7 @@ class Identity(BaseResource):
         )
 
     @classmethod
-    def create_many(cls, client, traffic_type_id, environment_id, entities):
+    def create_many(cls, client, traffic_type_id, environment_id, identities):
         '''
         entities: { key: { attr_id: value, ...} }
         '''
@@ -157,9 +157,9 @@ class Identity(BaseResource):
                         'key': key,
                         'trafficTypeId': traffic_type_id,
                         'environmentId': environment_id,
-                        'values': entities[key]
+                        'values': identities[key]
                     }
-                    for key in entities.keys()
+                    for key in identities.keys()
                 ],
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
