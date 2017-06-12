@@ -23,7 +23,7 @@ class Identity(BaseResource):
             'response': True,
         },
         'create_many': {
-            'method': 'PUT',
+            'method': 'POST',
             'url_template': ('trafficTypes/{trafficTypeId}/environments'
                              '/{environmentId}/identities'),
             'headers': [{
@@ -168,7 +168,7 @@ class Identity(BaseResource):
                 Identity(
                     client, i['key'], i['trafficTypeId'],
                     i['environmentId'], i['values']
-                ) for i in response
+                ) for i in response['objects']
             ]
 
         except HTTPResponseError as e:
