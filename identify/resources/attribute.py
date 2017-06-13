@@ -51,7 +51,7 @@ class Attribute(BaseResource):
         'displayName': 'string',
         'description': 'string',
         'dataType': 'string',
-        'isSearchable': 'string',
+        'isSearchable': 'bool',
     }
 
     def __init__(self, client, id, traffic_type_id, display_name=None,

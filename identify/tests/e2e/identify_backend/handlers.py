@@ -110,9 +110,13 @@ class IdentityHandler(BaseHandler):
 class MultiIdentityHandler(BaseHandler):
     '''
     '''
-    def put(self, traffic_type_id, environment_id):
+    def post(self, traffic_type_id, environment_id):
         '''
         '''
         jbody = tornado.escape.json_decode(self.request.body)
-        self.write(json.dumps(jbody))
+        self.write(json.dumps({
+            'objects': jbody,
+            'failed': [],
+            'metadata': {},
+        }))
         self.finish()

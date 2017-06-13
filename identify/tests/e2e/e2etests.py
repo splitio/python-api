@@ -29,7 +29,8 @@ class TestEndToEnd:
         '''
         c = get_client({
             'base_url': 'http://localhost:8888',
-            'apikey': 'Admin'
+            'apikey': 'Admin',
+            'log_level': 'debug'
         })
 
         tts = c.get_traffic_types()
@@ -49,7 +50,8 @@ class TestEndToEnd:
         '''
         c = get_client({
             'base_url': 'http://localhost:8888',
-            'apikey': 'Admin'
+            'apikey': 'Admin',
+            'log_level': 'debug'
         })
 
         envs = c.get_environments()
@@ -68,7 +70,8 @@ class TestEndToEnd:
         '''
         c = get_client({
             'base_url': 'http://localhost:8888',
-            'apikey': 'Admin'
+            'apikey': 'Admin',
+            'log_level': 'debug'
         })
 
         attrs = c.get_attributes_for_traffic_type('1')
@@ -81,6 +84,7 @@ class TestEndToEnd:
                 'displayName': attr.display_name,
                 'description': attr.description,
                 'dataType': attr.data_type,
+                'isSearchable': attr.is_searchable
             } == attr.to_dict()
             for attr in attrs
         )
@@ -90,7 +94,8 @@ class TestEndToEnd:
             'trafficTypeId': '1',
             'displayName': 'AA',
             'description': 'DESC',
-            'dataType': 'STRING'
+            'dataType': 'STRING',
+            'isSearchable': False,
         }
         new_attr = c.create_attribute_for_traffic_type(
             '1',
@@ -98,7 +103,8 @@ class TestEndToEnd:
                 'id': 'aa',
                 'displayName': 'AA',
                 'description': 'DESC',
-                'dataType': 'STRING'
+                'dataType': 'STRING',
+                'isSearchable': False,
             }
         )
         assert new_attr_props == new_attr.to_dict()
@@ -111,7 +117,8 @@ class TestEndToEnd:
         '''
         c = get_client({
             'base_url': 'http://localhost:8888',
-            'apikey': 'Admin'
+            'apikey': 'Admin',
+            'log_level': 'debug'
         })
 
         i1 = c.add_identity('1',  '1', 'keycita', {'a1': 'qwe'})
@@ -149,8 +156,10 @@ class TestEndToEnd:
                 'key2': {'b1': 'c', 'c2': 'c'},
             }
         )
-        assert isinstance(res_add_identities, list)
-        assert all(isinstance(i, Identity) for i in res_add_identities)
+        assert isinstance(res_add_identities, tuple)
+        objs, failed = res_add_identities
+        assert all(isinstance(i, Identity) for i in objs)
+        assert all(isinstance(i['object'], Identity) for i in failed)
         assert all(
             {
                 'key': i.key,
@@ -158,7 +167,7 @@ class TestEndToEnd:
                 'environmentId': i.environment_id,
                 'values': i.values,
             } == i.to_dict()
-            for i in res_add_identities
+            for i in objs
         )
 
         res_delete_attr = c.delete_attributes_from_key('1',  '1', 'keycita')

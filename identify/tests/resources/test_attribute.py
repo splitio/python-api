@@ -18,7 +18,9 @@ class TestTrafficType:
             'identify.resources.base_resource.BaseResource.__init__',
             new=mock_init
         )
-        tt = Attribute(client, '123', '456', 'display_name', 'desc', 'dt')
+        tt = Attribute(
+            client, '123', '456', 'display_name', 'desc', 'dt', False
+        )
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(tt, client, '123')
 
@@ -40,6 +42,7 @@ class TestTrafficType:
                 'displayName': 'name',
                 'description': 'desc',
                 'dataType': 'dt',
+                'isSearchable': False,
             }
         )
         Attribute.__init__.assert_called_once_with(
@@ -48,7 +51,8 @@ class TestTrafficType:
             '456',
             'name',
             'desc',
-            'dt'
+            'dt',
+            False
         )
 
     def test_create(self, mocker):
@@ -56,7 +60,7 @@ class TestTrafficType:
         '''
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        Attribute.create(sc, '123', '456', 'name', 'desc', 'dt')
+        Attribute.create(sc, '123', '456', 'name', 'desc', 'dt', False)
         SyncHttpClient.make_request.assert_called_once_with(
             Attribute._endpoint['create'],
             {
@@ -64,7 +68,8 @@ class TestTrafficType:
                 'trafficTypeId': '456',
                 'displayName': 'name',
                 'description': 'desc',
-                'dataType': 'DT'
+                'dataType': 'DT',
+                'isSearchable': False,
             },
             trafficTypeId='456'
         )
@@ -86,7 +91,7 @@ class TestTrafficType:
         '''
         mocker.patch('identify.resources.attribute.Attribute.delete')
         sc = SyncHttpClient('abc', 'abc')
-        attr = Attribute(sc, '123', '456', 'name', 'desc', 'dt')
+        attr = Attribute(sc, '123', '456', 'name', 'desc', 'dt', False)
         attr.delete_this()
         Attribute.delete.assert_called_once_with(
             sc,

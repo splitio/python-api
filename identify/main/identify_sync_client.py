@@ -92,8 +92,7 @@ class SyncIdentifyClient(BaseIdentifyClient):
         '''
         return Attribute.delete(self._client, attribute_id, traffic_type_id)
 
-    def add_identities(self, traffic_type_id, environment_id, identities,
-                       organization_id=None):
+    def add_identities(self, traffic_type_id, environment_id, identities):
         '''
         Create Identities for a specific traffic type and environment.
 
@@ -117,11 +116,9 @@ class SyncIdentifyClient(BaseIdentifyClient):
             traffic_type_id,
             environment_id,
             identities,
-            organization_id
         )
 
-    def add_identity(self, traffic_type_id, environment_id, key, values,
-                     organization_id=None):
+    def add_identity(self, traffic_type_id, environment_id, key, values):
         '''
         Create a new Identity.
 
@@ -140,12 +137,10 @@ class SyncIdentifyClient(BaseIdentifyClient):
             key,
             traffic_type_id,
             environment_id,
-            values,
-            organization_id
+            values
         )
 
-    def update_identity(self, traffic_type_id, environment_id, key, values,
-                        organization_id=None):
+    def update_identity(self, traffic_type_id, environment_id, key, values):
         '''
         Update an Identity.
 
@@ -164,12 +159,10 @@ class SyncIdentifyClient(BaseIdentifyClient):
             key,
             traffic_type_id,
             environment_id,
-            values,
-            organization_id
+            values
         )
 
-    def patch_identity(self, traffic_type_id, environment_id, key, values,
-                       organization_id=None):
+    def patch_identity(self, traffic_type_id, environment_id, key, values):
         '''
         Patch an Identity.
 
@@ -188,8 +181,7 @@ class SyncIdentifyClient(BaseIdentifyClient):
             key,
             traffic_type_id,
             environment_id,
-            values,
-            organization_id
+            values
         )
 
     def delete_attributes_from_key(self, traffic_type_id, environment_id, key):

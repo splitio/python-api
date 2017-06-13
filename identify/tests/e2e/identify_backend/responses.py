@@ -23,13 +23,15 @@ traffic_type_attributes = {
         'trafficTypeId': '1',
         'displayName': 'Attribute 1a',
         'description': 'Description of attribute 1a',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': False,
         }, {
         'id': '1b',
         'trafficTypeId': '1',
         'displayName': 'Attribute 1b',
         'description': 'Description of attribute 1b',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': False,
         }
     ],
     '2': [{
@@ -37,13 +39,15 @@ traffic_type_attributes = {
         'trafficTypeId': '2',
         'displayName': 'Attribute 2a',
         'description': 'Description of attribute 2a',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': False,
         }, {
         'id': '2b',
         'trafficTypeId': '2',
         'displayName': 'Attribute 2b',
         'description': 'Description of attribute 2b',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': False,
         }
     ]
 }
