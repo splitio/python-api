@@ -77,10 +77,12 @@ class Identity(BaseResource):
         'trafficTypeId': 'string',
         'environmentId': 'string',
         'values': 'object',
+        'organizationId': 'string',
+        'timestamp': 'string',
     }
 
     def __init__(self, client, key, traffic_type_id, environment_id,
-                 values=None):
+                 values=None, organization_id=None, timestamp=None):
         '''
         '''
         BaseResource.__init__(self, client, key)
@@ -88,6 +90,8 @@ class Identity(BaseResource):
         self._key = key
         self._environment_id = environment_id
         self._values = values
+        self._organization_id = organization_id
+        self._timestamp = timestamp
 
     @property
     def key(self):
@@ -105,6 +109,14 @@ class Identity(BaseResource):
     def values(self):
         return self._values
 
+    @property
+    def organization_id(self):
+        return self._organization_id
+
+    @property
+    def timestamp(self):
+        return self._timestamp
+
     @classmethod
     def _build_single_from_collection_response(cls, client, response):
         '''
@@ -112,7 +124,8 @@ class Identity(BaseResource):
         raise MethodNotApplicable()
 
     @classmethod
-    def create(cls, client, key, traffic_type_id, environment_id, values):
+    def create(cls, client, key, traffic_type_id, environment_id, values,
+               organization_id=None):
         '''
         '''
         try:
@@ -122,6 +135,7 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
+                    'organization_id': organization_id,
                     'values': values
                 },
                 key=key,
@@ -140,11 +154,14 @@ class Identity(BaseResource):
             response['key'],
             response['trafficTypeId'],
             response['environmentId'],
-            response['values']
+            response['values'],
+            response['organizationId'],
+            response['timestamp']
         )
 
     @classmethod
-    def create_many(cls, client, traffic_type_id, environment_id, identities):
+    def create_many(cls, client, traffic_type_id, environment_id, identities,
+                    organization_id=None):
         '''
         entities: { key: { attr_id: value, ...} }
         '''
@@ -157,6 +174,7 @@ class Identity(BaseResource):
                         'key': key,
                         'trafficTypeId': traffic_type_id,
                         'environmentId': environment_id,
+                        'organizationId': organization_id,
                         'values': identities[key]
                     }
                     for key in identities.keys()
@@ -164,12 +182,33 @@ class Identity(BaseResource):
                 trafficTypeId=traffic_type_id,
                 environmentId=environment_id
             )
-            return [
+
+            successful = [
                 Identity(
                     client, i['key'], i['trafficTypeId'],
-                    i['environmentId'], i['values']
+                    i['environmentId'], i['values'], i['organizationId'],
+                    i['timestamp']
                 ) for i in response['objects']
             ]
+
+            failed = [
+                {
+                    'object': Identity(
+                        client,
+                        i['object']['key'],
+                        i['object']['trafficTypeId'],
+                        i['object']['environmentId'],
+                        i['object']['values'],
+                        i['object']['organizationId'],
+                        i['object']['timestamp']
+                    ),
+                    'status': i['status'],
+                    'message': i['message']
+                }
+                for i in response['failed']
+            ]
+
+            return successful, failed
 
         except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Identities not created.')
@@ -179,7 +218,8 @@ class Identity(BaseResource):
             raise UnknownIdentifyClientError()
 
     @classmethod
-    def update(cls, client, key, traffic_type_id, environment_id, values):
+    def update(cls, client, key, traffic_type_id, environment_id, values,
+               organization_id):
         '''
         '''
         try:
@@ -189,6 +229,7 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
+                    'organizationId': organization_id,
                     'values': values
                 },
                 key=key,
@@ -207,11 +248,13 @@ class Identity(BaseResource):
             response['key'],
             response['trafficTypeId'],
             response['environmentId'],
-            response['values']
+            response['values'],
+            response['timestamp']
         )
 
     @classmethod
-    def patch(cls, client, key, traffic_type_id, environment_id, values):
+    def patch(cls, client, key, traffic_type_id, environment_id, values,
+              organization_id):
         '''
         '''
         try:
@@ -221,6 +264,7 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
+                    'organizationId': organization_id,
                     'values': values
                 },
                 key=key,
@@ -239,7 +283,9 @@ class Identity(BaseResource):
             response['key'],
             response['trafficTypeId'],
             response['environmentId'],
-            response['values']
+            response['values'],
+            response['organization_id'],
+            response['timestamp']
         )
 
     @classmethod
