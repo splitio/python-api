@@ -107,6 +107,7 @@ class Identity(BaseResource):
     def values(self):
         return self._values
 
+    @property
     def organization_id(self):
         return self._organization_id
 

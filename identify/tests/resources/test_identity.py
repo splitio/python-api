@@ -24,11 +24,34 @@ class TestIdentity:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(env, client, 'key')
 
-    def from_dict(self):
+    def test_from_dict(self, mocker):
         '''
         '''
-        # TODO!
-        assert False
+        client = object()
+        mock_init = mocker.Mock()
+        mocker.patch(
+            'identify.resources.identity.Identity.__init__',
+            new=mock_init
+        )
+        Identity.__init__.return_value = None
+        Identity.from_dict(
+            client,
+            {
+                'key': 'key',
+                'trafficTypeId': '123',
+                'environmentId': '456',
+                'values': {'asd': 1},
+                'organizationId': 'oo1',
+            }
+        )
+        Identity.__init__.assert_called_once_with(
+            client,
+            'key',
+            '123',
+            '456',
+            {'asd': 1},
+            'oo1',
+        )
 
     def test_create(self, mocker):
         '''
