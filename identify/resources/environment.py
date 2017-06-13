@@ -42,7 +42,7 @@ class Environment(BaseResource):
         return self._name
 
     @classmethod
-    def _build_single_from_collection_response(cls, client, response):
+    def from_dict(cls, client, response):
         '''
         '''
         return Environment(

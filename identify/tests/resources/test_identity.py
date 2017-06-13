@@ -24,27 +24,18 @@ class TestIdentity:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(env, client, 'key')
 
-    def test_build_single_from_collection_response(self):
+    def from_dict(self):
         '''
         '''
-        client = object()
-        with pytest.raises(MethodNotApplicable):
-            Identity._build_single_from_collection_response(
-                client,
-                {
-                    'key': 'key',
-                    'ttid': 'ttid',
-                    'envid': 'envid',
-                    'vals': 'vals'
-                }
-            )
+        # TODO!
+        assert False
 
     def test_create(self, mocker):
         '''
         '''
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        Identity.create(sc, 'key', '123', '456', {'asd': 1})
+        Identity.create(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
         SyncHttpClient.make_request.assert_called_once_with(
             Identity._endpoint['create'],
             {
@@ -52,6 +43,7 @@ class TestIdentity:
                 'trafficTypeId': '123',
                 'environmentId': '456',
                 'values': {'asd': 1},
+                'organizationId': 'oo1',
             },
             trafficTypeId='123',
             environmentId='456',
@@ -63,11 +55,11 @@ class TestIdentity:
         '''
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        entities = {
+        identities = {
             'key1': {'asd': 1},
             'key2': {'asd': 2},
         }
-        Identity.create_many(sc, '123', '456', entities)
+        Identity.create_many(sc, '123', '456', identities, 'oo1')
 
         # Because Python2 & Python3 use different hash functions to bucket
         # dictionary keys, any identity may come first, so we need to assert
@@ -79,12 +71,14 @@ class TestIdentity:
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 1},
+            'organizationId': 'oo1',
         }
         ikey2 = {
             'key': 'key2',
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 2},
+            'organizationId': 'oo1',
         }
 
         call1 = mocker.call(
@@ -99,7 +93,6 @@ class TestIdentity:
             trafficTypeId='123',
             environmentId='456'
         )
-
         assert ((call1 == SyncHttpClient.make_request.call_args) or
                 (call2 == SyncHttpClient.make_request.call_args))
 
@@ -108,7 +101,7 @@ class TestIdentity:
         '''
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        Identity.update(sc, 'key', '123', '456', {'asd': 1})
+        Identity.update(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
         SyncHttpClient.make_request.assert_called_once_with(
             Identity._endpoint['update'],
             {
@@ -116,6 +109,7 @@ class TestIdentity:
                 'trafficTypeId': '123',
                 'environmentId': '456',
                 'values': {'asd': 1},
+                'organizationId': 'oo1',
             },
             trafficTypeId='123',
             environmentId='456',
@@ -127,7 +121,7 @@ class TestIdentity:
         '''
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        Identity.patch(sc, 'key', '123', '456', {'asd': 1})
+        Identity.patch(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
         SyncHttpClient.make_request.assert_called_once_with(
             Identity._endpoint['patch'],
             {
@@ -135,6 +129,7 @@ class TestIdentity:
                 'trafficTypeId': '123',
                 'environmentId': '456',
                 'values': {'asd': 1},
+                'organizationId': 'oo1',
             },
             trafficTypeId='123',
             environmentId='456',
@@ -159,14 +154,15 @@ class TestIdentity:
         '''
         mocker.patch('identify.resources.identity.Identity.update')
         sc = SyncHttpClient('abc', 'abc')
-        attr = Identity(sc, 'key', '123', '456', {'asd': '1'})
+        attr = Identity(sc, 'key', '123', '456', {'asd': '1'}, 'oo1')
         attr.update_this({'asd': '2'})
         Identity.update.assert_called_once_with(
             sc,
             'key',
             '123',
             '456',
-            {'asd': '2'}
+            {'asd': '2'},
+            'oo1',
         )
 
     def test_patch_this(self, mocker):
@@ -174,14 +170,14 @@ class TestIdentity:
         '''
         mocker.patch('identify.resources.identity.Identity.patch')
         sc = SyncHttpClient('abc', 'abc')
-        attr = Identity(sc, 'key', '123', '456', {'asd': '1'})
+        attr = Identity(sc, 'key', '123', '456', {'asd': '1'}, 'oo1')
         attr.patch_this({'qwe': '3'})
         Identity.patch.assert_called_once_with(
             sc,
             'key',
             '123',
             '456',
-            {'qwe': '3'}
+            {'qwe': '3'},
         )
 
     def test_delete_attributes_this(self, mocker):

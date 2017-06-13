@@ -90,16 +90,16 @@ class Attribute(BaseResource):
         return self._is_searchable
 
     @classmethod
-    def _build_single_from_collection_response(cls, client, response):
+    def from_dict(cls, client, response):
         '''
         '''
         return Attribute(
             client,
-            response['id'],
-            response['trafficTypeId'],
-            response['displayName'],
-            response['description'],
-            response['dataType'],
+            response.get('id'),
+            response.get('trafficTypeId'),
+            response.get('displayName'),
+            response.get('description'),
+            response.get('dataType'),
             response.get('isSearchable')
         )
 
@@ -123,15 +123,7 @@ class Attribute(BaseResource):
                 trafficTypeId=traffic_type_id
             )
 
-            return Attribute(
-                client,
-                response['id'],
-                response['trafficTypeId'],
-                response['displayName'],
-                response['description'],
-                response['dataType'],
-                response.get('isSearchable')
-            )
+            return Attribute.from_dict(client, response)
 
         except HTTPResponseError as e:
             LOGGER.error('Call to Identify API failed. Attribute not created.')

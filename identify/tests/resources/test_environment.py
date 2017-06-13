@@ -21,7 +21,7 @@ class TestTrafficType:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(env, client, '123')
 
-    def test_build_single_from_collection_response(self, mocker):
+    def test_from_dict(self, mocker):
         '''
         '''
         client = object()
@@ -31,7 +31,7 @@ class TestTrafficType:
             new=mock_init
         )
         Environment.__init__.return_value = None
-        Environment._build_single_from_collection_response(
+        Environment.from_dict(
             client,
             {
                 'id': '123',

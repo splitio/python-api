@@ -127,7 +127,8 @@ class TestEndToEnd:
             'key': i1.key,
             'environmentId': i1.environment_id,
             'trafficTypeId': i1.traffic_type_id,
-            'values': i1.values
+            'values': i1.values,
+            'organizationId': i1.organization_id,
         } == i1.to_dict()
 
         i2 = c.update_identity('1',  '1', 'keycita', {'a1': 'qwe2'})
@@ -136,7 +137,8 @@ class TestEndToEnd:
             'key': i2.key,
             'environmentId': i2.environment_id,
             'trafficTypeId': i2.traffic_type_id,
-            'values': i2.values
+            'values': i2.values,
+            'organizationId': i2.organization_id,
         } == i2.to_dict()
 
         i3 = c.patch_identity('1',  '1', 'keycita', {'a1': 'qwe3'})
@@ -145,7 +147,8 @@ class TestEndToEnd:
             'key': i3.key,
             'environmentId': i3.environment_id,
             'trafficTypeId': i3.traffic_type_id,
-            'values': i3.values
+            'values': i3.values,
+            'organizationId': i3.organization_id,
         } == i3.to_dict()
 
         res_add_identities = c.add_identities(
@@ -154,7 +157,8 @@ class TestEndToEnd:
             {
                 'key1': {'a1': 'a', 'a2': 'b'},
                 'key2': {'b1': 'c', 'c2': 'c'},
-            }
+            },
+            'oo1'
         )
         assert isinstance(res_add_identities, tuple)
         objs, failed = res_add_identities
@@ -166,6 +170,7 @@ class TestEndToEnd:
                 'trafficTypeId': i.traffic_type_id,
                 'environmentId': i.environment_id,
                 'values': i.values,
+                'organizationId': i.organization_id,
             } == i.to_dict()
             for i in objs
         )

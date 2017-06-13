@@ -77,10 +77,11 @@ class Identity(BaseResource):
         'trafficTypeId': 'string',
         'environmentId': 'string',
         'values': 'object',
+        'organizationId': 'string',
     }
 
     def __init__(self, client, key, traffic_type_id, environment_id,
-                 values=None):
+                 values=None, organization_id=None):
         '''
         '''
         BaseResource.__init__(self, client, key)
@@ -88,6 +89,7 @@ class Identity(BaseResource):
         self._key = key
         self._environment_id = environment_id
         self._values = values
+        self._organization_id = organization_id
 
     @property
     def key(self):
@@ -105,14 +107,25 @@ class Identity(BaseResource):
     def values(self):
         return self._values
 
-    @classmethod
-    def _build_single_from_collection_response(cls, client, response):
-        '''
-        '''
-        raise MethodNotApplicable()
+    def organization_id(self):
+        return self._organization_id
 
     @classmethod
-    def create(cls, client, key, traffic_type_id, environment_id, values):
+    def from_dict(cls, client, response):
+        '''
+        '''
+        return Identity(
+            client,
+            response.get('key'),
+            response.get('trafficTypeId'),
+            response.get('environmentId'),
+            response.get('values'),
+            response.get('organizationId')
+        )
+
+    @classmethod
+    def create(cls, client, key, traffic_type_id, environment_id, values,
+               organization_id=None):
         '''
         '''
         try:
@@ -122,7 +135,8 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
-                    'values': values
+                    'values': values,
+                    'organizationId': organization_id
                 },
                 key=key,
                 trafficTypeId=traffic_type_id,
@@ -135,16 +149,11 @@ class Identity(BaseResource):
             LOGGER.debug(e)
             raise UnknownIdentifyClientError()
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values'],
-        )
+        return Identity.from_dict(client, response)
 
     @classmethod
-    def create_many(cls, client, traffic_type_id, environment_id, identities):
+    def create_many(cls, client, traffic_type_id, environment_id, identities,
+                    organization_id=None):
         '''
         entities: { key: { attr_id: value, ...} }
         '''
@@ -157,7 +166,8 @@ class Identity(BaseResource):
                         'key': key,
                         'trafficTypeId': traffic_type_id,
                         'environmentId': environment_id,
-                        'values': identities[key]
+                        'values': identities[key],
+                        'organizationId': organization_id,
                     }
                     for key in identities.keys()
                 ],
@@ -166,23 +176,14 @@ class Identity(BaseResource):
             )
 
             successful = [
-                Identity(
-                    client, i['key'], i['trafficTypeId'],
-                    i['environmentId'], i['values']
-                ) for i in response['objects']
+                Identity.from_dict(client, i) for i in response['objects']
             ]
 
             failed = [
                 {
-                    'object': Identity(
-                        client,
-                        i['object']['key'],
-                        i['object']['trafficTypeId'],
-                        i['object']['environmentId'],
-                        i['object']['values'],
-                    ),
+                    'object': Identity.from_dict(client, i['object']),
                     'status': i['status'],
-                    'message': i['message']
+                    'message': i['message'],
                 }
                 for i in response['failed']
             ]
@@ -197,7 +198,8 @@ class Identity(BaseResource):
             raise UnknownIdentifyClientError()
 
     @classmethod
-    def update(cls, client, key, traffic_type_id, environment_id, values):
+    def update(cls, client, key, traffic_type_id, environment_id, values,
+               organization_id=None):
         '''
         '''
         try:
@@ -207,7 +209,8 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
-                    'values': values
+                    'values': values,
+                    'organizationId': organization_id,
                 },
                 key=key,
                 trafficTypeId=traffic_type_id,
@@ -220,16 +223,11 @@ class Identity(BaseResource):
             LOGGER.debug(e)
             raise UnknownIdentifyClientError()
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values'],
-        )
+        return Identity.from_dict(client, response)
 
     @classmethod
-    def patch(cls, client, key, traffic_type_id, environment_id, values):
+    def patch(cls, client, key, traffic_type_id, environment_id, values,
+              organization_id=None):
         '''
         '''
         try:
@@ -239,7 +237,8 @@ class Identity(BaseResource):
                     'key': key,
                     'trafficTypeId': traffic_type_id,
                     'environmentId': environment_id,
-                    'values': values
+                    'values': values,
+                    'organizationId': organization_id,
                 },
                 key=key,
                 trafficTypeId=traffic_type_id,
@@ -252,13 +251,7 @@ class Identity(BaseResource):
             LOGGER.debug(e)
             raise UnknownIdentifyClientError()
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values'],
-        )
+        return Identity.from_dict(client, response)
 
     @classmethod
     def delete_all_attributes(cls, client, traffic_type_id, environment_id,
@@ -284,7 +277,7 @@ class Identity(BaseResource):
         '''
         return Identity.update(
             self._client, self.key, self.traffic_type_id,  self.environment_id,
-            values
+            values, self._organization_id
         )
 
     def patch_this(self, values):

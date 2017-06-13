@@ -18,12 +18,12 @@ class TestBaseResource:
             pass
 
         with pytest.raises(TypeError):
-            a = SampleResource('', '')
+            SampleResource('', '')
 
         class SampleResource2(BaseResource):
             _endpoint = {}
             _schema = {}
-            def _build_single_from_collection_response(self, c, r): pass
+            def from_dict(self, c, r): pass
 
         b = SampleResource2('', '')
         assert isinstance(b, BaseResource)
@@ -33,11 +33,11 @@ class TestBaseResource:
         '''
         items = ['item1', 'item2', 'item3', 'item4', 'item5']
         with mocker.patch('identify.resources.base_resource.BaseResource'
-                          '._build_single_from_collection_response'):
+                          '.from_dict'):
             BaseResource._process_all_response('client', items)
 
             calls = [mocker.call('client', item) for item in items]
-            (BaseResource._build_single_from_collection_response
+            (BaseResource.from_dict
              .assert_has_calls(calls))
 
     def test_retrieve_all(self, mocker):

@@ -47,30 +47,13 @@ class BaseResource(six.with_metaclass(abc.ABCMeta)):
         :rtype: list
         '''
         LOGGER.debug("Proccesing {n} items".format(n=len(response)))
-        return [
-            cls._build_single_from_collection_response(client, item)
-            for item in response
-        ]
+        return [cls.from_dict(client, item) for item in response]
 
     @classabstract
-    def _build_single_from_collection_response(cls, client, response):
+    def from_dict(client, response):
         '''
-        Abstract Class method to construct a resource instance from a single
-        item extracted from a colleciton.
         '''
         pass
-
-    @classmethod
-    def retrieve_single(cls, client, **kwargs):
-        '''
-        NOT USED. DECIDE IF NECESSARY
-        '''
-        try:
-            response = client.get(cls._endpoint['single_item'], **kwargs)
-            return response
-        except:
-            import traceback
-            traceback.print_exc()
 
     @classmethod
     def retrieve_all(cls, client, **kwargs):
