@@ -97,16 +97,7 @@ class TestEndToEnd:
             'dataType': 'STRING',
             'isSearchable': False,
         }
-        new_attr = c.attribute.create(
-            '1',
-            {
-                'id': 'aa',
-                'displayName': 'AA',
-                'description': 'DESC',
-                'dataType': 'STRING',
-                'isSearchable': False,
-            }
-        )
+        new_attr = c.attribute.create('1', 'aa', 'AA', 'DESC', 'STRING', False)
         assert new_attr_props == new_attr.to_dict()
 
         res_delete = c.attribute.delete(1, 'aa')

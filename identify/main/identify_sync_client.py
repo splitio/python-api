@@ -62,27 +62,27 @@ class AttributeMicroClient:
             trafficTypeId=traffic_type_id
         )
 
-    def create(self, traffic_type_id, attr_data):
+    def create(self, traffic_type_id, attr_id, display_name, description,
+               data_type, is_searchable):
         '''
         Creates an attribute for a specific traffic type.
 
         :param traffic_type_id: Id of the traffic type for which an attribute
             will be created.
-        :param attr_data: Dictionary with the the data to create the new
-            attribute. Should include the followind fields:
-                - 'id': Id of the new attribute
-                - 'displayName': Display Name of the new attribute
-                - 'description': Description of the new attribute
-                - 'dataType': Data type of the new attribute
+        :param attr_id: string. New attribute's Id
+        :param display_name: string. New attribute's display name
+        :param description: string. New attribute's description
+        :param data_type: string. New attribute's data type
+        :param is_searchable: string.
         '''
         return Attribute.create(
             self._http_client,
-            attr_data.get('id'),
+            attr_id,
             traffic_type_id,
-            attr_data.get('displayName'),
-            attr_data.get('description'),
-            attr_data.get('dataType'),
-            attr_data.get('isSearchable')
+            display_name,
+            description,
+            data_type,
+            is_searchable
         )
 
     def delete(self, traffic_type_id, attribute_id):
@@ -93,7 +93,11 @@ class AttributeMicroClient:
             will be removed.
         :param attribute_id: Id of the attribute to be removed.
         '''
-        return Attribute.delete(self._http_client, attribute_id, traffic_type_id)
+        return Attribute.delete(
+            self._http_client,
+            attribute_id,
+            traffic_type_id
+        )
 
 
 class IdentityMicroClient:
