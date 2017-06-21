@@ -33,7 +33,7 @@ class TestEndToEnd:
             'log_level': 'debug'
         })
 
-        tts = c.get_traffic_types()
+        tts = c.traffic_type.get_all()
         assert isinstance(tts, list)
         assert all(isinstance(tt, TrafficType) for tt in tts)
         assert all(
@@ -54,7 +54,7 @@ class TestEndToEnd:
             'log_level': 'debug'
         })
 
-        envs = c.get_environments()
+        envs = c.environment.get_all()
         assert isinstance(envs, list)
         assert all(isinstance(env, Environment) for env in envs)
         assert all(
@@ -74,7 +74,7 @@ class TestEndToEnd:
             'log_level': 'debug'
         })
 
-        attrs = c.get_attributes_for_traffic_type('1')
+        attrs = c.attribute.get_all('1')
         assert isinstance(attrs, list)
         assert all(isinstance(attr, Attribute) for attr in attrs)
         assert all(
@@ -97,7 +97,7 @@ class TestEndToEnd:
             'dataType': 'STRING',
             'isSearchable': False,
         }
-        new_attr = c.create_attribute_for_traffic_type(
+        new_attr = c.attribute.create(
             '1',
             {
                 'id': 'aa',
@@ -109,7 +109,7 @@ class TestEndToEnd:
         )
         assert new_attr_props == new_attr.to_dict()
 
-        res_delete = c.delete_attribute_from_schema(1, 'aa')
+        res_delete = c.attribute.delete(1, 'aa')
         assert res_delete is None
 
     def test_identity_endpoints(self):
@@ -121,7 +121,7 @@ class TestEndToEnd:
             'log_level': 'debug'
         })
 
-        i1 = c.add_identity('1',  '1', 'keycita', {'a1': 'qwe'})
+        i1 = c.identity.add('1',  '1', 'keycita', {'a1': 'qwe'})
         assert isinstance(i1, Identity)
         assert {
             'key': i1.key,
@@ -131,7 +131,7 @@ class TestEndToEnd:
             'organizationId': i1.organization_id,
         } == i1.to_dict()
 
-        i2 = c.update_identity('1',  '1', 'keycita', {'a1': 'qwe2'})
+        i2 = c.identity.update('1',  '1', 'keycita', {'a1': 'qwe2'})
         assert isinstance(i2, Identity)
         assert {
             'key': i2.key,
@@ -141,7 +141,7 @@ class TestEndToEnd:
             'organizationId': i2.organization_id,
         } == i2.to_dict()
 
-        i3 = c.patch_identity('1',  '1', 'keycita', {'a1': 'qwe3'})
+        i3 = c.identity.patch('1',  '1', 'keycita', {'a1': 'qwe3'})
         assert isinstance(i3, Identity)
         assert {
             'key': i3.key,
@@ -151,7 +151,7 @@ class TestEndToEnd:
             'organizationId': i3.organization_id,
         } == i3.to_dict()
 
-        res_add_identities = c.add_identities(
+        res_add_identities = c.identity.add_many(
             '1',
             '2',
             {
@@ -175,7 +175,7 @@ class TestEndToEnd:
             for i in objs
         )
 
-        res_delete_attr = c.delete_attributes_from_key('1',  '1', 'keycita')
+        res_delete_attr = c.identity.delete_attributes('1',  '1', 'keycita')
         assert res_delete_attr is None
 
     def teardown_class(cls):
