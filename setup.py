@@ -81,7 +81,6 @@ class E2ETests(Command):
 # Project requirements
 install_requires = [
     'argparse>=1.1',
-    'colorlog>=2.10.0',
     'requests>=2.14.2',
     'six>=1.10.0',
 ]

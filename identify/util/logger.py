@@ -1,7 +1,16 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 import logging
-import colorlog
+
+try:
+    from logging import NullHandler
+except ImportError:   # Python 2.7+
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+
+
+logging.getLogger(__name__).addHandler(NullHandler())
 
 _LOGLEVELS = {
     'CRITICAL': logging.CRITICAL,
@@ -13,20 +22,5 @@ _LOGLEVELS = {
 }
 
 
-handler = colorlog.StreamHandler()
-handler.setFormatter(colorlog.ColoredFormatter(
-    '%(log_color)s%(levelname)s:%(name)s: %(message)s'
-))
-
-LOGGER = colorlog.getLogger('IDENTIFY')
-LOGGER.addHandler(handler)
-LOGGER.setLevel(logging.CRITICAL)
-
-
-def set_level(strlevel):
-    '''
-    '''
-    lvl = _LOGLEVELS.get(strlevel.upper())
-    if not lvl:
-        raise Exception('Invalid Log Level %s' % strlevel)
-    LOGGER.setLevel(lvl)
+LOGGER = logging.getLogger('IDENTIFY')
+LOGGER.addHandler(NullHandler())
