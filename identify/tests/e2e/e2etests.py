@@ -30,10 +30,9 @@ class TestEndToEnd:
         c = get_client({
             'base_url': 'http://localhost:8888',
             'apikey': 'Admin',
-            'log_level': 'debug'
         })
 
-        tts = c.traffic_type.get_all()
+        tts = c.traffic_type.list()
         assert isinstance(tts, list)
         assert all(isinstance(tt, TrafficType) for tt in tts)
         assert all(
@@ -51,10 +50,9 @@ class TestEndToEnd:
         c = get_client({
             'base_url': 'http://localhost:8888',
             'apikey': 'Admin',
-            'log_level': 'debug'
         })
 
-        envs = c.environment.get_all()
+        envs = c.environment.list()
         assert isinstance(envs, list)
         assert all(isinstance(env, Environment) for env in envs)
         assert all(
@@ -71,10 +69,9 @@ class TestEndToEnd:
         c = get_client({
             'base_url': 'http://localhost:8888',
             'apikey': 'Admin',
-            'log_level': 'debug'
         })
 
-        attrs = c.attribute.get_all('1')
+        attrs = c.attribute.list('1')
         assert isinstance(attrs, list)
         assert all(isinstance(attr, Attribute) for attr in attrs)
         assert all(
@@ -97,10 +94,10 @@ class TestEndToEnd:
             'dataType': 'STRING',
             'isSearchable': False,
         }
-        new_attr = c.attribute.create('1', 'aa', 'AA', 'DESC', 'STRING', False)
+        new_attr = c.attribute.create(new_attr_props)
         assert new_attr_props == new_attr.to_dict()
 
-        res_delete = c.attribute.delete(1, 'aa')
+        res_delete = c.attribute.delete(new_attr)
         assert res_delete is None
 
     def test_identity_endpoints(self):
@@ -109,48 +106,58 @@ class TestEndToEnd:
         c = get_client({
             'base_url': 'http://localhost:8888',
             'apikey': 'Admin',
-            'log_level': 'debug'
         })
 
-        i1 = c.identity.add('1',  '1', 'keycita', {'a1': 'qwe'})
+        data = {
+            'key': 'key1',
+            'environmentId': 'e1',
+            'trafficTypeId': 'tt1',
+            'values': {'a1': 'v1'},
+            'organizationId': 'ooo1',
+        }
+        i1 = c.identity.save(data)
         assert isinstance(i1, Identity)
-        assert {
-            'key': i1.key,
-            'environmentId': i1.environment_id,
-            'trafficTypeId': i1.traffic_type_id,
-            'values': i1.values,
-            'organizationId': i1.organization_id,
-        } == i1.to_dict()
+        assert data == i1.to_dict()
 
-        i2 = c.identity.update('1',  '1', 'keycita', {'a1': 'qwe2'})
+        data2 = {
+            'key': 'key2',
+            'environmentId': 'e2',
+            'trafficTypeId': 'tt2',
+            'values': {'a2': 'v2'},
+            'organizationId': 'ooo2',
+        }
+        i2 = c.identity.update(data2)
         assert isinstance(i2, Identity)
-        assert {
-            'key': i2.key,
-            'environmentId': i2.environment_id,
-            'trafficTypeId': i2.traffic_type_id,
-            'values': i2.values,
-            'organizationId': i2.organization_id,
-        } == i2.to_dict()
+        assert data2 == i2.to_dict()
 
-        i3 = c.identity.patch('1',  '1', 'keycita', {'a1': 'qwe3'})
+        data3 = {
+            'key': 'key3',
+            'environmentId': 'e3',
+            'trafficTypeId': 'tt3',
+            'values': {'a3': 'v3'},
+            'organizationId': 'ooo3',
+        }
+        i3 = c.identity.patch(data3)
         assert isinstance(i3, Identity)
-        assert {
-            'key': i3.key,
-            'environmentId': i3.environment_id,
-            'trafficTypeId': i3.traffic_type_id,
-            'values': i3.values,
-            'organizationId': i3.organization_id,
-        } == i3.to_dict()
+        assert data3 == i3.to_dict()
 
-        res_add_identities = c.identity.add_many(
-            '1',
-            '2',
+        res_add_identities = c.identity.save_all([
             {
-                'key1': {'a1': 'a', 'a2': 'b'},
-                'key2': {'b1': 'c', 'c2': 'c'},
+                'trafficTypeId': '1',
+                'environmentId': '2',
+                'key': 'key1',
+                'values': {'a1': 'a', 'a2': 'b'},
+                'organizationId': 'ooo1',
             },
-            'oo1'
-        )
+            {
+                'trafficTypeId': '1',
+                'environmentId': '2',
+                'key': 'key2',
+                'values': {'b1': 'c', 'c2': 'c'},
+                'organizationId': 'ooo1',
+            },
+        ])
+
         assert isinstance(res_add_identities, tuple)
         objs, failed = res_add_identities
         assert all(isinstance(i, Identity) for i in objs)
@@ -166,7 +173,9 @@ class TestEndToEnd:
             for i in objs
         )
 
-        res_delete_attr = c.identity.delete_attributes('1',  '1', 'keycita')
+        res_delete_attr = c.identity.delete_all_attributes_by_id(
+            '1',  '1', 'keycita'
+        )
         assert res_delete_attr is None
 
     def teardown_class(cls):

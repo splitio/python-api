@@ -72,3 +72,20 @@ class UnknownIdentifyClientError(IdentifyException):
     happens
     '''
     pass
+
+
+class ClientRequiredError(IdentifyException):
+    '''
+    Exception to be thrown when an operation that requires an http client has
+    been attempted but the object was created with the constructor directly
+    and no client was passed.
+    '''
+    pass
+
+
+class IdentifyBackendUnreachableError(IdentifyException):
+    '''
+    Exception to be thrown when the Identify API cannot be reached, usually
+    due a a connection error, or an incorrect baseUrl
+    '''
+    pass

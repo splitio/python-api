@@ -6,7 +6,8 @@ import requests
 from identify.http_clients import base_client
 from identify.util.logger import LOGGER
 from identify.util.exceptions import HTTPResponseError, HTTPNotFoundError, \
-    HTTPIncorrectParametersError, HTTPUnauthorizedError
+    HTTPIncorrectParametersError, HTTPUnauthorizedError, \
+    IdentifyBackendUnreachableError
 
 
 class SyncHttpClient(base_client.BaseHttpClient):
@@ -51,6 +52,14 @@ class SyncHttpClient(base_client.BaseHttpClient):
         else:
             raise HTTPResponseError
 
+    def _handle_connection_error(self, e):
+        '''
+        '''
+        LOGGER.debug(e)
+        raise IdentifyBackendUnreachableError(
+            'Unable to reach Identify backend'
+        )
+
     def make_request(self, endpoint, body=None, **kwargs):
         '''
         This method delegates bulding of headers, url and querystring (!)
@@ -81,7 +90,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
         try:
             response = method(url, headers=headers)
         except Exception as e:
-            return self._connection_error(e)
+            return self._handle_connection_error(e)
         finally:
             LOGGER.debug('RESPONSE: ' + response.text)
 

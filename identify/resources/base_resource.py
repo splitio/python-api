@@ -4,10 +4,8 @@ import abc
 import six
 from identify.util import validation
 from identify.util.logger import LOGGER
-from identify.util.abstract_extra import classabstract
 from identify.util import camelcase
-from identify.util.exceptions import HTTPResponseError, \
-    EndpointNotImplemented, UnknownIdentifyClientError
+from identify.util.exceptions import UnknownIdentifyClientError
 
 
 class BaseResource(six.with_metaclass(abc.ABCMeta)):
@@ -15,7 +13,7 @@ class BaseResource(six.with_metaclass(abc.ABCMeta)):
     Abstract class to handle resources uniformely.
     '''
 
-    def __init__(self, client, id):
+    def __init__(self, id, client=None):
         '''
         Constructs (a child) resource instance (called via super or __init__,
         stores the id and client.
@@ -26,59 +24,13 @@ class BaseResource(six.with_metaclass(abc.ABCMeta)):
         self._id = id
         self._client = client
 
-    @abc.abstractproperty
-    def _endpoint(self):
-        pass
+    @property
+    def id(self):
+        return self._id
 
     @abc.abstractproperty
     def _schema(self):
         pass
-
-    @classmethod
-    def _process_all_response(cls, client, response):
-        '''
-        This method simply calls the child (concrete) class' appropriate method
-        for constructing a resource object out of a single item extracted from
-        a returned collection.
-
-        :param client: HTTP Client
-        :param response: response received from the API
-
-        :rtype: list
-        '''
-        LOGGER.debug("Proccesing {n} items".format(n=len(response)))
-        return [cls.from_dict(client, item) for item in response]
-
-    @classabstract
-    def from_dict(client, response):
-        '''
-        '''
-        pass
-
-    @classmethod
-    def retrieve_all(cls, client, **kwargs):
-        '''
-        Class method that uses the child class' 'all_items' endpoint if
-        available to retrieve all items.
-
-        :param client: HTTP Client.
-        :param kwargs: Other parameters required to make that request.
-
-        :rtype: list
-        '''
-        endpoint = cls._endpoint.get('all_items')
-        if not endpoint:
-            raise EndpointNotImplemented
-
-        try:
-            response = client.make_request(endpoint, **kwargs)
-            return cls._process_all_response(client, response)
-        except HTTPResponseError as e:
-            LOGGER.error('Error retrieving items')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
 
     @classmethod
     def _validate(cls, response_item):

@@ -1,11 +1,10 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-import pytest
-from identify.resources.identity import Identity
 from identify.http_clients.sync_client import SyncHttpClient
-from identify.util.exceptions import MethodNotApplicable
-
+from identify.resources.identity import Identity
+from identify.microclients import IdentityMicroClient
+from identify.main import get_client
 
 class TestIdentity:
     '''
@@ -20,194 +19,138 @@ class TestIdentity:
             'identify.resources.base_resource.BaseResource.__init__',
             new=mock_init
         )
-        env = Identity(client, 'key', 'ttid', 'envid', 'vals')
-        from identify.resources.base_resource import BaseResource
-        BaseResource.__init__.assert_called_once_with(env, client, 'key')
-
-    def test_from_dict(self, mocker):
-        '''
-        '''
-        client = object()
-        mock_init = mocker.Mock()
-        mocker.patch(
-            'identify.resources.identity.Identity.__init__',
-            new=mock_init
-        )
-        Identity.__init__.return_value = None
-        Identity.from_dict(
-            client,
+        identity = Identity(
             {
                 'key': 'key',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 1},
-                'organizationId': 'oo1',
-            }
-        )
-        Identity.__init__.assert_called_once_with(
-            client,
-            'key',
-            '123',
-            '456',
-            {'asd': 1},
-            'oo1',
-        )
-
-    def test_create(self, mocker):
-        '''
-        '''
-        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        Identity.create(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
-        SyncHttpClient.make_request.assert_called_once_with(
-            Identity._endpoint['create'],
-            {
-                'key': 'key',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 1},
-                'organizationId': 'oo1',
+                'trafficTypeId': 'ttid',
+                'enironmentId': 'envid',
+                'values': 'vals'
             },
-            trafficTypeId='123',
-            environmentId='456',
-            key='key'
+            client
+        )
+        from identify.resources.base_resource import BaseResource
+        BaseResource.__init__.assert_called_once_with(identity, None, client)
+
+    def test_save(self, mocker):
+        '''
+        '''
+        http_client_mock = mocker.Mock()
+        i1 = Identity(
+            {
+                'key': 'key1',
+                'trafficTypeId': '1',
+                'environmentId': '1',
+                'values': {'a1': 'v1'},
+                'organizationId': 'o1'
+            },
+            http_client_mock
+        )
+        http_client_mock.make_request.return_value = i1.to_dict()
+
+        res = i1.save()
+
+        http_client_mock.make_request.assert_called_once_with(
+           IdentityMicroClient._endpoint['create'],
+            i1.to_dict(),
+            trafficTypeId=i1.traffic_type_id,
+            environmentId=i1.environment_id,
+            key=i1.key
         )
 
-    def test_create_many(self, mocker):
-        '''
-        '''
+        assert res.to_dict() == i1.to_dict()
+
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        identities = {
-            'key1': {'asd': 1},
-            'key2': {'asd': 2},
-        }
-        Identity.create_many(sc, '123', '456', identities, 'oo1')
-
-        # Because Python2 & Python3 use different hash functions to bucket
-        # dictionary keys, any identity may come first, so we need to assert
-        # that make_request has been called with either the 'key1' identity
-        # first or the 'key2' identity first
-
-        ikey1 = {
-            'key': 'key1',
-            'trafficTypeId': '123',
-            'environmentId': '456',
-            'values': {'asd': 1},
-            'organizationId': 'oo1',
-        }
-        ikey2 = {
-            'key': 'key2',
-            'trafficTypeId': '123',
-            'environmentId': '456',
-            'values': {'asd': 2},
-            'organizationId': 'oo1',
-        }
-
-        call1 = mocker.call(
-            Identity._endpoint['create_many'],
-            [ikey1, ikey2],
-            trafficTypeId='123',
-            environmentId='456'
+        SyncHttpClient.make_request.return_value = i1.to_dict()
+        ic = get_client({'base_url': 'http://test', 'apikey': '123'})
+        i2 = Identity(i1.to_dict())
+        res = i2.save(ic)
+        http_client_mock.make_request.assert_called_once_with(
+            IdentityMicroClient._endpoint['create'],
+            i1.to_dict(),
+            trafficTypeId=i2.traffic_type_id,
+            environmentId=i2.environment_id,
+            key=i2.key
         )
-        call2 = mocker.call(
-            Identity._endpoint['create_many'],
-            [ikey2, ikey1],
-            trafficTypeId='123',
-            environmentId='456'
-        )
-        assert ((call1 == SyncHttpClient.make_request.call_args) or
-                (call2 == SyncHttpClient.make_request.call_args))
+        assert res.to_dict() == i2.to_dict()
 
     def test_update(self, mocker):
         '''
         '''
-        mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        Identity.update(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
-        SyncHttpClient.make_request.assert_called_once_with(
-            Identity._endpoint['update'],
+        http_client_mock = mocker.Mock()
+        i1 = Identity(
             {
-                'key': 'key',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 1},
-                'organizationId': 'oo1',
+                'key': 'key1',
+                'trafficTypeId': '1',
+                'environmentId': '1',
+                'values': {'a1': 'v1'},
+                'organizationId': 'o1'
             },
-            trafficTypeId='123',
-            environmentId='456',
-            key='key'
+            http_client_mock
+        )
+        http_client_mock.make_request.return_value = i1.to_dict()
+
+        res = i1.update()
+
+        http_client_mock.make_request.assert_called_once_with(
+           IdentityMicroClient._endpoint['update'],
+            i1.to_dict(),
+            trafficTypeId=i1.traffic_type_id,
+            environmentId=i1.environment_id,
+            key=i1.key
         )
 
-    def test_patch(self, mocker):
-        '''
-        '''
+        assert res.to_dict() == i1.to_dict()
+
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        Identity.patch(sc, 'key', '123', '456', {'asd': 1}, 'oo1')
-        SyncHttpClient.make_request.assert_called_once_with(
-            Identity._endpoint['patch'],
+        SyncHttpClient.make_request.return_value = i1.to_dict()
+        ic = get_client({'base_url': 'http://test', 'apikey': '123'})
+        i2 = Identity(i1.to_dict())
+        res = i2.update(ic)
+        http_client_mock.make_request.assert_called_once_with(
+            IdentityMicroClient._endpoint['update'],
+            i1.to_dict(),
+            trafficTypeId=i2.traffic_type_id,
+            environmentId=i2.environment_id,
+            key=i2.key
+        )
+        assert res.to_dict() == i2.to_dict()
+
+    def test_delete_attributes(self, mocker):
+        '''
+        '''
+        http_client_mock = mocker.Mock()
+        i1 = Identity(
             {
-                'key': 'key',
-                'trafficTypeId': '123',
-                'environmentId': '456',
-                'values': {'asd': 1},
-                'organizationId': 'oo1',
+                'key': 'key1',
+                'trafficTypeId': '1',
+                'environmentId': '1',
+                'values': {'a1': 'v1'},
+                'organizationId': 'o1'
             },
-            trafficTypeId='123',
-            environmentId='456',
-            key='key'
+            http_client_mock
+        )
+        http_client_mock.make_request.return_value = None
+
+        res = i1.delete_attributes()
+
+        http_client_mock.make_request.assert_called_once_with(
+           IdentityMicroClient._endpoint['delete_attributes'],
+            trafficTypeId=i1.traffic_type_id,
+            environmentId=i1.environment_id,
+            key=i1.key
         )
 
-    def test_delete_all_attributes(self, mocker):
-        '''
-        '''
+        assert res is None
+
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        Identity.delete_all_attributes(sc, '123', '456', 'key')
-        SyncHttpClient.make_request.assert_called_once_with(
-            Identity._endpoint['delete_attributes'],
-            trafficTypeId='123',
-            environmentId='456',
-            key='key'
+        SyncHttpClient.make_request.return_value = None
+        ic = get_client({'base_url': 'http://test', 'apikey': '123'})
+        i2 = Identity(i1.to_dict())
+        res = i2.delete_attributes(ic)
+        http_client_mock.make_request.assert_called_once_with(
+            IdentityMicroClient._endpoint['delete_attributes'],
+            trafficTypeId=i2.traffic_type_id,
+            environmentId=i2.environment_id,
+            key=i2.key
         )
-
-    def test_update_this(self, mocker):
-        '''
-        '''
-        mocker.patch('identify.resources.identity.Identity.update')
-        sc = SyncHttpClient('abc', 'abc')
-        attr = Identity(sc, 'key', '123', '456', {'asd': '1'}, 'oo1')
-        attr.update_this({'asd': '2'})
-        Identity.update.assert_called_once_with(
-            sc,
-            'key',
-            '123',
-            '456',
-            {'asd': '2'},
-            'oo1',
-        )
-
-    def test_patch_this(self, mocker):
-        '''
-        '''
-        mocker.patch('identify.resources.identity.Identity.patch')
-        sc = SyncHttpClient('abc', 'abc')
-        attr = Identity(sc, 'key', '123', '456', {'asd': '1'}, 'oo1')
-        attr.patch_this({'qwe': '3'})
-        Identity.patch.assert_called_once_with(
-            sc,
-            'key',
-            '123',
-            '456',
-            {'qwe': '3'},
-        )
-
-    def test_delete_attributes_this(self, mocker):
-        '''
-        '''
-        mocker.patch('identify.resources.identity.Identity.delete_all_attributes')
-        sc = SyncHttpClient('abc', 'abc')
-        attr = Identity(sc, 'key', '123', '456', {'asd': '1'})
-        attr.delete_attributes_this()
-        Identity.delete_all_attributes.assert_called_once_with(sc, '123', '456', 'key')
+        assert res is None
