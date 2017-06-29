@@ -57,7 +57,7 @@ class AttributeMicroClient:
                 self._endpoint['all_items'],
                 trafficTypeId=traffic_type_id
             )
-            return [Attribute(item) for item in response]
+            return [Attribute(item, self._http_client) for item in response]
         except HTTPResponseError as e:
             LOGGER.error('Error retrieving items')
             raise e

@@ -34,7 +34,7 @@ class EnvironmentMicroClient:
             response = self._http_client.make_request(
                 self._endpoint['all_items']
             )
-            return [Environment(item) for item in response]
+            return [Environment(item, self._http_client) for item in response]
         except HTTPResponseError as e:
             LOGGER.error('Error retrieving items')
             raise e

@@ -19,8 +19,6 @@ class TrafficTypeMicroClient:
             'query_string': [],
             'response': True,
         },
-#        'fetch_attributes': Attribute._endpoint['all_items'],
-#        'add_attribute': Attribute._endpoint['create']
     }
 
     def __init__(self, http_client):
@@ -36,7 +34,7 @@ class TrafficTypeMicroClient:
             response = self._http_client.make_request(
                 self._endpoint['all_items']
             )
-            return [TrafficType(item) for item in response]
+            return [TrafficType(item, self._http_client) for item in response]
         except HTTPResponseError as e:
             LOGGER.error('Error retrieving items')
             raise e
