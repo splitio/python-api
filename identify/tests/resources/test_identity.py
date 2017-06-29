@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 from identify.http_clients.sync_client import SyncHttpClient
-from identify.resources.identity import Identity
+from identify.resources import Identity
 from identify.microclients import IdentityMicroClient
 from identify.main import get_client
 

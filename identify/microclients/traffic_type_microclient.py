@@ -1,4 +1,4 @@
-from identify.resources.traffic_type import TrafficType
+from identify.resources import TrafficType
 from identify.util.exceptions import HTTPResponseError, \
     UnknownIdentifyClientError
 from identify.util.logger import LOGGER

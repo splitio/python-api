@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from identify.resources.attribute import Attribute
+from identify.resources import Attribute
 from identify.microclients import AttributeMicroClient
 from identify.http_clients.sync_client import SyncHttpClient
 from identify.main import get_client

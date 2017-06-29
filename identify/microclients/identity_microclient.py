@@ -1,4 +1,4 @@
-from identify.resources.identity import Identity
+from identify.resources import Identity
 from identify.util.exceptions import HTTPResponseError, \
     UnknownIdentifyClientError
 from identify.util.logger import LOGGER

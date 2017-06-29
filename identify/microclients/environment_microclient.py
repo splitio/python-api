@@ -1,4 +1,4 @@
-from identify.resources.environment import Environment
+from identify.resources import Environment
 from identify.util.exceptions import HTTPResponseError, \
     UnknownIdentifyClientError
 from identify.util.logger import LOGGER
