@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 from identify.resources import Environment
+from identify.resources import Identity
 from identify.microclients import IdentityMicroClient
 from identify.http_clients.sync_client import SyncHttpClient
 from identify.main import get_client
@@ -52,7 +53,7 @@ class TestEnvironment:
         }
         http_client_mock = mocker.Mock()
         http_client_mock.make_request.return_value = data
-        tt1 = Environment(
+        env1 = Environment(
             {
                 'id': '1',
                 'name': 'e1',
@@ -60,7 +61,7 @@ class TestEnvironment:
             http_client_mock
         )
 
-        attr = tt1.add_identity(data)
+        attr = env1.add_identity(data)
 
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create'],
@@ -71,7 +72,20 @@ class TestEnvironment:
         )
         assert attr.to_dict() == data
 
-        tt2 = Environment(
+        # Test by passing an instance instead of dict data
+        http_client_mock.reset_mock()
+        idinstance = Identity(data)
+        env1.add_identity(idinstance)
+        http_client_mock.make_request.assert_called_once_with(
+            IdentityMicroClient._endpoint['create'],
+            idinstance.to_dict(),
+            trafficTypeId=idinstance.traffic_type_id,
+            environmentId=idinstance.environment_id,
+            key=idinstance.key
+        )
+        assert attr.to_dict() == data
+
+        env2 = Environment(
             {
                 'id': '1',
                 'name': 'e2',
@@ -81,7 +95,7 @@ class TestEnvironment:
         mocker.patch('identify.http_clients.sync_client.SyncHttpClient.make_request')
         SyncHttpClient.make_request.return_value = data
         ic = get_client({'base_url': 'http://test', 'apikey': '123'})
-        attr = tt2.add_identity(data, ic)
+        attr = env2.add_identity(data, ic)
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create'],
             data,
@@ -114,7 +128,7 @@ class TestEnvironment:
             'failed': [],
             'metadata': {}
         }
-        tt1 = Environment(
+        env1 = Environment(
             {
                 'id': '1',
                 'name': 'e1',
@@ -122,7 +136,7 @@ class TestEnvironment:
             http_client_mock
         )
 
-        s1, f1 = tt1.add_identities(data)
+        s1, f1 = env1.add_identities(data)
 
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
@@ -132,7 +146,19 @@ class TestEnvironment:
         )
         assert [s.to_dict() for s in s1] == data
 
-        tt2 = Environment(
+        # Test by passing an instances as well as raw dict data
+        http_client_mock.reset_mock()
+        idinstances = [Identity(data[0]), data[1]]
+        ss, ff = env1.add_identities(idinstances)
+        http_client_mock.make_request.assert_called_once_with(
+            IdentityMicroClient._endpoint['create_many'],
+            data,
+            trafficTypeId=idinstances[0].traffic_type_id,
+            environmentId=idinstances[0].environment_id,
+        )
+        assert [s.to_dict() for s in ss] == data
+
+        env2 = Environment(
             {
                 'id': '1',
                 'name': 'e2',
@@ -146,7 +172,7 @@ class TestEnvironment:
             'metadata': {}
         }
         ic = get_client({'base_url': 'http://test', 'apikey': '123'})
-        s2, f2 = tt2.add_identities(data, ic)
+        s2, f2 = env2.add_identities(data, ic)
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
             data,
