@@ -30,6 +30,16 @@ class TestEnvironment:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(env, '123', client)
 
+    def test_getters_and_setters(self):
+        '''
+        '''
+        env1 = Environment({})
+        env1.id = 'a'
+        env1.name = 'b'
+
+        assert env1.id == 'a'
+        assert env1.name == 'b'
+
     def test_add_identity(self, mocker):
         '''
         '''

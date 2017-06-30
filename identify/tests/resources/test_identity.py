@@ -31,6 +31,24 @@ class TestIdentity:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(identity, None, client)
 
+    def test_getters_and_setters(self):
+        '''
+        '''
+        identity1 = Identity({})
+        identity1.id = 'a'
+        identity1.key = 'b'
+        identity1.traffic_type_id = 'c'
+        identity1.environment_id = 'd'
+        identity1.values = 'e'
+        identity1.organization_id = 'f'
+
+        assert identity1.id == 'a'
+        assert identity1.key == 'b'
+        assert identity1.traffic_type_id == 'c'
+        assert identity1.environment_id == 'd'
+        assert identity1.values == 'e'
+        assert identity1.organization_id == 'f'
+
     def test_save(self, mocker):
         '''
         '''

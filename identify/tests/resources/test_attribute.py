@@ -37,6 +37,23 @@ class TestAttribute:
         assert data['description'] == tt.description
         assert data['dataType'] == tt.data_type
 
+    def test_getters_and_setters(self):
+        '''
+        '''
+        attr1 = Attribute({})
+        attr1.id = 'a'
+        attr1.traffic_type_id = 'b'
+        attr1.display_name = 'c'
+        attr1.description = 'd'
+        attr1.data_type = 'e'
+
+        assert attr1.id == 'a'
+        assert attr1.traffic_type_id == 'b'
+        assert attr1.display_name == 'c'
+        assert attr1.description == 'd'
+        assert attr1.data_type == 'e'
+
+
     def test_delete(self, mocker):
         '''
         '''

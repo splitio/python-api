@@ -32,6 +32,18 @@ class TestTrafficType:
         from identify.resources.base_resource import BaseResource
         BaseResource.__init__.assert_called_once_with(tt, '123', client)
 
+    def test_getters_and_setters(self):
+        '''
+        '''
+        tt1 = TrafficType({})
+        tt1.id = 'a'
+        tt1.name = 'b'
+        tt1.display_attribute_id = 'c'
+
+        assert tt1.id == 'a'
+        assert tt1.name == 'b'
+        assert tt1.display_attribute_id == 'c'
+
     def test_fetch_attributes(self, mocker):
         '''
         '''
