@@ -26,11 +26,3 @@ class TestBaseResource:
 
         b = SampleResource2('', '')
         assert isinstance(b, BaseResource)
-
-    def test_validate(self):
-        # TODO!
-        pass
-
-    def test_to_dict(self):
-        # TODO!
-        pass

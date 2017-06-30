@@ -66,6 +66,14 @@ class Identity(BaseResource):
 
     def save(self, identify_client=None):
         '''
+        Save this Identity
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: newly saved Identity object
+        :rtype: Identity
         '''
         if identify_client is not None:
             imc = identify_client.identity
@@ -79,6 +87,14 @@ class Identity(BaseResource):
 
     def update(self, identify_client=None):
         '''
+        Update this Identity
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: newly saved Identity object
+        :rtype: Identity
         '''
         if identify_client is not None:
             imc = identify_client.identity
@@ -92,6 +108,11 @@ class Identity(BaseResource):
 
     def delete_attributes(self, identify_client=None):
         '''
+        Delete all attributes from this Identity
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
         '''
         if identify_client is not None:
             imc = identify_client.identity

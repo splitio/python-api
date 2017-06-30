@@ -67,6 +67,11 @@ class Attribute(BaseResource):
 
     def delete(self, identify_client=None):
         '''
+        Delete this attribute
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
         '''
         if identify_client is not None:
             amc = identify_client.attribute

@@ -28,6 +28,12 @@ class Environment(BaseResource):
 
     def add_identity(self, data, identify_client=None):
         '''
+        Add a new identity associated with this environment.
+
+        :param data: Identity object or dict containing identity properties
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
         '''
         if identify_client is not None:
             imc = identify_client.identity
@@ -44,6 +50,18 @@ class Environment(BaseResource):
 
     def add_identities(self, data, identify_client=None):
         '''
+        Add multiple new identities associated with this environment.
+
+        :param data: list ofIdentity objects or dicts containing identity
+            properties
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: tuple with successful and failed items. Succesful items
+            are Identity objects. Failed ones will contain the Identity object
+            for the failed item togegther with a status code and a message
+        :rtype: tuple
         '''
         if identify_client is not None:
             imc = identify_client.identity

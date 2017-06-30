@@ -72,11 +72,19 @@ class IdentityMicroClient:
 
     def __init__(self, http_client):
         '''
+        Constructor
         '''
         self._http_client = http_client
 
     def save(self, identity):
         '''
+        Save an identity
+
+        :param identity: Identity instance or dict containing keys with identity
+            properties
+
+        :returns: newly created Identity
+        :rtype: Identity
         '''
         try:
             data = identity.to_dict() if isinstance(identity, Identity) else identity
@@ -98,7 +106,15 @@ class IdentityMicroClient:
 
     def save_all(self, identities):
         '''
-        entities: { key: { attr_id: value, ...} }
+        Save multiple identities at once
+
+        :param identities: array of Identity instances or dicts containing keys
+            with identity's properties
+
+        :returns: tuple with successful and failed items. Succesful items
+            are Identity objects. Failed ones will contain the Identity object
+            for the failed item togegther with a status code and a message
+        :rtype: tuple
         '''
         # TODO: Validate!
         try:
@@ -139,6 +155,13 @@ class IdentityMicroClient:
 
     def update(self, identity):
         '''
+        Update an existing identity
+
+        :param identity: Identity instance or dict containing keys with identity
+            properties
+
+        :returns: updated Identity
+        :rtype: Identity
         '''
         try:
             data = identity.to_dict() if isinstance(identity, Identity) else identity
@@ -160,6 +183,13 @@ class IdentityMicroClient:
 
     def patch(self, identity):
         '''
+        Patch an existing identity
+
+        :param identity: Identity instance or dict containing keys with identity
+            properties
+
+        :returns: patched Identity
+        :rtype: Identity
         '''
         try:
             data = identity.to_dict() if isinstance(identity, Identity) else identity
@@ -181,6 +211,9 @@ class IdentityMicroClient:
 
     def delete_all_attributes(self, identity):
         '''
+        Delete all attributes from the current identity
+
+        :param identity: Identity instance
         '''
         return self.delete_all_attributes_by_id(
             identity.traffic_type_id,
@@ -190,6 +223,12 @@ class IdentityMicroClient:
 
     def delete_all_attributes_by_id(self, traffic_type_id, environment_id, key):
         '''
+        Delete all attributes by specifying the traffic type id, the environment
+        id and the identity's key instead of passing an Identify object.
+
+        :param traffic_type_id: Identity's traffic type id
+        :param environment_id: Identity's environment id
+        :param key: Identity's key
         '''
         try:
             self._http_client.make_request(

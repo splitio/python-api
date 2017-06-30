@@ -38,7 +38,11 @@ class SyncHttpClient(base_client.BaseHttpClient):
 
     def _handle_invalid_response(self, response):
         '''
-        TODO
+        Handle responses that are not okay and throw an appropriate exception.
+        If the code doesn't match the known ones, a generic HTTPResponseError
+        is thrown
+
+        :param response: requests' module response object
         '''
         status_codes_exceptions = {
             404: HTTPNotFoundError,
@@ -54,6 +58,10 @@ class SyncHttpClient(base_client.BaseHttpClient):
 
     def _handle_connection_error(self, e):
         '''
+        Handle error when attempting to connect to identify backend.
+        Logs exception thrown by requests module, and raises an
+        IdentifyBackendUnreachableError error, so that it can be caught
+        by using the top level IdentifyException
         '''
         LOGGER.debug(e)
         raise IdentifyBackendUnreachableError(

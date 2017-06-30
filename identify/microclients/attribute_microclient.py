@@ -51,6 +51,10 @@ class AttributeMicroClient:
     def list(self, traffic_type_id):
         '''
         Returns a list of TrafficType objects.
+
+        :param traffic_type_id: Id of the TrafficType whose attributes will be
+            returned
+        :rtype: list(TrafficType)
         '''
         try:
             response = self._http_client.make_request(
@@ -67,6 +71,13 @@ class AttributeMicroClient:
 
     def create(self, attribute):
         '''
+        Create a new attribute.
+
+        :param attribute: Attribute instance or dict with camelcase keys
+            containing Attribute properties
+
+        :returns: newly created attribute
+        :rtype: Attribute
         '''
         # TODO: Validate!
         try:
@@ -88,11 +99,18 @@ class AttributeMicroClient:
 
     def delete(self, attribute):
         '''
+        Delete an attribute
+
+        :param attribute: Attribute instance
         '''
         return self.delete_by_id(attribute.id, attribute.traffic_type_id)
 
     def delete_by_id(self, attribute_id, traffic_type_id):
         '''
+        Delete an attribute by specifying its id and it's traffic type id.
+
+        :param attribute_id: attribute's id
+        :param traffic_type_id: atribute's traffic type id
         '''
         try:
             return self._http_client.make_request(

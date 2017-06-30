@@ -23,12 +23,16 @@ class TrafficTypeMicroClient:
 
     def __init__(self, http_client):
         '''
+        Constructor
         '''
         self._http_client = http_client
 
     def list(self):
         '''
         Returns a list of TrafficType objects.
+
+        :returns: List of TrafficType objects
+        :rtype: list(TrafficType)
         '''
         try:
             response = self._http_client.make_request(

@@ -23,12 +23,16 @@ class EnvironmentMicroClient:
 
     def __init__(self, http_client):
         '''
+        Constructor
         '''
         self._http_client = http_client
 
     def list(self):
         '''
         Returns a list of Environment objects.
+
+        :returns: list of Environment objects
+        :rtype: list(Environment)
         '''
         try:
             response = self._http_client.make_request(

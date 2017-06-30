@@ -17,6 +17,7 @@ class TrafficType(BaseResource):
 
     def __init__(self, data, client=None):
         '''
+        Constructor
         '''
         BaseResource.__init__(self, data.get('id'), client)
         self._name = data.get('name')
@@ -40,6 +41,14 @@ class TrafficType(BaseResource):
 
     def fetch_attributes(self, identify_client=None):
         '''
+        Fetch all attributes for this traffic type
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: List of attributes associated with this traffic type
+        :rtype: list(Attribute)
         '''
         if identify_client is not None:
             amc = identify_client.attribute
@@ -52,6 +61,15 @@ class TrafficType(BaseResource):
 
     def add_attribute(self, data, identify_client=None):
         '''
+        Add a new attribute associated with this traffic type
+
+        :param data: Attribute instance or dict containing Attribute properties
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: Newly created attribute
+        :rtype: Attribute
         '''
         if identify_client is not None:
             amc = identify_client.attribute
@@ -68,6 +86,15 @@ class TrafficType(BaseResource):
 
     def add_identity(self, data, identify_client=None):
         '''
+        Add a new identity associated with this traffic type.
+
+        :param data: Identity object or dict containing identity properties
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: newly created Identity
+        :rtype: Identity
         '''
         if identify_client is not None:
             imc = identify_client.identity
@@ -84,6 +111,18 @@ class TrafficType(BaseResource):
 
     def add_identities(self, data, identify_client=None):
         '''
+        Add multiple new identities associated with this traffic type.
+
+        :param data: list ofIdentity objects or dicts containing identity
+            properties
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: tuple with successful and failed items. Succesful items
+            are Identity objects. Failed ones will contain the Identity object
+            for the failed item togegther with a status code and a message
+        :rtype: tuple
         '''
         if identify_client is not None:
             imc = identify_client.identity
