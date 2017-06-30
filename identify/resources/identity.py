@@ -44,6 +44,26 @@ class Identity(BaseResource):
     def organization_id(self):
         return self._organization_id
 
+    @key.setter
+    def key(self, new):
+        self._key = new
+
+    @traffic_type_id.setter
+    def traffic_type_id(self, new):
+        self._traffic_type_id = new
+
+    @environment_id.setter
+    def environment_id(self, new):
+        self._environment_id = new
+
+    @values.setter
+    def values(self, new):
+        self._values = new
+
+    @organization_id.setter
+    def organization_id(self, new):
+        self._organization_id = new
+
     def save(self, identify_client=None):
         '''
         '''

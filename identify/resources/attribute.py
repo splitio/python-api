@@ -45,6 +45,26 @@ class Attribute(BaseResource):
     def is_searchable(self):
         return self._is_searchable
 
+    @traffic_type_id.setter
+    def traffic_type_id(self, new):
+        self._traffic_type_id = new
+
+    @display_name.setter
+    def display_name(self, new):
+        self._display_name = new
+
+    @description.setter
+    def description(self, new):
+        self._description = new
+
+    @data_type.setter
+    def data_type(self, new):
+        self._data_type = new
+
+    @is_searchable.setter
+    def is_searchable(self, new):
+        self._is_searchable = new
+
     def delete(self, identify_client=None):
         '''
         '''

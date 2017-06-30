@@ -19,12 +19,12 @@ class Environment(BaseResource):
         self._name = data.get('name')
 
     @property
-    def id(self):
-        return self._id
-
-    @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, new):
+        self._name = new
 
     def add_identity(self, data, identify_client=None):
         '''

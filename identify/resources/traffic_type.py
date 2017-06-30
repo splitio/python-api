@@ -23,16 +23,20 @@ class TrafficType(BaseResource):
         self._display_attribute_id = data.get('displayAttributeId')
 
     @property
-    def id(self):
-        return self._id
-
-    @property
     def name(self):
         return self._name
 
     @property
     def display_attribute_id(self):
         return self._display_attribute_id
+
+    @name.setter
+    def name(self, new):
+        self._name = new
+
+    @display_attribute_id.setter
+    def display_attribute_id(self, new):
+        self._display_attribute_id = new
 
     def fetch_attributes(self, identify_client=None):
         '''

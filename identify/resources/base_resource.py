@@ -28,6 +28,10 @@ class BaseResource(six.with_metaclass(abc.ABCMeta)):
     def id(self):
         return self._id
 
+    @id.setter
+    def id(self, new):
+        self._id = new
+
     @abc.abstractproperty
     def _schema(self):
         pass
