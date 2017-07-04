@@ -2,11 +2,11 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from identify.main.identify_client import BaseIdentifyClient
 from identify.http_clients.sync_client import SyncHttpClient
-from identify.resources.traffic_type import TrafficType
-from identify.resources.environment import Environment
-from identify.resources.attribute import Attribute
-from identify.resources.identity import Identity
 from identify.util.exceptions import InsufficientConfigArgumentsException
+from identify.microclients import TrafficTypeMicroClient
+from identify.microclients import EnvironmentMicroClient
+from identify.microclients import IdentityMicroClient
+from identify.microclients import AttributeMicroClient
 
 
 class SyncIdentifyClient(BaseIdentifyClient):
@@ -33,167 +33,25 @@ class SyncIdentifyClient(BaseIdentifyClient):
                 % ','.join(missing)
             )
 
-        self._client = SyncHttpClient(self._base_url, self._apikey)
+        http_client = SyncHttpClient(self._base_url, self._apikey)
 
-    def get_traffic_types(self):
-        '''
-        Returns a list of TrafficType objects.
-        '''
-        return TrafficType.retrieve_all(self._client)
+        self._traffic_type_client = TrafficTypeMicroClient(http_client)
+        self._environment_client = EnvironmentMicroClient(http_client)
+        self._attribute_client = AttributeMicroClient(http_client)
+        self._identity_client = IdentityMicroClient(http_client)
 
-    def get_environments(self):
-        '''
-        Returns a list of environments.
-        '''
-        return Environment.retrieve_all(self._client)
+    @property
+    def traffic_type(self):
+        return self._traffic_type_client
 
-    def get_attributes_for_traffic_type(self, traffic_type_id):
-        '''
-        Returns a list of attributes for a particular traffic type.
+    @property
+    def environment(self):
+        return self._environment_client
 
-        :param traffic_type_id: Id of the traffic type whose attributes are to
-            be retrieved.
-        '''
-        return Attribute.retrieve_all(
-            self._client,
-            trafficTypeId=traffic_type_id
-        )
+    @property
+    def attribute(self):
+        return self._attribute_client
 
-    def create_attribute_for_traffic_type(self, traffic_type_id, attr_data):
-        '''
-        Creates an attribute for a specific traffic type.
-
-        :param traffic_type_id: Id of the traffic type for which an attribute
-            will be created.
-        :param attr_data: Dictionary with the the data to create the new
-            attribute. Should include the followind fields:
-                - 'id': Id of the new attribute
-                - 'displayName': Display Name of the new attribute
-                - 'description': Description of the new attribute
-                - 'dataType': Data type of the new attribute
-        '''
-        return Attribute.create(
-            self._client,
-            attr_data.get('id'),
-            traffic_type_id,
-            attr_data.get('displayName'),
-            attr_data.get('description'),
-            attr_data.get('dataType')
-        )
-
-    def delete_attribute_from_schema(self, traffic_type_id, attribute_id):
-        '''
-        Delete an attribute from a particular traffic type.
-
-        :param traffic_type_id: Trafic id of the schema whose attribute
-            will be removed.
-        :param attribute_id: Id of the attribute to be removed.
-        '''
-        return Attribute.delete(self._client, attribute_id, traffic_type_id)
-
-    def add_identities(self, traffic_type_id, environment_id, identities):
-        '''
-        Create Identities for a specific traffic type and environment.
-
-        :param traffic_type_id: Traffic type id
-        :param environment_id: Environment where the identities will be created.
-        :param identities: Identities to be added. Should be in a dict with
-            the following format:
-                {
-                    'key1': {
-                        attribute_id_1a: value_1a,
-                        attribute_id_1b: value_1b,
-                    },
-                    'key2': {
-                        attribute_id_2a: value_2a,
-                        attribute_id_2b: value_2b,
-                    }
-                }
-        '''
-        return Identity.create_many(
-            self._client,
-            traffic_type_id,
-            environment_id,
-            identities
-        )
-
-    def add_identity(self, traffic_type_id, environment_id, key, values):
-        '''
-        Create a new Identity.
-
-        :param traffic_type_id: Traffic Type Id
-        :param environment_id: Environment where the identity will be created.
-        :key: Identity key
-        :values: Attribute values for the identity. Should be a dict with
-             the following format:
-                 {
-                    attribute_id1: value1,
-                    attribute_id2: value2,
-                 }
-        '''
-        return Identity.create(
-            self._client,
-            key,
-            traffic_type_id,
-            environment_id,
-            values
-        )
-
-    def update_identity(self, traffic_type_id, environment_id, key, values):
-        '''
-        Update an Identity.
-
-        :param traffic_type_id: Traffic Type Id
-        :param environment_id: Environment where the identity will be updated.
-        :key: Identity key
-        :values: Attribute values for the identity. Should be a dict with
-             the following format:
-                 {
-                    attribute_id1: value1,
-                    attribute_id2: value2,
-                 }
-        '''
-        return Identity.update(
-            self._client,
-            key,
-            traffic_type_id,
-            environment_id,
-            values
-        )
-
-    def patch_identity(self, traffic_type_id, environment_id, key, values):
-        '''
-        Patch an Identity.
-
-        :param traffic_type_id: Traffic Type Id
-        :param environment_id: Environment where the identity will be patched.
-        :key: Identity key
-        :values: Attribute values for the identity. Should be a dict with
-             the following format:
-                 {
-                    attribute_id1: value1,
-                    attribute_id2: value2,
-                 }
-        '''
-        return Identity.patch(
-            self._client,
-            key,
-            traffic_type_id,
-            environment_id,
-            values
-        )
-
-    def delete_attributes_from_key(self, traffic_type_id, environment_id, key):
-        '''
-        Delete all attributes for a specific key.
-
-        :param traffic_type_id: Traffic Type Id,
-        :param environment_id: Enviroment Id,
-        :key: Key whose attributes will be deleted.
-        '''
-        return Identity.delete_all_attributes(
-            self._client,
-            traffic_type_id,
-            environment_id,
-            key
-        )
+    @property
+    def identity(self):
+        return self._identity_client

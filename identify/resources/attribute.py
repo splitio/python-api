@@ -1,71 +1,29 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from identify.resources.base_resource import BaseResource
-from identify.util.logger import LOGGER
-from identify.util.exceptions import HTTPResponseError, \
-    UnknownIdentifyClientError
 
 
 class Attribute(BaseResource):
     '''
     '''
-    _endpoint = {
-        'all_items': {
-            'method': 'GET',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema',
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'create': {
-            'method': 'PUT',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema',
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'delete': {
-            'method': 'DELETE',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema/{attributeId}',
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': False,
-        },
-    }
-
     _schema = {
         'id': 'string',
         'trafficTypeId': 'string',
         'displayName': 'string',
         'description': 'string',
-        'dataType': 'string'
+        'dataType': 'string',
+        'isSearchable': 'bool',
     }
 
-    def __init__(self, client, id, traffic_type_id, display_name=None,
-                 description=None, data_type=None):
+    def __init__(self, data, client=None):
         '''
         '''
-        BaseResource.__init__(self, client, id)
-        self._traffic_type_id = traffic_type_id
-        self._display_name = display_name
-        self._description = description
-        self._data_type = data_type
-
-    @property
-    def id(self):
-        return self._id
+        BaseResource.__init__(self, data.get('id'), client)
+        self._traffic_type_id = data.get('trafficTypeId')
+        self._display_name = data.get('displayName')
+        self._description = data.get('description')
+        self._data_type = data.get('dataType')
+        self._is_searchable = data.get('isSearchable')
 
     @property
     def traffic_type_id(self):
@@ -83,72 +41,44 @@ class Attribute(BaseResource):
     def data_type(self):
         return self._data_type
 
-    @classmethod
-    def _build_single_from_collection_response(cls, client, response):
-        '''
-        '''
-        return Attribute(
-            client,
-            response['id'],
-            response['trafficTypeId'],
-            response['displayName'],
-            response['description'],
-            response['dataType']
-        )
+    @property
+    def is_searchable(self):
+        return self._is_searchable
 
-    @classmethod
-    def create(cls, client, id, traffic_type_id, display_name, description,
-               data_type):
-        '''
-        '''
-        # TODO: Validate!
-        try:
-            response = client.make_request(
-                cls._endpoint['create'],
-                {
-                    'id': id,
-                    'trafficTypeId': traffic_type_id,
-                    'displayName': display_name,
-                    'description': description,
-                    'dataType': data_type.upper()
-                },
-                trafficTypeId=traffic_type_id
-            )
+    @traffic_type_id.setter
+    def traffic_type_id(self, new):
+        self._traffic_type_id = new
 
-            return Attribute(
-                client,
-                response['id'],
-                response['trafficTypeId'],
-                response['displayName'],
-                response['description'],
-                response['dataType']
-            )
+    @display_name.setter
+    def display_name(self, new):
+        self._display_name = new
 
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Attribute not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+    @description.setter
+    def description(self, new):
+        self._description = new
 
-    @classmethod
-    def delete(cls, client, attribute_id, traffic_type_id):
-        '''
-        '''
-        try:
-            return client.make_request(
-                cls._endpoint['delete'],
-                trafficTypeId=traffic_type_id,
-                attributeId=attribute_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Attribute not deleted.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+    @data_type.setter
+    def data_type(self, new):
+        self._data_type = new
 
-    def delete_this(self):
+    @is_searchable.setter
+    def is_searchable(self, new):
+        self._is_searchable = new
+
+    def delete(self, identify_client=None):
         '''
+        Delete this attribute
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
         '''
-        return Attribute.delete(self._client, self._id, self.traffic_type_id)
+        if identify_client is not None:
+            amc = identify_client.attribute
+        elif self._client is not None:
+            from identify.microclients import AttributeMicroClient
+            amc = AttributeMicroClient(self._client)
+        else:
+            raise ClientRequiredError('An IdentityMicroClient is required')
+
+        return amc.delete(self)

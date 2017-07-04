@@ -6,7 +6,8 @@ import requests
 from identify.http_clients import base_client
 from identify.util.logger import LOGGER
 from identify.util.exceptions import HTTPResponseError, HTTPNotFoundError, \
-    HTTPIncorrectParametersError, HTTPUnauthorizedError
+    HTTPIncorrectParametersError, HTTPUnauthorizedError, \
+    IdentifyBackendUnreachableError
 
 
 class SyncHttpClient(base_client.BaseHttpClient):
@@ -37,7 +38,11 @@ class SyncHttpClient(base_client.BaseHttpClient):
 
     def _handle_invalid_response(self, response):
         '''
-        TODO
+        Handle responses that are not okay and throw an appropriate exception.
+        If the code doesn't match the known ones, a generic HTTPResponseError
+        is thrown
+
+        :param response: requests' module response object
         '''
         status_codes_exceptions = {
             404: HTTPNotFoundError,
@@ -50,6 +55,18 @@ class SyncHttpClient(base_client.BaseHttpClient):
             raise exc()
         else:
             raise HTTPResponseError
+
+    def _handle_connection_error(self, e):
+        '''
+        Handle error when attempting to connect to identify backend.
+        Logs exception thrown by requests module, and raises an
+        IdentifyBackendUnreachableError error, so that it can be caught
+        by using the top level IdentifyException
+        '''
+        LOGGER.debug(e)
+        raise IdentifyBackendUnreachableError(
+            'Unable to reach Identify backend'
+        )
 
     def make_request(self, endpoint, body=None, **kwargs):
         '''
@@ -81,7 +98,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
         try:
             response = method(url, headers=headers)
         except Exception as e:
-            return self._connection_error(e)
+            return self._handle_connection_error(e)
         finally:
             LOGGER.debug('RESPONSE: ' + response.text)
 

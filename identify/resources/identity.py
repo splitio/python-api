@@ -1,97 +1,32 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from identify.resources.base_resource import BaseResource
-from identify.util.exceptions import HTTPResponseError, MethodNotApplicable, \
-    UnknownIdentifyClientError
-from identify.util.logger import LOGGER
 
 
 class Identity(BaseResource):
     '''
     '''
-    _endpoint = {
-        'create': {
-            'method': 'PUT',
-            'url_template': ('trafficTypes/{trafficTypeId}/environments'
-                             '/{environmentId}/identities/{key}'),
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'create_many': {
-            'method': 'PUT',
-            'url_template': ('trafficTypes/{trafficTypeId}/environments'
-                             '/{environmentId}/identities'),
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'update': {
-            'method': 'POST',
-            'url_template': ('trafficTypes/{trafficTypeId}/environments'
-                             '/{environmentId}/identities/{key}/patch'),
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'patch': {
-            'method': 'PATCH',
-            'url_template': ('trafficTypes/{trafficTypeId}/environments'
-                             '/{environmentId}/identities/{key}'),
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': True,
-        },
-        'delete_attributes': {
-            'method': 'DELETE',
-            'url_template': ('trafficTypes/{trafficTypeId}/environments'
-                             '/{environmentId}/identities/{key}'),
-            'headers': [{
-                'name': 'Authorization',
-                'template': 'Bearer {value}',
-                'required': True,
-            }],
-            'query_string': [],
-            'response': False,
-        },
-    }
-
     _schema = {
         'key': 'string',
         'trafficTypeId': 'string',
         'environmentId': 'string',
         'values': 'object',
+        'organizationId': 'string',
     }
 
-    def __init__(self, client, key, traffic_type_id, environment_id,
-                 values=None):
+    def __init__(self, data, client=None):
         '''
         '''
-        BaseResource.__init__(self, client, key)
-        self._traffic_type_id = traffic_type_id
-        self._key = key
-        self._environment_id = environment_id
-        self._values = values
+        BaseResource.__init__(self, None, client)
+        self._traffic_type_id = data.get('trafficTypeId')
+        self._key = data.get('key')
+        self._environment_id = data.get('environmentId')
+        self._values = data.get('values')
+        self._organization_id = data.get('organizationId')
 
     @property
     def key(self):
-        return self._id
+        return self._key
 
     @property
     def traffic_type_id(self):
@@ -105,181 +40,86 @@ class Identity(BaseResource):
     def values(self):
         return self._values
 
-    @classmethod
-    def _build_single_from_collection_response(cls, client, response):
-        '''
-        '''
-        raise MethodNotApplicable()
+    @property
+    def organization_id(self):
+        return self._organization_id
 
-    @classmethod
-    def create(cls, client, key, traffic_type_id, environment_id, values):
-        '''
-        '''
-        try:
-            response = client.make_request(
-                cls._endpoint['create'],
-                {
-                    'key': key,
-                    'trafficTypeId': traffic_type_id,
-                    'environmentId': environment_id,
-                    'values': values
-                },
-                key=key,
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Identity not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+    @key.setter
+    def key(self, new):
+        self._key = new
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values']
-        )
+    @traffic_type_id.setter
+    def traffic_type_id(self, new):
+        self._traffic_type_id = new
 
-    @classmethod
-    def create_many(cls, client, traffic_type_id, environment_id, entities):
-        '''
-        entities: { key: { attr_id: value, ...} }
-        '''
-        # TODO: Validate!
-        try:
-            response = client.make_request(
-                cls._endpoint['create_many'],
-                [
-                    {
-                        'key': key,
-                        'trafficTypeId': traffic_type_id,
-                        'environmentId': environment_id,
-                        'values': entities[key]
-                    }
-                    for key in entities.keys()
-                ],
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-            return [
-                Identity(
-                    client, i['key'], i['trafficTypeId'],
-                    i['environmentId'], i['values']
-                ) for i in response
-            ]
+    @environment_id.setter
+    def environment_id(self, new):
+        self._environment_id = new
 
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Identities not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+    @values.setter
+    def values(self, new):
+        self._values = new
 
-    @classmethod
-    def update(cls, client, key, traffic_type_id, environment_id, values):
-        '''
-        '''
-        try:
-            response = client.make_request(
-                cls._endpoint['update'],
-                {
-                    'key': key,
-                    'trafficTypeId': traffic_type_id,
-                    'environmentId': environment_id,
-                    'values': values
-                },
-                key=key,
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Identity not updated.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+    @organization_id.setter
+    def organization_id(self, new):
+        self._organization_id = new
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values']
-        )
+    def save(self, identify_client=None):
+        '''
+        Save this Identity
 
-    @classmethod
-    def patch(cls, client, key, traffic_type_id, environment_id, values):
-        '''
-        '''
-        try:
-            response = client.make_request(
-                cls._endpoint['patch'],
-                {
-                    'key': key,
-                    'trafficTypeId': traffic_type_id,
-                    'environmentId': environment_id,
-                    'values': values
-                },
-                key=key,
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Identity not patched.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
 
-        return Identity(
-            client,
-            response['key'],
-            response['trafficTypeId'],
-            response['environmentId'],
-            response['values']
-        )
+        :returns: newly saved Identity object
+        :rtype: Identity
+        '''
+        if identify_client is not None:
+            imc = identify_client.identity
+        elif self._client is not None:
+            from identify.microclients import IdentityMicroClient
+            imc = IdentityMicroClient(self._client)
+        else:
+            raise ClientRequiredError('An IdentityMicroClient is required')
 
-    @classmethod
-    def delete_all_attributes(cls, client, traffic_type_id, environment_id,
-                              key):
-        '''
-        '''
-        try:
-            client.make_request(
-                cls._endpoint['delete_attributes'],
-                key=key,
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Identify API failed. Identity not patched.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownIdentifyClientError()
+        return imc.save(self.to_dict())
 
-    def update_this(self, values):
+    def update(self, identify_client=None):
         '''
-        '''
-        return Identity.update(
-            self._client, self.key, self.traffic_type_id,  self.environment_id,
-            values
-        )
+        Update this Identity
 
-    def patch_this(self, values):
-        '''
-        '''
-        return Identity.patch(
-            self._client, self.key, self.traffic_type_id,  self.environment_id,
-            values
-        )
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
 
-    def delete_attributes_this(self):
+        :returns: newly saved Identity object
+        :rtype: Identity
         '''
+        if identify_client is not None:
+            imc = identify_client.identity
+        elif self._client is not None:
+            from identify.microclients import IdentityMicroClient
+            imc = IdentityMicroClient(self._client)
+        else:
+            raise ClientRequiredError('An IdentityMicroClient is required')
+
+        return imc.update(self.to_dict())
+
+    def delete_attributes(self, identify_client=None):
         '''
-        return Identity.delete_all_attributes(
-            self._client, self.traffic_type_id, self.environment_id, self.key
-        )
+        Delete all attributes from this Identity
+
+        :param identify_client: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+        '''
+        if identify_client is not None:
+            imc = identify_client.identity
+        elif self._client is not None:
+            from identify.microclients import IdentityMicroClient
+            imc = IdentityMicroClient(self._client)
+        else:
+            raise ClientRequiredError('An IdentityMicroClient is required')
+
+        return imc.delete_all_attributes(self)
