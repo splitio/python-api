@@ -62,7 +62,7 @@ class E2ETests(Command):
         '''
         le2e_test_file = path.join(
             path.dirname(path.realpath(__file__)),
-            'identify',
+            'splitapiclient',
             'tests',
             'e2e',
             'e2etests.py'
@@ -88,8 +88,9 @@ install_requires = [
 
 # Standard unit test requirements
 tests_requires = [
-    'pytest-mock',
-    'pytest',
+    'mock==2.0.0',
+    'pytest-mock==1.6.0',
+    'pytest==3.1.3',
 ]
 
 
@@ -101,11 +102,11 @@ locale2e_requires = [
 
 # Get version number
 with open(path.join(path.abspath(path.dirname(__file__)),
-                    'identify', 'version.py')) as f:
+                    'splitapiclient', 'version.py')) as f:
     exec(f.read())
 # Run setup!
 setup(
-    name='identify_client',
+    name='splitapiclient',
     version=__version__,  # noqa
     description='Split.io Identify Python Client',
     author='Patricio Echague, Sebastian Arrubia, Martin Redolatti',
