@@ -2,7 +2,7 @@ from splitapiclient.resources import Attribute
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
-
+from splitapiclient.util.helpers import as_dict
 
 class AttributeMicroClient:
     '''
@@ -56,18 +56,11 @@ class AttributeMicroClient:
             returned
         :rtype: list(TrafficType)
         '''
-        try:
-            response = self._http_client.make_request(
-                self._endpoint['all_items'],
-                trafficTypeId=traffic_type_id
-            )
-            return [Attribute(item, self._http_client) for item in response]
-        except HTTPResponseError as e:
-            LOGGER.error('Error retrieving items')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        response = self._http_client.make_request(
+            self._endpoint['all_items'],
+            trafficTypeId=traffic_type_id
+        )
+        return [Attribute(item, self._http_client) for item in response]
 
     def save(self, attribute):
         '''
@@ -79,31 +72,13 @@ class AttributeMicroClient:
         :returns: newly created attribute
         :rtype: Attribute
         '''
-        # TODO: Validate!
-        try:
-            data = attribute.to_dict() if isinstance(attribute, Attribute) else attribute
-            response = self._http_client.make_request(
-                self._endpoint['create'],
-                data,
-                trafficTypeId=data['trafficTypeId']
-            )
-
-            return Attribute(response, self._http_client)
-
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Attribute not created.')
-            raise e
-        except Exception as e:
-            LOGGER.exception(e)
-            raise UnknownApiClientError()
-
-    def delete_by_instance(self, attribute):
-        '''
-        Delete an attribute
-
-        :param attribute: Attribute instance
-        '''
-        return self.delete(attribute.id, attribute.traffic_type_id)
+        data = as_dict(attribute)
+        response = self._http_client.make_request(
+            self._endpoint['create'],
+            data,
+            trafficTypeId=data.get('trafficTypeId')
+        )
+        return Attribute(response, self._http_client)
 
     def delete(self, attribute_id, traffic_type_id):
         '''
@@ -112,15 +87,20 @@ class AttributeMicroClient:
         :param attribute_id: attribute's id
         :param traffic_type_id: atribute's traffic type id
         '''
-        try:
-            return self._http_client.make_request(
-                self._endpoint['delete'],
-                trafficTypeId=traffic_type_id,
-                attributeId=attribute_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Attribute not deleted.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        return self._http_client.make_request(
+            self._endpoint['delete'],
+            trafficTypeId=traffic_type_id,
+            attributeId=attribute_id
+        )
+
+    def delete_by_instance(self, attribute):
+        '''
+        Delete an attribute
+
+        :param attribute: Attribute instance
+        '''
+        data = as_dict(attribute)
+        return self.delete(
+            data.get('id'),
+            data.get('trafficTypeId')
+        )

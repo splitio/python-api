@@ -89,3 +89,10 @@ class SplitBackendUnreachableError(SplitException):
     due a a connection error, or an incorrect baseUrl
     '''
     pass
+
+
+class InvalidArgumentException(SplitException):
+    '''
+    This exception will be thrown when a method expected an argument of a
+    different type
+    '''

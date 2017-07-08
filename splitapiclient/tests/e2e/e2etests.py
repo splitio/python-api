@@ -9,7 +9,7 @@ from splitapiclient.resources.traffic_type import TrafficType
 from splitapiclient.resources.environment import Environment
 from splitapiclient.resources.attribute import Attribute
 from splitapiclient.resources.identity import Identity
-
+from splitapiclient.util.bulk_result import BulkOperationResult
 
 class TestEndToEnd:
     '''
@@ -158,10 +158,15 @@ class TestEndToEnd:
             },
         ])
 
-        assert isinstance(res_add_identities, tuple)
-        objs, failed = res_add_identities
-        assert all(isinstance(i, Identity) for i in objs)
-        assert all(isinstance(i['object'], Identity) for i in failed)
+        assert isinstance(res_add_identities, BulkOperationResult)
+        assert all(
+            isinstance(i, Identity)
+            for i in res_add_identities.successful
+        )
+        assert all(isinstance(
+            i['object'], Identity)
+            for i in res_add_identities.failed
+        )
         assert all(
             {
                 'key': i.key,
@@ -170,7 +175,7 @@ class TestEndToEnd:
                 'values': i.values,
                 'organizationId': i.organization_id,
             } == i.to_dict()
-            for i in objs
+            for i in res_add_identities.successful
         )
 
         res_delete_attr = c.identities.delete(

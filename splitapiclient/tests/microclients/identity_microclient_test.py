@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, \
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.resources import Identity
+from splitapiclient.util.bulk_result import BulkOperationResult
 
 class TestIdentityMicroClient:
     '''
@@ -63,6 +64,10 @@ class TestIdentityMicroClient:
             'metadata': {},
         }
         result = imc.save_all(identities)
+        assert isinstance(result, BulkOperationResult)
+        assert [i.to_dict() for i in result.successful] == identities
+        assert isinstance(result.failed, list)
+        assert isinstance(result.metadata, dict)
 
         SyncHttpClient.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
@@ -70,6 +75,7 @@ class TestIdentityMicroClient:
             trafficTypeId=identities[0]['trafficTypeId'],
             environmentId=identities[0]['environmentId'],
         )
+
 
     def test_update(self, mocker):
         '''

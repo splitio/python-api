@@ -34,14 +34,7 @@ class TrafficTypeMicroClient:
         :returns: List of TrafficType objects
         :rtype: list(TrafficType)
         '''
-        try:
-            response = self._http_client.make_request(
-                self._endpoint['all_items']
-            )
-            return [TrafficType(item, self._http_client) for item in response]
-        except HTTPResponseError as e:
-            LOGGER.error('Error retrieving items')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        response = self._http_client.make_request(
+            self._endpoint['all_items']
+        )
+        return [TrafficType(item, self._http_client) for item in response]

@@ -3,7 +3,6 @@ from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
 
-
 class EnvironmentMicroClient:
     '''
     '''
@@ -34,14 +33,7 @@ class EnvironmentMicroClient:
         :returns: list of Environment objects
         :rtype: list(Environment)
         '''
-        try:
-            response = self._http_client.make_request(
-                self._endpoint['all_items']
-            )
-            return [Environment(item, self._http_client) for item in response]
-        except HTTPResponseError as e:
-            LOGGER.error('Error retrieving items')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        response = self._http_client.make_request(
+            self._endpoint['all_items']
+        )
+        return [Environment(item, self._http_client) for item in response]

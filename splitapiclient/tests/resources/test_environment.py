@@ -136,7 +136,7 @@ class TestEnvironment:
             http_client_mock
         )
 
-        s1, f1 = env1.add_identities(data)
+        res = env1.add_identities(data)
 
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
@@ -144,19 +144,23 @@ class TestEnvironment:
             trafficTypeId=data[0]['trafficTypeId'],
             environmentId=data[0]['environmentId'],
         )
-        assert [s.to_dict() for s in s1] == data
+        assert [s.to_dict() for s in res.successful] == data
+        assert isinstance(res.failed, list)
+        assert isinstance(res.metadata, dict)
 
         # Test by passing an instances as well as raw dict data
         http_client_mock.reset_mock()
         idinstances = [Identity(data[0]), data[1]]
-        ss, ff = env1.add_identities(idinstances)
+        res2 = env1.add_identities(idinstances)
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
             data,
             trafficTypeId=idinstances[0].traffic_type_id,
             environmentId=idinstances[0].environment_id,
         )
-        assert [s.to_dict() for s in ss] == data
+        assert [s.to_dict() for s in res2.successful] == data
+        assert isinstance(res2.failed, list)
+        assert isinstance(res2.metadata, dict)
 
         env2 = Environment(
             {
@@ -172,11 +176,13 @@ class TestEnvironment:
             'metadata': {}
         }
         ic = get_client({'base_url': 'http://test', 'apikey': '123'})
-        s2, f2 = env2.add_identities(data, ic)
+        res3 = env2.add_identities(data, ic)
         http_client_mock.make_request.assert_called_once_with(
             IdentityMicroClient._endpoint['create_many'],
             data,
             trafficTypeId=data[0]['trafficTypeId'],
             environmentId=data[0]['environmentId'],
         )
-        assert [s.to_dict() for s in s2] == data
+        assert [s.to_dict() for s in res3.successful] == data
+        assert isinstance(res3.failed, list)
+        assert isinstance(res3.metadata, dict)

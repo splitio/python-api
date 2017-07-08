@@ -2,6 +2,8 @@ from splitapiclient.resources import Identity
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
+from splitapiclient.util.helpers import as_dict
+from splitapiclient.util.bulk_result import BulkOperationResult
 
 
 class IdentityMicroClient:
@@ -86,22 +88,14 @@ class IdentityMicroClient:
         :returns: newly created Identity
         :rtype: Identity
         '''
-        try:
-            data = identity.to_dict() if isinstance(identity, Identity) else identity
-            response = self._http_client.make_request(
-                self._endpoint['create'],
-                data,
-                key=data.get('key'),
-                trafficTypeId=data.get('trafficTypeId'),
-                environmentId=data.get('environmentId'),
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Identity not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
-
+        data = as_dict(identity)
+        response = self._http_client.make_request(
+            self._endpoint['create'],
+            data,
+            key=data.get('key'),
+            trafficTypeId=data.get('trafficTypeId'),
+            environmentId=data.get('environmentId'),
+        )
         return Identity(response, self._http_client)
 
     def save_all(self, identities):
@@ -116,42 +110,29 @@ class IdentityMicroClient:
             for the failed item togegther with a status code and a message
         :rtype: tuple
         '''
-        # TODO: Validate!
-        try:
-            # convert Identity objects to dict if necessary
-            to_save = [
-                i.to_dict() if isinstance(i, Identity) else i
-                for i in identities
-            ]
-            response = self._http_client.make_request(
-                self._endpoint['create_many'],
-                to_save,
-                trafficTypeId=to_save[0]['trafficTypeId'],
-                environmentId=to_save[0]['environmentId']
-            )
+        to_save = [as_dict(i) for i in identities]
+        response = self._http_client.make_request(
+            self._endpoint['create_many'],
+            to_save,
+            trafficTypeId=to_save[0].get('trafficTypeId'),
+            environmentId=to_save[0].get('environmentId')
+        )
 
-            successful = [
-                Identity(i, self._http_client)
-                for i in response['objects']
-            ]
+        successful = [
+            Identity(i, self._http_client)
+            for i in response.get('objects', [])
+        ]
 
-            failed = [
-                {
-                    'object': Identity(i['object'], self._http_client),
-                    'status': i['status'],
-                    'message': i['message'],
-                }
-                for i in response['failed']
-            ]
+        failed = [
+            {
+                'object': Identity(i['object'], self._http_client),
+                'status': i['status'],
+                'message': i['message'],
+            }
+            for i in response.get('failed', [])
+        ]
 
-            return successful, failed
-
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Identities not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        return BulkOperationResult(successful, failed, response.get('metadata'))
 
     def update(self, identity):
         '''
@@ -163,22 +144,14 @@ class IdentityMicroClient:
         :returns: updated Identity
         :rtype: Identity
         '''
-        try:
-            data = identity.to_dict() if isinstance(identity, Identity) else identity
-            response = self._http_client.make_request(
-                self._endpoint['update'],
-                data,
-                key=data.get('key'),
-                trafficTypeId=data.get('trafficTypeId'),
-                environmentId=data.get('environmentId'),
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Identity not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
-
+        data = as_dict(identity)
+        response = self._http_client.make_request(
+            self._endpoint['update'],
+            data,
+            key=data.get('key'),
+            trafficTypeId=data.get('trafficTypeId'),
+            environmentId=data.get('environmentId'),
+        )
         return Identity(response, self._http_client)
 
     def patch(self, identity):
@@ -191,35 +164,15 @@ class IdentityMicroClient:
         :returns: patched Identity
         :rtype: Identity
         '''
-        try:
-            data = identity.to_dict() if isinstance(identity, Identity) else identity
-            response = self._http_client.make_request(
-                self._endpoint['patch'],
-                data,
-                key=data.get('key'),
-                trafficTypeId=data.get('trafficTypeId'),
-                environmentId=data.get('environmentId'),
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Identity not created.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
-
-        return Identity(response, self._http_client)
-
-    def delete_by_instance(self, identity):
-        '''
-        Delete the identity
-
-        :param identity: Identity instance
-        '''
-        return self.delete(
-            identity.traffic_type_id,
-            identity.environment_id,
-            identity.key
+        data = as_dict(identity)
+        response = self._http_client.make_request(
+            self._endpoint['patch'],
+            data,
+            key=data.get('key'),
+            trafficTypeId=data.get('trafficTypeId'),
+            environmentId=data.get('environmentId'),
         )
+        return Identity(response, self._http_client)
 
     def delete(self, traffic_type_id, environment_id, key):
         '''
@@ -230,16 +183,22 @@ class IdentityMicroClient:
         :param environment_id: Identity's environment id
         :param key: Identity's key
         '''
-        try:
-            self._http_client.make_request(
-                self._endpoint['delete_attributes'],
-                key=key,
-                trafficTypeId=traffic_type_id,
-                environmentId=environment_id
-            )
-        except HTTPResponseError as e:
-            LOGGER.error('Call to Split API failed. Identity not patched.')
-            raise e
-        except Exception as e:
-            LOGGER.debug(e)
-            raise UnknownApiClientError()
+        self._http_client.make_request(
+            self._endpoint['delete_attributes'],
+            key=key,
+            trafficTypeId=traffic_type_id,
+            environmentId=environment_id
+        )
+
+    def delete_by_instance(self, identity):
+        '''
+        Delete the identity
+
+        :param identity: Identity instance
+        '''
+        data = as_dict(identity)
+        return self.delete(
+            data.get('trafficTypeId'),
+            data.get('environmentId'),
+            data.get('key')
+        )
