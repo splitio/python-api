@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, \
 from splitapiclient.resources import Attribute
 from splitapiclient.microclients import AttributeMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 
 
@@ -65,7 +66,7 @@ class TestAttribute:
             'dataType': 'string',
             'isSearchable': False,
         }
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = attr_data
         a1 = Attribute(attr_data, http_client_mock)
 
@@ -94,7 +95,7 @@ class TestAttribute:
     def test_delete(self, mocker):
         '''
         '''
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = None
         a1 = Attribute(
             {

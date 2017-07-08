@@ -7,6 +7,7 @@ from splitapiclient.resources import Attribute
 from splitapiclient.microclients import AttributeMicroClient
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 
 
@@ -64,7 +65,7 @@ class TestTrafficType:
             'dataType': 'string',
             'description': 'd2',
         }]
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
         tt1 = TrafficType(
             {
@@ -109,7 +110,7 @@ class TestTrafficType:
             'dataType': 'string',
             'description': 'd1',
         }
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
         tt1 = TrafficType(
             {
@@ -166,7 +167,7 @@ class TestTrafficType:
             'values': {'a1': 'v1'},
             'organizationId': 'o1',
         }
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
         tt1 = TrafficType(
             {
@@ -240,7 +241,7 @@ class TestTrafficType:
             'organizationId': 'o1',
         }]
 
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = {
             'objects': data,
             'failed': [],

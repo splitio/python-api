@@ -1,10 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from splitapiclient.resources.base_resource import BaseResource
-from splitapiclient.resources.attribute import Attribute
-from splitapiclient.resources.identity import Identity
-from splitapiclient.util.exceptions import ClientRequiredError
-
+from splitapiclient.util.helpers import as_dict, require_client
 
 class TrafficType(BaseResource):
     '''
@@ -50,13 +47,7 @@ class TrafficType(BaseResource):
         :returns: List of attributes associated with this traffic type
         :rtype: list(Attribute)
         '''
-        if apiclient is not None:
-            amc = apiclient.attributes
-        elif self._client is not None:
-            from splitapiclient.microclients import AttributeMicroClient
-            amc = AttributeMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An AttributeMicroClient is required')
+        amc = require_client('Attribute', self._client, apiclient)
         return amc.list(self.id)
 
     def add_attribute(self, data, apiclient=None):
@@ -71,17 +62,9 @@ class TrafficType(BaseResource):
         :returns: Newly created attribute
         :rtype: Attribute
         '''
-        if apiclient is not None:
-            amc = apiclient.attributes
-        elif self._client is not None:
-            from splitapiclient.microclients import AttributeMicroClient
-            amc = AttributeMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An AttributeMicroClient is required')
-
-        attribute = data.to_dict() if isinstance(data, Attribute) else data
-        if not attribute.get('trafficTypeId'):
-            attribute['trafficTypeId'] = self.id
+        amc = require_client('Attribute', self._client, apiclient)
+        attribute = as_dict(data)
+        attribute['trafficTypeId'] = self.id
         return amc.save(attribute)
 
     def add_identity(self, data, apiclient=None):
@@ -96,17 +79,9 @@ class TrafficType(BaseResource):
         :returns: newly created Identity
         :rtype: Identity
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
-        identity = data.to_dict() if isinstance(data, Identity) else data
-        if not identity.get('trafficTypeId'):
-            identity['trafficTypeId'] = self.id
+        imc = require_client('Identity', self._client, apiclient)
+        identity = as_dict(data)
+        identity['trafficTypeId'] = self.id
         return imc.save(identity)
 
     def add_identities(self, data, apiclient=None):
@@ -124,20 +99,8 @@ class TrafficType(BaseResource):
             for the failed item togegther with a status code and a message
         :rtype: tuple
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients.identity_microclient import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
-        identities = [
-            i.to_dict() if isinstance(i, Identity) else i
-            for i in data
-        ]
+        imc = require_client('Identity', self._client, apiclient)
+        identities = [as_dict(i) for i in data]
         for item in identities:
-            if not item.get('trafficTypeId'):
-                item['trafficTypeId'] = self.id
+            item['trafficTypeId'] = self.id
         return imc.save_all(identities)
-

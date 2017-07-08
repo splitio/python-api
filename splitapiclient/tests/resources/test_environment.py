@@ -5,6 +5,7 @@ from splitapiclient.resources import Environment
 from splitapiclient.resources import Identity
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 
 
@@ -51,7 +52,7 @@ class TestEnvironment:
             'values': {'a1': 'v1'},
             'organizationId': 'o1',
         }
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
         env1 = Environment(
             {
@@ -122,7 +123,7 @@ class TestEnvironment:
             'organizationId': 'o1',
         }]
 
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = {
             'objects': data,
             'failed': [],

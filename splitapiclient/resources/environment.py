@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from splitapiclient.resources.base_resource import BaseResource
-from splitapiclient.resources.identity import Identity
+from splitapiclient.util.helpers import require_client, as_dict
 
 
 class Environment(BaseResource):
@@ -35,17 +35,9 @@ class Environment(BaseResource):
             the IdentifyClient instance should be passed in order to perform the
             http call
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentifyClient is required')
-
-        identity = data.to_dict() if isinstance(data, Identity) else data
-        if not identity.get('environmentId'):
-            identity['environmentId'] = self.id
+        imc = require_client('Identity', self._client, apiclient)
+        identity = as_dict(data)
+        identity['environmentId'] = self.id
         return imc.save(identity)
 
     def add_identities(self, data, apiclient=None):
@@ -63,21 +55,8 @@ class Environment(BaseResource):
             for the failed item togegther with a status code and a message
         :rtype: tuple
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
-        # Convert identity objects to dicts if necessary before updating the
-        # environmentId
-        identities = [
-            i.to_dict() if isinstance(i, Identity) else i
-            for i in data
-        ]
+        imc = require_client('Identity', self._client, apiclient)
+        identities = [as_dict(i) for i in data]
         for item in identities:
-            if not item.get('environmentId'):
-                item['environmentId'] = self.id
+            item['environmentId'] = self.id
         return imc.save_all(identities)

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from splitapiclient.resources.base_resource import BaseResource
+from splitapiclient.util.helpers import as_dict, require_client
 
 
 class Identity(BaseResource):
@@ -75,14 +76,7 @@ class Identity(BaseResource):
         :returns: newly saved Identity object
         :rtype: Identity
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
+        imc = require_client('Identity', self._client, apiclient)
         return imc.save(self.to_dict())
 
     def update(self, apiclient=None):
@@ -96,14 +90,7 @@ class Identity(BaseResource):
         :returns: newly saved Identity object
         :rtype: Identity
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
+        imc = require_client('Identity', self._client, apiclient)
         return imc.update(self.to_dict())
 
     def delete(self, apiclient=None):
@@ -114,12 +101,5 @@ class Identity(BaseResource):
             the IdentifyClient instance should be passed in order to perform the
             http call
         '''
-        if apiclient is not None:
-            imc = apiclient.identities
-        elif self._client is not None:
-            from splitapiclient.microclients import IdentityMicroClient
-            imc = IdentityMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
+        imc = require_client('Identity', self._client, apiclient)
         return imc.delete_by_instance(self)

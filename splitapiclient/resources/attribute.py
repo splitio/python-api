@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from splitapiclient.resources.base_resource import BaseResource
+from splitapiclient.util.helpers import require_client
 
 
 class Attribute(BaseResource):
@@ -73,14 +74,7 @@ class Attribute(BaseResource):
             the IdentifyClient instance should be passed in order to perform the
             http call
         '''
-        if apiclient is not None:
-            amc = apiclient.attributes
-        elif self._client is not None:
-            from splitapiclient.microclients import AttributeMicroClient
-            amc = AttributeMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
+        amc = require_client('Attribute', self._client, apiclient)
         return amc.save(self)
 
     def delete(self, apiclient=None):
@@ -91,12 +85,5 @@ class Attribute(BaseResource):
             the IdentifyClient instance should be passed in order to perform the
             http call
         '''
-        if apiclient is not None:
-            amc = apiclient.attributes
-        elif self._client is not None:
-            from splitapiclient.microclients import AttributeMicroClient
-            amc = AttributeMicroClient(self._client)
-        else:
-            raise ClientRequiredError('An IdentityMicroClient is required')
-
+        amc = require_client('Attribute', self._client, apiclient)
         return amc.delete_by_instance(self)

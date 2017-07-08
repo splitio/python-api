@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.resources import Identity
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.main import get_client
@@ -52,7 +53,7 @@ class TestIdentity:
     def test_save(self, mocker):
         '''
         '''
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         i1 = Identity(
             {
                 'key': 'key1',
@@ -94,7 +95,7 @@ class TestIdentity:
     def test_update(self, mocker):
         '''
         '''
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         i1 = Identity(
             {
                 'key': 'key1',
@@ -136,7 +137,7 @@ class TestIdentity:
     def test_delete(self, mocker):
         '''
         '''
-        http_client_mock = mocker.Mock()
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
         i1 = Identity(
             {
                 'key': 'key1',
