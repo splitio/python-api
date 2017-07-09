@@ -96,3 +96,11 @@ class InvalidArgumentException(SplitException):
     This exception will be thrown when a method expected an argument of a
     different type
     '''
+    pass
+
+class InvalidModelException(SplitException):
+    '''
+    Exception to be thrown when an invalid model is used when attempting to
+    retrieve a client
+    '''
+    pass

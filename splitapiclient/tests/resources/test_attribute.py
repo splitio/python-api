@@ -41,7 +41,7 @@ class TestAttribute:
     def test_getters_and_setters(self):
         '''
         '''
-        attr1 = Attribute({})
+        attr1 = Attribute()
         attr1.id = 'a'
         attr1.traffic_type_id = 'b'
         attr1.display_name = 'c'

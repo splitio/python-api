@@ -15,9 +15,11 @@ class Identity(BaseResource):
         'organizationId': 'string',
     }
 
-    def __init__(self, data, client=None):
+    def __init__(self, data=None, client=None):
         '''
         '''
+        if not data:
+            data = {}
         BaseResource.__init__(self, None, client)
         self._traffic_type_id = data.get('trafficTypeId')
         self._key = data.get('key')

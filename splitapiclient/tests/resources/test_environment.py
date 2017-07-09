@@ -35,7 +35,7 @@ class TestEnvironment:
     def test_getters_and_setters(self):
         '''
         '''
-        env1 = Environment({})
+        env1 = Environment()
         env1.id = 'a'
         env1.name = 'b'
 

@@ -12,9 +12,11 @@ class Environment(BaseResource):
         'name': 'string',
     }
 
-    def __init__(self, data, client=None):
+    def __init__(self, data=None, client=None):
         '''
         '''
+        if not data:
+            data = {}
         BaseResource.__init__(self, data.get('id'), client)
         self._name = data.get('name')
 

@@ -38,7 +38,7 @@ class TestTrafficType:
     def test_getters_and_setters(self):
         '''
         '''
-        tt1 = TrafficType({})
+        tt1 = TrafficType()
         tt1.id = 'a'
         tt1.name = 'b'
         tt1.display_attribute_id = 'c'

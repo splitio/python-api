@@ -35,7 +35,7 @@ class TestIdentity:
     def test_getters_and_setters(self):
         '''
         '''
-        identity1 = Identity({})
+        identity1 = Identity()
         identity1.id = 'a'
         identity1.key = 'b'
         identity1.traffic_type_id = 'c'

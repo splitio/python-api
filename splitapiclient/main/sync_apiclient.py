@@ -27,7 +27,7 @@ class SyncApiClient(BaseApiClient):
             self._base_url = config['base_url']
             self._apikey = config['apikey']
         else:
-            missing = [i not in config for i in ['base_url', 'apikey']]
+            missing = [i for i in ['base_url', 'apikey'] if i not in config]
             raise InsufficientConfigArgumentsException(
                 'The following keys must be present in the config dict: %s'
                 % ','.join(missing)

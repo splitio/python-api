@@ -16,9 +16,11 @@ class Attribute(BaseResource):
         'isSearchable': 'bool',
     }
 
-    def __init__(self, data, client=None):
+    def __init__(self, data=None, client=None):
         '''
         '''
+        if not data:
+            data = {}
         BaseResource.__init__(self, data.get('id'), client)
         self._traffic_type_id = data.get('trafficTypeId')
         self._display_name = data.get('displayName')

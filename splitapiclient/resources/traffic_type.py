@@ -12,10 +12,12 @@ class TrafficType(BaseResource):
         'displayAttributeId': 'string'
     }
 
-    def __init__(self, data, client=None):
+    def __init__(self, data=None, client=None):
         '''
         Constructor
         '''
+        if not data:
+            data = {}
         BaseResource.__init__(self, data.get('id'), client)
         self._name = data.get('name')
         self._display_attribute_id = data.get('displayAttributeId')
