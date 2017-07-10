@@ -14,6 +14,8 @@ class SyncApiClient(BaseApiClient):
     Synchronous Split API client
     '''
 
+    BASE_PROD_URL = 'https://api.split.io/internal/api/v1'
+
     def __init__(self, config):
         '''
         Class constructor.
@@ -23,16 +25,19 @@ class SyncApiClient(BaseApiClient):
                 - 'base_url': Base url where the API is hosted
                 - 'apikey': APIKey used to authenticate the user.
         '''
-        if 'base_url' in config and 'apikey' in config:
+        if 'base_url' in config:
             self._base_url = config['base_url']
-            self._apikey = config['apikey']
         else:
-            missing = [i for i in ['base_url', 'apikey'] if i not in config]
+            self._base_url = self.BASE_PROD_URL
+
+        missing = [i for i in ['apikey'] if i not in config]
+        if missing:
             raise InsufficientConfigArgumentsException(
                 'The following keys must be present in the config dict: %s'
                 % ','.join(missing)
             )
 
+        self._apikey = config['apikey']
         http_client = SyncHttpClient(self._base_url, self._apikey)
 
         self._traffic_type_client = TrafficTypeMicroClient(http_client)
