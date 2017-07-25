@@ -18,7 +18,7 @@ Split has built and maintains a API wrappers for:
 
 * Java [Github](https://github.com/splitio/java-api)
 * Node [Github](https://github.com/splitio/javascript-api)
-* .NET [Github](https://github.com/splitio/net-api)
+* .NET [Github](https://github.com/splitio/.net-api)
 * Ruby [Github](https://github.com/splitio/ruby-api)
 * PHP [Github](https://github.com/splitio/php-api)
 * Python [Github](https://github.com/splitio/python-api)
