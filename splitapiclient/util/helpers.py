@@ -26,6 +26,7 @@ def require_client(model, http_client, apiclient):
     from splitapiclient.http_clients.base_client import BaseHttpClient
     from splitapiclient.microclients.attribute_microclient import AttributeMicroClient
     from splitapiclient.microclients.environment_microclient import EnvironmentMicroClient
+    from splitapiclient.microclients.workspaces_microclient import WorkspaceMicroClient
     from splitapiclient.microclients.identity_microclient import IdentityMicroClient
     from splitapiclient.microclients.traffic_type_microclient import TrafficTypeMicroClient
 
@@ -35,11 +36,13 @@ def require_client(model, http_client, apiclient):
     if apiclient and isinstance(apiclient, BaseApiClient):
         if model == 'Attribute': return apiclient.attributes
         if model == 'Environment': return apiclient.environments
+        if model == 'Workspace': return apiclient.workspaces
         if model == 'Identity': return apiclient.identities
         if model == 'TrafficType': return apiclient.traffic_types
     elif http_client and isinstance(http_client, BaseHttpClient):
         if model == 'Attribute': return AttributeMicroClient(http_client)
         if model == 'Environment': return EnvironmentMicroClient(http_client)
+        if model == 'Workspace': return WorkspaceMicroClient(http_client)
         if model == 'Identity': return IdentityMicroClient(http_client)
         if model == 'TrafficType': return TrafficTypeMicroClient(http_client)
     else:

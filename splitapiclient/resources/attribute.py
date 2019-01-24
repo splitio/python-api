@@ -14,6 +14,7 @@ class Attribute(BaseResource):
         'description': 'string',
         'dataType': 'string',
         'isSearchable': 'bool',
+        'workspaceId' : 'string',
     }
 
     def __init__(self, data=None, client=None):
@@ -27,6 +28,7 @@ class Attribute(BaseResource):
         self._description = data.get('description')
         self._data_type = data.get('dataType')
         self._is_searchable = data.get('isSearchable')
+        self._workspace_id = data.get('workspaceId')
 
     @property
     def traffic_type_id(self):

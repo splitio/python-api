@@ -1,15 +1,15 @@
-from splitapiclient.resources import Environment
+from splitapiclient.resources import Workspace
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
 
-class EnvironmentMicroClient:
+class WorkspaceMicroClient:
     '''
     '''
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': 'environments/ws/{workspaceId}',
+            'url_template': 'workspaces',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -26,15 +26,14 @@ class EnvironmentMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, workspace_id):
+    def list(self):
         '''
-        Returns a list of Environment objects.
+        Returns a list of Workspaces objects.
 
-        :returns: list of Environment objects
-        :rtype: list(Environment)
+        :returns: list of Workspaces objects
+        :rtype: list(Workspaces)
         '''
         response = self._http_client.make_request(
-            self._endpoint['all_items'],
-            workspaceId =workspace_id
+            self._endpoint['all_items']
         )
-        return [Environment(item, self._http_client) for item in response]
+        return [Workspace(item, self._http_client) for item in response['objects']]

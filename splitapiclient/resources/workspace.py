@@ -4,13 +4,12 @@ from splitapiclient.resources.base_resource import BaseResource
 from splitapiclient.util.helpers import require_client, as_dict
 
 
-class Environment(BaseResource):
+class Workspace(BaseResource):
     '''
     '''
     _schema = {
         'id': 'string',
         'name': 'string',
-        'workspaceId' : 'string',
     }
 
     def __init__(self, data=None, client=None):
@@ -20,12 +19,7 @@ class Environment(BaseResource):
             data = {}
         BaseResource.__init__(self, data.get('id'), client)
         self._name = data.get('name')
-        self._workspace_id = data.get('workspaceId')
 
-    @property
-    def workspace_id(self):
-        return self._workspace_id
-            
     @property
     def name(self):
         return self._name

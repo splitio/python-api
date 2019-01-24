@@ -10,7 +10,7 @@ class AttributeMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema',
+            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -20,8 +20,8 @@ class AttributeMicroClient:
             'response': True,
         },
         'create': {
-            'method': 'PUT',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema',
+            'method': 'POST',
+            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -32,7 +32,7 @@ class AttributeMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': 'trafficTypes/{trafficTypeId}/schema/{attributeId}',
+            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}/schema/{attributeId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -48,7 +48,7 @@ class AttributeMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, traffic_type_id):
+    def list(self, workspace_id, traffic_type_id):
         '''
         Returns a list of TrafficType objects.
 
@@ -58,7 +58,8 @@ class AttributeMicroClient:
         '''
         response = self._http_client.make_request(
             self._endpoint['all_items'],
-            trafficTypeId=traffic_type_id
+            trafficTypeId=traffic_type_id,
+            workspaceId=workspace_id
         )
         return [Attribute(item, self._http_client) for item in response]
 
@@ -73,14 +74,18 @@ class AttributeMicroClient:
         :rtype: Attribute
         '''
         data = as_dict(attribute)
+        wsId=data.get('workspaceId')
+        del data['workspaceId']
+        del data['isSearchable']
         response = self._http_client.make_request(
             self._endpoint['create'],
             data,
-            trafficTypeId=data.get('trafficTypeId')
+            trafficTypeId=data.get('trafficTypeId'),
+            workspaceId=wsId
         )
         return Attribute(response, self._http_client)
 
-    def delete(self, attribute_id, traffic_type_id):
+    def delete(self, attribute_id, workspace_id, traffic_type_id):
         '''
         Delete an attribute by specifying its id and it's traffic type id.
 
@@ -90,7 +95,8 @@ class AttributeMicroClient:
         return self._http_client.make_request(
             self._endpoint['delete'],
             trafficTypeId=traffic_type_id,
-            attributeId=attribute_id
+            attributeId=attribute_id,
+            workspaceId=workspace_id
         )
 
     def delete_by_instance(self, attribute):
@@ -102,5 +108,6 @@ class AttributeMicroClient:
         data = as_dict(attribute)
         return self.delete(
             data.get('id'),
-            data.get('trafficTypeId')
+            data.get('trafficTypeId'),
+            data.get('workspaceId')
         )

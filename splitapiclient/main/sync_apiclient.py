@@ -5,6 +5,7 @@ from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.util.exceptions import InsufficientConfigArgumentsException
 from splitapiclient.microclients import TrafficTypeMicroClient
 from splitapiclient.microclients import EnvironmentMicroClient
+from splitapiclient.microclients import WorkspaceMicroClient
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.microclients import AttributeMicroClient
 
@@ -14,7 +15,8 @@ class SyncApiClient(BaseApiClient):
     Synchronous Split API client
     '''
 
-    BASE_PROD_URL = 'https://api.split.io/internal/api/v1'
+    BASE_PROD_URL = 'https://api.split.io/internal/api/v2'
+    BASE_PROD_URL_OLD = 'https://api.split.io/internal/api/v1'
 
     def __init__(self, config):
         '''
@@ -29,6 +31,7 @@ class SyncApiClient(BaseApiClient):
             self._base_url = config['base_url']
         else:
             self._base_url = self.BASE_PROD_URL
+            self._base_url_old = self.BASE_PROD_URL_OLD
 
         missing = [i for i in ['apikey'] if i not in config]
         if missing:
@@ -38,10 +41,13 @@ class SyncApiClient(BaseApiClient):
             )
 
         self._apikey = config['apikey']
-        http_client = SyncHttpClient(self._base_url, self._apikey)
-
+        
+        http_client = SyncHttpClient(self._base_url_old, self._apikey)
         self._traffic_type_client = TrafficTypeMicroClient(http_client)
+
+        http_client = SyncHttpClient(self._base_url, self._apikey)
         self._environment_client = EnvironmentMicroClient(http_client)
+        self._workspace_client = WorkspaceMicroClient(http_client)
         self._attribute_client = AttributeMicroClient(http_client)
         self._identity_client = IdentityMicroClient(http_client)
 
@@ -52,6 +58,10 @@ class SyncApiClient(BaseApiClient):
     @property
     def environments(self):
         return self._environment_client
+
+    @property
+    def workspaces(self):
+        return self._workspace_client
 
     @property
     def attributes(self):

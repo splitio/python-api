@@ -21,6 +21,11 @@ class BaseApiClient:
         pass
 
     @abc.abstractproperty
+    def workspaces(sself):
+        pass
+
+    
+    @abc.abstractproperty
     def attributes(self):
         pass
 
