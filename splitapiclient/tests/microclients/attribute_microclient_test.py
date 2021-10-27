@@ -19,20 +19,23 @@ class TestAttributeMicroClient:
             'displayName': 'name',
             'description': 'desc',
             'dataType': 'dt',
-            'isSearchable': False
+            'isSearchable': False,
+            'workspaceId': None
         }, {
             'id': '124',
             'trafficTypeId': '456',
             'displayName': 'name',
             'description': 'desc',
             'dataType': 'dt',
-            'isSearchable': False
+            'isSearchable': False,
+            'workspaceId': None
         }]
         SyncHttpClient.make_request.return_value = data
-        result = amc.list('456')
+        result = amc.list('ws_id', '456')
         SyncHttpClient.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['all_items'],
-            trafficTypeId='456'
+            trafficTypeId='456',
+            workspaceId='ws_id'
         )
         assert result[0].to_dict() == data[0]
         assert result[1].to_dict() == data[1]
@@ -49,13 +52,15 @@ class TestAttributeMicroClient:
             'displayName': 'name',
             'description': 'desc',
             'dataType': 'dt',
-            'isSearchable': False
+            'isSearchable': False,
+            'workspaceId': None
         }
         amc.save(data)
         SyncHttpClient.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['create'],
             data,
-            trafficTypeId='456'
+            trafficTypeId='456',
+            workspaceId=None
         )
 
     def test_delete(self, mocker):
@@ -64,11 +69,12 @@ class TestAttributeMicroClient:
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
         amc = AttributeMicroClient(sc)
-        amc.delete('123', '456')
+        amc.delete('123', None, '456')
         sc.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['delete'],
             attributeId='123',
-            trafficTypeId='456'
+            trafficTypeId='456',
+            workspaceId=None
         )
 
     def test_delete_by_instance(self, mocker):
@@ -78,11 +84,13 @@ class TestAttributeMicroClient:
         sc = SyncHttpClient('abc', 'abc')
         amc = AttributeMicroClient(sc)
         amc.delete_by_instance(Attribute({
+             'workspaceId': None,
              'id': '123',
              'trafficTypeId': '456',
         }))
         sc.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['delete'],
             attributeId='123',
-            trafficTypeId='456'
+            workspaceId=None,
+            trafficTypeId='456',
         )

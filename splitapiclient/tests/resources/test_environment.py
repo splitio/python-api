@@ -25,20 +25,23 @@ class TestEnvironment:
         env = Environment(
             {
                 'id': '123',
-                'name': 'name'
+                'name': 'name',
+                'production': True
             },
             client
         )
         from splitapiclient.resources.base_resource import BaseResource
-        BaseResource.__init__.assert_called_once_with(env, '123', client)
+        BaseResource.__init__.assert_called_once_with(env, '123', None)
 
     def test_getters_and_setters(self):
         '''
         '''
-        env1 = Environment()
-        env1.id = 'a'
-        env1.name = 'b'
-
+        env1 = Environment(
+        {
+            'id': 'a',
+            'name': 'b',
+            'production': True
+        })
         assert env1.id == 'a'
         assert env1.name == 'b'
 
@@ -58,7 +61,9 @@ class TestEnvironment:
             {
                 'id': '1',
                 'name': 'e1',
+                'production': True
             },
+            'ws_id',
             http_client_mock
         )
 
@@ -133,7 +138,9 @@ class TestEnvironment:
             {
                 'id': '1',
                 'name': 'e1',
+                'production': True
             },
+            'ws_id',
             http_client_mock
         )
 

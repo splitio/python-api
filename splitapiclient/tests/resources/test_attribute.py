@@ -64,7 +64,6 @@ class TestAttribute:
             'description': 'asd',
             'trafficTypeId': '111',
             'dataType': 'string',
-            'isSearchable': False,
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = attr_data
@@ -76,10 +75,19 @@ class TestAttribute:
             AttributeMicroClient._endpoint['create'],
             attr_data,
             trafficTypeId=a1.traffic_type_id,
+            workspaceId=None
         )
-
+        attr_data['isSearchable']=None
+        attr_data['workspaceId']=None
         assert res.to_dict() == attr_data
 
+        attr_data = {
+            'id': '1',
+            'displayName': 'n1',
+            'description': 'asd',
+            'trafficTypeId': '111',
+            'dataType': 'string',
+        }
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         SyncHttpClient.make_request.return_value = attr_data
         ic = get_client({'base_url': 'http://test', 'apikey': '123'})
@@ -89,7 +97,10 @@ class TestAttribute:
             AttributeMicroClient._endpoint['create'],
             attr_data,
             trafficTypeId=a2.traffic_type_id,
+            workspaceId=None
         )
+        attr_data['isSearchable']=None
+        attr_data['workspaceId']=None
         assert res.to_dict() == attr_data
 
     def test_delete(self, mocker):
@@ -105,6 +116,7 @@ class TestAttribute:
                 'trafficTypeId': '111',
                 'dataType': 'string',
                 'isSearchable': False,
+                'workspaceId': None
             },
             http_client_mock
         )
@@ -114,7 +126,8 @@ class TestAttribute:
         http_client_mock.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['delete'],
             trafficTypeId=a1.traffic_type_id,
-            attributeId=a1.id
+            attributeId=a1.id,
+            workspaceId=None
         )
 
         assert res is None
@@ -129,11 +142,13 @@ class TestAttribute:
             'trafficTypeId': '111',
             'dataType': 'string',
             'isSearchable': False,
+            'workspaceId': None
         })
         res = a2.delete(ic)
         http_client_mock.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['delete'],
             trafficTypeId=a2.traffic_type_id,
-            attributeId=a2.id
+            attributeId=a2.id,
+            workspaceId=None
         )
         assert res is None

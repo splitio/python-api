@@ -23,6 +23,10 @@ class EnvironmentsHandler(BaseHandler):
     def get(self):
         self.write(json.dumps(responses.environments_all))
 
+class WorkspacesHandler(BaseHandler):
+    def get(self):
+        self.write(json.dumps(responses.workspaces_all))
+
 
 class TrafficTypeAttributesHandler(BaseHandler):
     def get(self, traffic_type_id):

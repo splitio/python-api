@@ -4,17 +4,21 @@ from __future__ import absolute_import, division, print_function, \
 from splitapiclient.util.exceptions import InvalidArgumentException, \
     ClientRequiredError, InvalidModelException
 from splitapiclient.resources.base_resource import BaseResource
-from splitapiclient.resources import Attribute, Environment, Identity, TrafficType
+from splitapiclient.resources import Attribute, Environment, Identity, TrafficType, Workspace, Segment, Split, User, Group
 from splitapiclient.main.apiclient import BaseApiClient
 from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.microclients.attribute_microclient import AttributeMicroClient
 from splitapiclient.microclients.environment_microclient import EnvironmentMicroClient
 from splitapiclient.microclients.identity_microclient import IdentityMicroClient
 from splitapiclient.microclients.traffic_type_microclient import TrafficTypeMicroClient
+from splitapiclient.microclients.workspace_microclient import WorkspaceMicroClient
+from splitapiclient.microclients.segment_microclient import SegmentMicroClient
+from splitapiclient.microclients.split_microclient import SplitMicroClient
+from splitapiclient.microclients.user_microclient import UserMicroClient
+from splitapiclient.microclients.group_microclient import GroupMicroClient
 from splitapiclient.main.sync_apiclient import SyncApiClient
 from splitapiclient.util import helpers
 import pytest
-
 
 class TestHelperFuntions:
     '''
@@ -26,12 +30,17 @@ class TestHelperFuntions:
         httpclient = mocker.Mock(spec=BaseHttpClient)
         apiclient = SyncApiClient({'base_url': 'http://test', 'apikey': '123'})
 
-        models = ['Attribute', 'Environment', 'Identity', 'TrafficType']
+        models = ['Attribute', 'Environment', 'Identity', 'TrafficType', 'Workspace', 'Segment', 'Split', 'User', 'Group']
         microclients = [
             AttributeMicroClient,
             EnvironmentMicroClient,
             IdentityMicroClient,
             TrafficTypeMicroClient,
+            WorkspaceMicroClient,
+            SegmentMicroClient,
+            SplitMicroClient,
+            UserMicroClient,
+            GroupMicroClient
         ]
         # Test an exception is thrown if no client is passed
         for m in models:
@@ -64,7 +73,12 @@ class TestHelperFuntions:
             Attribute(),
             Identity(),
             Environment(),
-            TrafficType()
+            TrafficType(),
+            Workspace(),
+            Segment(),
+            Split(),
+            User(),
+            Group()
         ]
 
         # Test it works for all subclasses of BaseResource

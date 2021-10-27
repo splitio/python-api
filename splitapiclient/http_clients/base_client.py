@@ -45,7 +45,7 @@ class BaseHttpClient(six.with_metaclass(abc.ABCMeta)):
     @staticmethod
     def get_params_from_url_template(url):
         '''
-        Retuns a list of tempated variables that must be replaced when
+        Retuns a list of templated variables that must be replaced when
         instantiating the url template.
 
         :param url: url template

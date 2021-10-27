@@ -1,2 +1,6 @@
 1.0 (July 10th, 2017)
  - Initial release
+2.0 (June 23rd, 2019)
+- Added Workspace and update base URL to use v2
+3.0 (June 23rd, 2019)
+- Added support for Users, Groups, Splits, Split Definitions, Segments, Segments Definitions, Rollout dashboard, Change requests and API Keys

@@ -7,6 +7,7 @@ import os.path
 from splitapiclient.main import get_client
 from splitapiclient.resources.traffic_type import TrafficType
 from splitapiclient.resources.environment import Environment
+from splitapiclient.resources.workspace import Workspace
 from splitapiclient.resources.attribute import Attribute
 from splitapiclient.resources.identity import Identity
 from splitapiclient.util.bulk_result import BulkOperationResult

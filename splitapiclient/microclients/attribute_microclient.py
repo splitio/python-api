@@ -108,6 +108,6 @@ class AttributeMicroClient:
         data = as_dict(attribute)
         return self.delete(
             data.get('id'),
-            data.get('trafficTypeId'),
-            data.get('workspaceId')
+            data.get('workspaceId'),
+            data.get('trafficTypeId')
         )

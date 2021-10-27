@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 import json
+import time
 from functools import partial
 import requests
 from splitapiclient.http_clients import base_client
@@ -95,15 +96,23 @@ class SyncHttpClient(base_client.BaseHttpClient):
             LOGGER.debug('BODY: ' + json.dumps(body))
 
         # Make the actual HTTP call!
-        try:
-            response = method(url, headers=headers)
-            LOGGER.debug('RESPONSE: ' + response.text)
-        except Exception as e:
-            return self._handle_connection_error(e)
-
-        if not response.status_code == 200:
+        while True:
+            try:
+                response = method(url, headers=headers)
+                LOGGER.debug('RESPONSE: ' + response.text)
+            except Exception as e:
+                return self._handle_connection_error(e)
+            if response.status_code==429:
+                LOGGER.warning('RESPONSE CODE: %s, retrying in 5 seconds' % response.status_code)
+                time.sleep(5)
+                continue
+            else:
+                break
+            
+        if not (response.status_code == 200 or response.status_code == 204):
             LOGGER.warning('RESPONSE CODE: %s' % response.status_code)
             self._handle_invalid_response(response)
 
         if endpoint.get('response', False):
-            return json.loads(response.text)
+            if response.status_code != 204:
+                return json.loads(response.text)

@@ -10,17 +10,20 @@ class Environment(BaseResource):
     _schema = {
         'id': 'string',
         'name': 'string',
-        'workspaceId' : 'string',
+        'production': 'boolean'
     }
 
-    def __init__(self, data=None, client=None):
+    def __init__(self, data=None, workspace_id=None, client=None):
         '''
         '''
         if not data:
             data = {}
         BaseResource.__init__(self, data.get('id'), client)
+        self._id = data.get('id')
         self._name = data.get('name')
-        self._workspace_id = data.get('workspaceId')
+        self._production = data.get('production')
+        self._workspace_id = workspace_id
+        self._client = client
 
     @property
     def workspace_id(self):
@@ -30,9 +33,22 @@ class Environment(BaseResource):
     def name(self):
         return self._name
 
-    @name.setter
-    def name(self, new):
-        self._name = new
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def production(self):
+        return self._production
+
+    def update_name(self, new_name, apiclient=None):
+        '''
+        Update environment name
+        '''
+        imc = require_client('Environment', self._client, apiclient)
+        environment = as_dict({'name':self._name, 'production':self._production, 'id':self._id})
+        workspaceId = self._workspace_id
+        return imc.update_name(new_name, environment, workspaceId)
 
     def add_identity(self, data, apiclient=None):
         '''

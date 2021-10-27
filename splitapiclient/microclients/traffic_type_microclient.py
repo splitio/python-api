@@ -1,7 +1,7 @@
-from splitapiclient.resources import TrafficType
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
+from splitapiclient.resources import TrafficType
 
 
 class TrafficTypeMicroClient:
@@ -10,7 +10,7 @@ class TrafficTypeMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': 'trafficTypes',
+            'url_template': 'trafficTypes/ws/{workspaceId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -27,7 +27,7 @@ class TrafficTypeMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self):
+    def list(self, workspace_id):
         '''
         Returns a list of TrafficType objects.
 
@@ -35,6 +35,7 @@ class TrafficTypeMicroClient:
         :rtype: list(TrafficType)
         '''
         response = self._http_client.make_request(
-            self._endpoint['all_items']
+            self._endpoint['all_items'],
+            workspaceId = workspace_id
         )
         return [TrafficType(item, self._http_client) for item in response]

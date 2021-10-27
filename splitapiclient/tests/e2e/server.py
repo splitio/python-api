@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 import tornado.ioloop
 import tornado.web
-from backend.handlers import EnvironmentsHandler, IdentityHandler, \
+from backend.handlers import WorkspacesHandler, EnvironmentsHandler, IdentityHandler, \
     MultiIdentityHandler, TrafficTypeAttributesHandler, TrafficTypesHandler
 
 
@@ -17,7 +17,8 @@ def make_app():
         (r'/trafficTypes/(\w+)/environments/(\w+)/identities',
          MultiIdentityHandler),
         (r'/trafficTypes', TrafficTypesHandler),
-        (r'/environments', EnvironmentsHandler)
+        (r'/environments', EnvironmentsHandler),
+        (r'/workspaces', WorkspacesHandler)
     ])
 
 if __name__ == "__main__":

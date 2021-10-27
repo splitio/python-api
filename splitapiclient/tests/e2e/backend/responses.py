@@ -10,12 +10,24 @@ traffic_types_all = [{
 
 
 environments_all = [{
-    'id': 'env1',
-    'name': 'Environment 1',
-}, {
-    'id': 'env2',
-    'name': 'Environment 2'
-}]
+                    'id': 'env1',
+                    'name': 'Environment 1',
+                    }, {
+                    'id': 'env2',
+                    'name': 'Environment 2'
+                    }]
+
+workspaces_all = {'objects': [{
+                    'id': 'ws1',
+                    'name': 'Workspace 1',
+                    }, {
+                    'id': 'ws2',
+                    'name': 'Workspace 2'
+                    }],
+                'offset': 1,
+                'totalCount': 2,
+                'limit': 2
+}
 
 traffic_type_attributes = {
     '1': [{

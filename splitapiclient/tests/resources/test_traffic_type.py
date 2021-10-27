@@ -30,6 +30,7 @@ class TestTrafficType:
                 'name': 'name',
                 'displayAttributeId': 'a1'
             },
+            'ws_id',
             client
         )
         from splitapiclient.resources.base_resource import BaseResource
@@ -57,6 +58,7 @@ class TestTrafficType:
             'isSearchable': False,
             'dataType': 'string',
             'description': 'd1',
+            'workspaceId': None
         }, {
             'id': 'a2',
             'trafficTypeId': '1',
@@ -64,6 +66,7 @@ class TestTrafficType:
             'isSearchable': False,
             'dataType': 'string',
             'description': 'd2',
+            'workspaceId': None
         }]
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -73,6 +76,7 @@ class TestTrafficType:
                 'displayAttributeId': 'asd',
                 'name': 'n1',
             },
+            'ws_id',
             http_client_mock
         )
 
@@ -80,7 +84,8 @@ class TestTrafficType:
 
         http_client_mock.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['all_items'],
-            trafficTypeId=data[0]['trafficTypeId']
+            trafficTypeId=data[0]['trafficTypeId'],
+            workspaceId='ws_id'
         )
         assert [a.to_dict() for a in attrs] == data
 
@@ -91,11 +96,14 @@ class TestTrafficType:
             'id': '1',
             'displayAttributeId': 'asd',
             'name': 'n2'
-        })
+        },
+        'ws_id',
+        )
         attrs = tt2.fetch_attributes(ic)
         http_client_mock.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['all_items'],
-            trafficTypeId=data[0]['trafficTypeId']
+            trafficTypeId=data[0]['trafficTypeId'],
+            workspaceId='ws_id'
         )
         assert [a.to_dict() for a in attrs] == data
 
@@ -109,6 +117,7 @@ class TestTrafficType:
             'isSearchable': False,
             'dataType': 'string',
             'description': 'd1',
+            'workspaceId': 'ws_id'
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -118,6 +127,7 @@ class TestTrafficType:
                 'displayAttributeId': 'asd',
                 'name': 'n1',
             },
+            'ws_id',
             http_client_mock
         )
 
@@ -127,10 +137,21 @@ class TestTrafficType:
             AttributeMicroClient._endpoint['create'],
             data,
             trafficTypeId=data['trafficTypeId'],
+            workspaceId='ws_id'
         )
+        
+        data['workspaceId']=None
+        data['isSearchable']=None
         assert attr.to_dict() == data
 
         # Test adding an attribute instance
+        data = {
+            'id': 'a1',
+            'trafficTypeId': '1',
+            'displayName': 'dn1',
+            'dataType': 'string',
+            'description': 'd1',
+        }
         atinstance = Attribute(data)
         http_client_mock.reset_mock()
         attr = tt1.add_attribute(atinstance)
@@ -138,14 +159,19 @@ class TestTrafficType:
             AttributeMicroClient._endpoint['create'],
             data,
             trafficTypeId=data['trafficTypeId'],
+            workspaceId=None
         )
+        data['workspaceId']=None
+        data['isSearchable']=None
         assert attr.to_dict() == atinstance.to_dict()
 
         tt2 = TrafficType({
             'id': '1',
             'displayAttributeId': 'asd',
             'name': 'n2'
-        })
+        },
+        'ws_id'
+        )
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         SyncHttpClient.make_request.return_value = data
         ic = get_client({'base_url': 'http://test', 'apikey': '123'})
@@ -154,7 +180,10 @@ class TestTrafficType:
             AttributeMicroClient._endpoint['create'],
             data,
             trafficTypeId=data['trafficTypeId'],
+            workspaceId=None
         )
+        data['workspaceId']=None
+        data['isSearchable']=None
         assert attr.to_dict() == data
 
     def test_add_identity(self, mocker):
@@ -175,6 +204,7 @@ class TestTrafficType:
                 'name': 'tt1',
                 'displayAttributeId': '111',
             },
+            'ws_id',
             http_client_mock
         )
 
@@ -208,7 +238,8 @@ class TestTrafficType:
                 'id': '1',
                 'name': 'tt1',
                 'displayAttributeId': '111',
-            }
+            },
+            'ws_id',
         )
 
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
@@ -253,6 +284,7 @@ class TestTrafficType:
                 'name': 'tt1',
                 'displayAttributeId': '111'
             },
+            'ws_id',
             http_client_mock
         )
 
@@ -287,7 +319,9 @@ class TestTrafficType:
             'id': '1',
             'name': 'tt1',
             'displayAttributeId': '111'
-        })
+            },
+            'ws_id',
+        )
 
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         SyncHttpClient.make_request.return_value = {

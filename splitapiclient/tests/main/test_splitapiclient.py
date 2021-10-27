@@ -9,7 +9,7 @@ class TestSyncApiClient:
     '''
     '''
 
-    def test_constructor(self, mocker):
+    def test_constructor(self, mock):
         '''
         '''
         # Should have PROD url by default

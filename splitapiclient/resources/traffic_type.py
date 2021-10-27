@@ -9,10 +9,10 @@ class TrafficType(BaseResource):
     _schema = {
         'id': 'string',
         'name': 'string',
-        'displayAttributeId': 'string'
+        'displayAttributeId': 'string',
     }
 
-    def __init__(self, data=None, client=None):
+    def __init__(self, data=None, workspaceId=None, client=None):
         '''
         Constructor
         '''
@@ -21,6 +21,7 @@ class TrafficType(BaseResource):
         BaseResource.__init__(self, data.get('id'), client)
         self._name = data.get('name')
         self._display_attribute_id = data.get('displayAttributeId')
+        self._workspace_id = workspaceId
 
     @property
     def name(self):
@@ -50,7 +51,7 @@ class TrafficType(BaseResource):
         :rtype: list(Attribute)
         '''
         amc = require_client('Attribute', self._client, apiclient)
-        return amc.list(self.id)
+        return amc.list(self._workspace_id, self.id)
 
     def add_attribute(self, data, apiclient=None):
         '''
