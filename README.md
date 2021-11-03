@@ -8,7 +8,7 @@ For specific instructions on how to use this API refer to our [official API docu
 
 Install the split-admin-api:
 
-`pip install split-admin-api`
+`pip install splitapiclient`
 
 Import the client object and initialize connection using an Admin API Key:
 
