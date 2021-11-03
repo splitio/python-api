@@ -111,7 +111,7 @@ class GroupMicroClient:
             self._endpoint['create_group'],
             body = data
         )
-        return response
+        return Group(response)
 
     def delete_group(self, group_id):
         '''

@@ -20,7 +20,6 @@ class TestIdentityMicroClient:
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 1},
-            'organizationId': 'oo1',
         }
 
         sc = SyncHttpClient('abc', 'abc')
@@ -49,13 +48,11 @@ class TestIdentityMicroClient:
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 1},
-            'organizationId': 'oo1',
         }, {
             'key': 'key2',
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 2},
-            'organizationId': 'oo1',
         }]
 
         SyncHttpClient.make_request.return_value = {
@@ -87,7 +84,6 @@ class TestIdentityMicroClient:
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 1},
-            'organizationId': 'oo1',
         }
 
         sc = SyncHttpClient('abc', 'abc')
@@ -114,7 +110,6 @@ class TestIdentityMicroClient:
             'trafficTypeId': '123',
             'environmentId': '456',
             'values': {'asd': 1},
-            'organizationId': 'oo1',
         }
 
         sc = SyncHttpClient('abc', 'abc')

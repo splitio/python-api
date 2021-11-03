@@ -10,7 +10,7 @@ class SegmentDefinitionMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': 'segments/ws/{workspaceId}/environments/{environmentId}?limit=20&offset={offset}',
+            'url_template': 'segments/ws/{workspaceId}/environments/{environmentId}?limit=50&offset={offset}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',

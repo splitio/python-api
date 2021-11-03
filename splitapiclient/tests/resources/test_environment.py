@@ -53,7 +53,6 @@ class TestEnvironment:
             'trafficTypeId': '1',
             'environmentId': '1',
             'values': {'a1': 'v1'},
-            'organizationId': 'o1',
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -119,13 +118,11 @@ class TestEnvironment:
             'trafficTypeId': '1',
             'environmentId': '1',
             'values': {'a1': 'v1'},
-            'organizationId': 'o1',
         }, {
             'key': 'key2',
             'trafficTypeId': '1',
             'environmentId': '1',
             'values': {'a2': 'v2'},
-            'organizationId': 'o1',
         }]
 
         http_client_mock = mocker.Mock(spec=BaseHttpClient)

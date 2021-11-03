@@ -175,7 +175,6 @@ class TestSplitDefinition:
             'operationType': 'op',
             'comment': 'com',
             'approvers': ['approver'],
-            'rolloutStatus': {'id': None}
         }
 
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
@@ -202,7 +201,8 @@ class TestSplitDefinition:
             'trafficAllocation': None,
             'rules': [],
             'defaultRule': [],
-            'openChangeRequestId' : None
+            'openChangeRequestId' : None,
+            'rolloutStatus': {'id': None}
         }
 
         attr = sp1.submit_change_request(definition, 'op', 'title', 'com', ['approver'], None)

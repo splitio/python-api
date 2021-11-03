@@ -31,12 +31,29 @@ class TestAttributeMicroClient:
             'workspaceId': None
         }]
         SyncHttpClient.make_request.return_value = data
-        result = amc.list('ws_id', '456')
+        result = amc.list('456', 'ws_id')
         SyncHttpClient.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['all_items'],
             trafficTypeId='456',
             workspaceId='ws_id'
         )
+        data = [{
+            'id': '123',
+            'trafficTypeId': '456',
+            'displayName': 'name',
+            'description': 'desc',
+            'dataType': 'dt',
+            'isSearchable': False,
+            'workspaceId': None
+        }, {
+            'id': '124',
+            'trafficTypeId': '456',
+            'displayName': 'name',
+            'description': 'desc',
+            'dataType': 'dt',
+            'isSearchable': False,
+            'workspaceId': None
+        }]
         assert result[0].to_dict() == data[0]
         assert result[1].to_dict() == data[1]
 
@@ -53,14 +70,21 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': 'ws_id'
         }
-        amc.save(data)
+        amc.save(Attribute(data))
+        data = {
+            'id': '123',
+            'trafficTypeId': '456',
+            'displayName': 'name',
+            'description': 'desc',
+            'dataType': 'dt',
+        }
         SyncHttpClient.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['create'],
             data,
-            trafficTypeId='456',
-            workspaceId=None
+            trafficTypeId = '456',
+            workspaceId = 'ws_id'
         )
 
     def test_delete(self, mocker):

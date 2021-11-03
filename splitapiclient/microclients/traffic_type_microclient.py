@@ -39,3 +39,20 @@ class TrafficTypeMicroClient:
             workspaceId = workspace_id
         )
         return [TrafficType(item, self._http_client) for item in response]
+
+    def find(self, traffic_type_name, workspace_id):
+        '''
+        Find TrafficType in workspace
+
+        :returns: TrafficType object
+        :rtype: TrafficType
+        '''
+        response = self._http_client.make_request(
+            self._endpoint['all_items'],
+            workspaceId = workspace_id
+        )
+        for item in response:
+            if item['name']==traffic_type_name:
+                return TrafficType(item, workspace_id, self._http_client)
+        LOGGER.error("TrafficType Name does not exist")
+        return None

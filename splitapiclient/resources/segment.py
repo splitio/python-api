@@ -60,8 +60,8 @@ class Segment(BaseResource):
             the IdentifyClient instance should be passed in order to perform the
             http call
 
-        :returns: SegmentDefinition instance
-        :rtype: SegmentDefinition
+        :returns: True if successful
+        :rtype: Boolean
         '''
         imc = require_client('Segment', self._client, apiclient)
         return imc.remove_from_environment(self._name, environment_id)

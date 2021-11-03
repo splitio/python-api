@@ -51,7 +51,6 @@ class WorkspaceMicroClient:
                 self._endpoint['all_items'],
                 offset = offset_val
             )
-            print(response)
             for item in response['objects']:
                 final_list.append(item)
             offset = int(response['offset'])

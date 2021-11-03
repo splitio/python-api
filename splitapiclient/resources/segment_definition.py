@@ -70,7 +70,6 @@ class SegmentDefinition(BaseResource):
             keysWriter = csv.writer(keysFile,  delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
             for key in imc.get_keys(self._name, self._environment['id']):
-                print(key)
                 keysWriter.writerow([key])
         return True
 

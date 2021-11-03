@@ -156,8 +156,9 @@ class SplitDefinition(BaseResource):
             'title': title,
             'comment': comment,
             'approvers': approvers,
-            'rolloutStatus': {'id': rollout_status_id}
         }
+        if rollout_status_id is not None:
+            data['rolloutStatus'] = {'id': rollout_status_id}
         imc = require_client('ChangeRequest', self._client, apiclient)
         return imc.submit_change_request(self._name, self._environment_id, self._workspace_id, data)
 

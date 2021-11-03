@@ -55,7 +55,7 @@ class SegmentMicroClient:
         },
         'all_items': {
             'method': 'GET',
-            'url_template': 'segments/ws/{workspaceId}?limit=20&offset={offset}',
+            'url_template': 'segments/ws/{workspaceId}?limit=50&offset={offset}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',

@@ -62,8 +62,8 @@ class TestGroupMicroClient:
         response = {
             'id': 'group_id',
             'name': 'gr1',
-            'description': 'desc',
-            'type': 'group'
+            'description': None,
+            'type': None
         }
         SyncHttpClient.make_request.return_value = response
         
@@ -72,7 +72,7 @@ class TestGroupMicroClient:
             GroupMicroClient._endpoint['create_group'],
             body = data
         )
-        assert result == response
+        assert result.to_dict() == response
 
     def test_delete_group(self, mocker):
         '''

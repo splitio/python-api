@@ -72,7 +72,7 @@ class Attribute(BaseResource):
 
     def save(self, apiclient=None):
         '''
-        Delete this attribute
+        Save this attribute
 
         :param apiclient: If this instance wasn't returned by the client,
             the IdentifyClient instance should be passed in order to perform the

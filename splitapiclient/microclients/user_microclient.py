@@ -122,7 +122,7 @@ class UserMicroClient:
         for item in self.list('ACTIVE'):
             if item._email == user_email:
                 return item
-        for item in self.list('DEACTIVED'):
+        for item in self.list('DEACTIVATED'):
             if item._email == user_email:
                 return item
         for item in self.list('PENDING'):

@@ -41,14 +41,12 @@ class TestIdentity:
         identity1.traffic_type_id = 'c'
         identity1.environment_id = 'd'
         identity1.values = 'e'
-        identity1.organization_id = 'f'
 
         assert identity1.id == 'a'
         assert identity1.key == 'b'
         assert identity1.traffic_type_id == 'c'
         assert identity1.environment_id == 'd'
         assert identity1.values == 'e'
-        assert identity1.organization_id == 'f'
 
     def test_save(self, mocker):
         '''
@@ -60,7 +58,6 @@ class TestIdentity:
                 'trafficTypeId': '1',
                 'environmentId': '1',
                 'values': {'a1': 'v1'},
-                'organizationId': 'o1'
             },
             http_client_mock
         )
@@ -102,7 +99,6 @@ class TestIdentity:
                 'trafficTypeId': '1',
                 'environmentId': '1',
                 'values': {'a1': 'v1'},
-                'organizationId': 'o1'
             },
             http_client_mock
         )
@@ -144,7 +140,6 @@ class TestIdentity:
                 'trafficTypeId': '1',
                 'environmentId': '1',
                 'values': {'a1': 'v1'},
-                'organizationId': 'o1'
             },
             http_client_mock
         )

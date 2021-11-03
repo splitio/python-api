@@ -32,7 +32,7 @@ class AttributeMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}/schema/{attributeId}',
+            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}/{attributeId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -48,20 +48,43 @@ class AttributeMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, workspace_id, traffic_type_id):
+    def list(self, traffic_type_id, workspace_id):
         '''
-        Returns a list of TrafficType objects.
+        Returns a list of Attribute objects.
 
         :param traffic_type_id: Id of the TrafficType whose attributes will be
             returned
-        :rtype: list(TrafficType)
+        :rtype: list(Attribute)
         '''
         response = self._http_client.make_request(
             self._endpoint['all_items'],
-            trafficTypeId=traffic_type_id,
-            workspaceId=workspace_id
+            trafficTypeId = traffic_type_id,
+            workspaceId = workspace_id
         )
-        return [Attribute(item, self._http_client) for item in response]
+        final_array=[]
+        for item in response:
+            item['workspaceId'] = workspace_id
+            final_array.append(Attribute(item))
+        return final_array
+
+    def find(self, attribute_id, traffic_type_name, workspace_id):
+        '''
+        Find Attribute in a TrafficType for a workspace
+
+        :returns: Attribute object
+        :rtype: Attribute
+        '''
+        response = self._http_client.make_request(
+            self._endpoint['all_items'],
+            trafficTypeId = traffic_type_name,
+            workspaceId = workspace_id
+        )
+        for item in response:
+            if item['id']==attribute_id:
+                item['workspaceId'] = workspace_id
+                return Attribute(item, self._http_client)
+        LOGGER.error("Attribute Id does not exist")
+        return None
 
     def save(self, attribute):
         '''
@@ -73,15 +96,15 @@ class AttributeMicroClient:
         :returns: newly created attribute
         :rtype: Attribute
         '''
+        wsId = attribute._workspace_id
         data = as_dict(attribute)
-        wsId=data.get('workspaceId')
         del data['workspaceId']
         del data['isSearchable']
         response = self._http_client.make_request(
             self._endpoint['create'],
             data,
-            trafficTypeId=data.get('trafficTypeId'),
-            workspaceId=wsId
+            trafficTypeId = data.get('trafficTypeId'),
+            workspaceId = wsId
         )
         return Attribute(response, self._http_client)
 
@@ -108,6 +131,6 @@ class AttributeMicroClient:
         data = as_dict(attribute)
         return self.delete(
             data.get('id'),
-            data.get('workspaceId'),
+            attribute._workspace_id,
             data.get('trafficTypeId')
         )

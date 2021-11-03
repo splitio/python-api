@@ -12,7 +12,6 @@ class Identity(BaseResource):
         'trafficTypeId': 'string',
         'environmentId': 'string',
         'values': 'object',
-        'organizationId': 'string',
     }
 
     def __init__(self, data=None, client=None):
@@ -25,7 +24,6 @@ class Identity(BaseResource):
         self._key = data.get('key')
         self._environment_id = data.get('environmentId')
         self._values = data.get('values')
-        self._organization_id = data.get('organizationId')
 
     @property
     def key(self):
@@ -43,10 +41,6 @@ class Identity(BaseResource):
     def values(self):
         return self._values
 
-    @property
-    def organization_id(self):
-        return self._organization_id
-
     @key.setter
     def key(self, new):
         self._key = new
@@ -62,10 +56,6 @@ class Identity(BaseResource):
     @values.setter
     def values(self, new):
         self._values = new
-
-    @organization_id.setter
-    def organization_id(self, new):
-        self._organization_id = new
 
     def save(self, apiclient=None):
         '''

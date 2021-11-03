@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, \
     unicode_literals
 from splitapiclient.resources.base_resource import BaseResource
 from splitapiclient.util.helpers import as_dict, require_client
+from splitapiclient.resources.attribute import Attribute
 
 class TrafficType(BaseResource):
     '''
@@ -51,7 +52,7 @@ class TrafficType(BaseResource):
         :rtype: list(Attribute)
         '''
         amc = require_client('Attribute', self._client, apiclient)
-        return amc.list(self._workspace_id, self.id)
+        return amc.list(self.id, self._workspace_id)
 
     def add_attribute(self, data, apiclient=None):
         '''
@@ -68,7 +69,7 @@ class TrafficType(BaseResource):
         amc = require_client('Attribute', self._client, apiclient)
         attribute = as_dict(data)
         attribute['trafficTypeId'] = self.id
-        return amc.save(attribute)
+        return amc.save(Attribute(attribute))
 
     def add_identity(self, data, apiclient=None):
         '''
