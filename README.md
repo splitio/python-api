@@ -6,60 +6,61 @@ This API wrapper is designed to work with [Split](https://www.split.io), the pla
 
 For specific instructions on how to use this API refer to our [official API documentation](https://docs.split.io/reference).
 
-Install the split-admin-api:
+Install the split-admin-api:\
 `pip install split-admin-api`
 
-Import the client object and initialize connection using an Admin API Key:
-`from splitapiclient.main import get_client
+Import the client object and initialize connection using an Admin API Key:\
+`from splitapiclient.main import get_client &nbsp;
 client = get_client({'apikey': 'ADMIN API KEY'})
 `
 
-Enable optional logging:
+Enable optional logging:\
 `import logging
 logging.basicConfig(level=logging.DEBUG)
 `
 
-**Workspaces**
-Fetch all workspaces:
+**Workspaces**\
+Fetch all workspaces:\
 `for ws in client.workspaces.list():
     print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
 `
 
-Find a specific workspaces:
+Find a specific workspaces:\
 `ws = client.workspaces.find("Defaults")
 print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
 `
 
-**Environments**
-Fetch all Environments:
+**Environments**\
+Fetch all Environments:\
 `ws = client.workspaces.find("Defaults")
 for env in client.environments.list(ws.id):
     print ("\nEnvironment: "+env.name+", Id: "+env.id)
-Add new environment:
+`
+
+Add new environment:\
 `ws = client.workspaces.find("Defaults")
 env = ws.add_environment({'name':'new_environment', 'production':False})
 `
 
-**Splits**
-
-Fetch all Splits:
+**Splits**\
+Fetch all Splits:\
 `ws = client.workspaces.find("Defaults")
 for split in client.splits.list(ws.id):
     print ("\nSplit: "+split.name+", "+split._workspace_id)
 `
 
-Add new Split:
+Add new Split:\
 `
 split = ws.add_split({'name':'split_name', 'description':'new UI feature'}, "user")
 print(split.name)
 `
 
-Add tags:
+Add tags:\
 `
 split.associate_tags(['my_new_tag', 'another_new_tag'])
 `
 
-Add Split to environment:
+Add Split to environment:\
 `
 ws = client.workspaces.find("Defaults")
 split = client.splits.find("new_feature", ws.id) 
@@ -76,7 +77,7 @@ data={"treatments":[tr1.export_dict() ,tr2.export_dict()],"defaultTreatment":"of
 splitdef = split.add_to_environment(env.id, data)
 `
 
-Kill Split:
+Kill Split:\
 `
 ws = client.workspaces.find("Defaults")
 env = client.environments.find("Production", ws.id)
@@ -84,12 +85,12 @@ splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
 splitDef.kill()
 `
 
-Restore Split:
+Restore Split:\
 `
 splitDef.restore()
 `
 
-Fetch all Splits in an Environment:
+Fetch all Splits in an Environment:\
 `
 ws = client.workspaces.find("Defaults")
 env = client.environments.find("Production", ws.id)
@@ -97,7 +98,7 @@ for spDef in client.split_definitions.list(env.id, ws.id):
     print(spDef.name+str(spDef._default_rule))
 `
 
-Submit a Change request to update a Split definition:
+Submit a Change request to update a Split definition:\
 `
 splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
 definition= {"treatments":[ {"name":"on"},{"name":"off"}],
@@ -108,7 +109,7 @@ definition= {"treatments":[ {"name":"on"},{"name":"off"}],
 splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'comment', ['user@email.com'], '')
 `
 
-List all change requests:
+List all change requests:\
 `
 for cr in client.change_requests.list():
     if cr._split is not None:
@@ -117,22 +118,21 @@ for cr in client.change_requests.list():
         print (cr._id+", "+cr._segment['name']+", "+cr._title)
 `
 
-Approve specific change request:
+Approve specific change request:\
 `
 for cr in client.change_requests.list():
     if cr._split['name']=='new_feature':
         cr.update_status("APPROVED", "done")
 `
 
-**Users and Groups**
-
-Fetch all Active users:
+**Users and Groups**\
+Fetch all Active users:\
 `
 for user in client.users.list('ACTIVE'):
     print(user.email+", "+user._id) 
 `
 
-Invite new user:
+Invite new user:\
 `
 group = client.groups.find('Administrators')
 userData = {'email':'user@email.com', 'groups':[{'id':'', 'type':'group'}]}
@@ -140,7 +140,7 @@ userData['groups'][0]['id'] = group._id
 client.users.invite_user(userData)
 `
 
-Delete a pending invite:
+Delete a pending invite:\
 `
 for user in client.users.list('PENDING'):
     print(user.email+", "+user._id+", "+user._status)
@@ -148,31 +148,31 @@ for user in client.users.list('PENDING'):
         client.users.delete(user._id)
 `
 
-Update user info:
+Update user info:\
 `
 data = {'name':'new_name', 'email':'user@email.com', '2fa':False, 'status':'ACTIVE'}
 user = client.users.find('user@email.com')
 user.update_user(user._id, data)
 `
 
-Fetch all Groups:
+Fetch all Groups:\
 `
 for group in client.groups.list():
     print (group._id+", "+group._name)
 `
 
-Create Group:
+Create Group:\
 `
 client.groups.create_group({'name':'new_group', 'description':''})
 `
 
-Delete Group:
+Delete Group:\
 `
 group = client.groups.find('new_group')
 client.groups.delete_group(group._id)
 `
 
-Replace existing user group:
+Replace existing user group:\
 `
 user = client.users.find('user@email.com')
 group = client.groups.find('Administrators')
@@ -181,7 +181,7 @@ data[0]['value']['id'] = group._id
 user.update_user_group(data)
 `
 
-Add user to new group
+Add user to new group\
 `
 user = client.users.find('user@email.com')
 group = client.groups.find('Administrators')
