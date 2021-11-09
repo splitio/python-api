@@ -110,7 +110,7 @@ setup(
     name='splitapiclient',
     version=__version__,  # noqa
     description='This Python Library provide full support for Split REST Admin API',
-    long_descrpition=(this_directory / "README.md").read_text(),
+    long_description=(this_directory / "README.md").read_text(),
     long_description_content_type='text/markdown',
     author='Patricio Echague, Sebastian Arrubia, Martin Redolatti',
     author_email='pato@split.io, sebastian@split.io, martin@split.io',
