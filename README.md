@@ -10,7 +10,7 @@ Install the split-admin-api:\
 `pip install split-admin-api`
 
 Import the client object and initialize connection using an Admin API Key:\
-`from splitapiclient.main import get_client &nbsp;
+`from splitapiclient.main import get_client
 client = get_client({'apikey': 'ADMIN API KEY'})
 `
 
@@ -209,3 +209,4 @@ Visit [split.io/product](https://www.split.io/product) for an overview of Split,
 **System Status:**
 
 We use a status page to monitor the availability of Split’s various services. You can check the current status at [status.split.io](http://status.split.io).
+
