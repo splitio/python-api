@@ -7,7 +7,7 @@ import pkg_resources
 from setuptools import setup, find_packages
 from os import path
 from distutils.cmd import Command
-
+from pathlib import Path
 
 @contextlib.contextmanager
 def _save_argv(repl=None):
@@ -105,10 +105,13 @@ with open(path.join(path.abspath(path.dirname(__file__)),
                     'splitapiclient', 'version.py')) as f:
     exec(f.read())
 # Run setup!
+this_directory = Path(__file__).parent
 setup(
     name='splitapiclient',
     version=__version__,  # noqa
-    description='Split.io Identify Python Client',
+    description='This Python Library provide full support for Split REST Admin API',
+    long_descrpition=(this_directory / "README.md").read_text(),
+    long_description_content_type='text/markdown',
     author='Patricio Echague, Sebastian Arrubia, Martin Redolatti',
     author_email='pato@split.io, sebastian@split.io, martin@split.io',
     url='https://github.com/splitio/python-api',
