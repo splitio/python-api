@@ -57,7 +57,8 @@ class SplitDefinition(BaseResource):
             'size': 'number'
         }],
         'creationTime' : 'number',
-        'lastUpdateTime' : 'number'
+        'lastUpdateTime' : 'number',
+        'lastTrafficReceivedAt': 'number'
     }
 
     def __init__(self, data=None, environment_id=None, workspace_id=None, client=None):
@@ -81,7 +82,10 @@ class SplitDefinition(BaseResource):
             self._default_rule.append(DefaultRule(item))
         self._workspace_id = workspace_id
         self._environment_id = environment_id
-            
+        self._lastUpdateTime = data.get('lastUpdateTime') if 'lastUpdateTime' in data else 0
+        self._lastTrafficReceivedAt = data.get('lastTrafficReceivedAt') if 'lastTrafficReceivedAt' in data else 0
+        self._creationTime = data.get('creationTime') if 'creationTime' in data else 0
+
     @property
     def name(self):
         return self._name

@@ -2,9 +2,11 @@
 
 This API wrapper is designed to work with [Split](https://www.split.io), the platform for controlled rollouts, serving features to your users via the Split feature flag to manage your complete customer experience.
 
-### Quick setup
+For specific instructions on how to use Split Admin REST API refer to our [official API documentation](https://docs.split.io/reference).
 
-For specific instructions on how to use this API refer to our [official API documentation](https://docs.split.io/reference).
+Full documentation on this Python wrapper is available in [this link](https://help.split.io/hc/en-us/articles/4412331052685-Python-PyPi-library-for-Split-REST-Admin-API).
+
+### Quick setup
 
 Install the split-admin-api:
 ```
