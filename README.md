@@ -8,9 +8,9 @@ Full documentation on this Python wrapper is available in [this link](https://he
 
 ### Quick setup
 
-Install the split-admin-api:
+Install the splitapiclient:
 ```
-pip install split-admin-api
+pip install splitapiclient
 ```
 
 Import the client object and initialize connection using an Admin API Key:
