@@ -92,6 +92,8 @@ class TestSplit:
         data['defaultRule'] = None
         data['creationTime'] = None
         data['lastUpdateTime'] = None
+        data['lastTrafficReceivedAt'] = None
+        
         assert attr.to_dict() == data
 
     def test_remove_from_environment(self, mocker):

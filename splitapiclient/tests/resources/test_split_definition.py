@@ -101,7 +101,8 @@ class TestSplitDefinition:
             'rules': None,
             'defaultRule': None,
             'creationTime' : None,
-            'lastUpdateTime' : None
+            'lastUpdateTime' : None,
+            'lastTrafficReceivedAt': None
         }
         assert attr.to_dict() == data
 
@@ -209,7 +210,6 @@ class TestSplitDefinition:
 
         http_client_mock.make_request.assert_called_once_with(
             ChangeRequestMicroClient._endpoint['submit_change_request'],
-            splitName = 'split1',
             workspaceId = 'ws_id',
             environmentId = 'env_id',
             body = data

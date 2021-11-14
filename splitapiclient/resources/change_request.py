@@ -90,6 +90,7 @@ class ChangeRequest(BaseResource):
         self._comment = data.get('comment') if 'comment' in data else ''
         self._split = data.get('split') if 'split' in data else {}
         self._segment = data.get('segment') if 'segment' in data else {}
+        self._operationType = data.get('operationType') if 'operationType' in data else ''
         self._environment = data.get('environment')
         self._approvers = []
         if 'approvers' in data:

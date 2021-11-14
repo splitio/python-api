@@ -68,12 +68,15 @@ class SplitDefinition(BaseResource):
             data = {}
         BaseResource.__init__(self, data.get('name'), client)
         self._name = data.get('name')
-        self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._environment = Environment(data.get('environment')) if 'environment' in data else {}
+        self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._treatments = []
+        self._killed = data.get('killed') if 'killed' in data else False
         if 'treatments' in data:
             for item in data.get('treatments'):
                 self._treatments.append(Treatment(item))
+        self._default_treatment = data.get('defaultTreatment') if 'defaultTreatment' in data else ''
+        self._traffic_allocation = data.get('trafficAllocation') if 'trafficAllocation' in data else 0
         self._rules = []
         for item in data.get('rules'):
             self._rules.append(Rule(item))
@@ -164,5 +167,5 @@ class SplitDefinition(BaseResource):
         if rollout_status_id is not None:
             data['rolloutStatus'] = {'id': rollout_status_id}
         imc = require_client('ChangeRequest', self._client, apiclient)
-        return imc.submit_change_request(self._name, self._environment_id, self._workspace_id, data)
+        return imc.submit_change_request(self._environment_id, self._workspace_id, data)
 

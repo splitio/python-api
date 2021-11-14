@@ -43,7 +43,7 @@ class APIKey(BaseResource):
         self._name = data.get('name')
         self._apiKeyType = data.get('apiKeyType')
         self._createdBy = data.get('createdBy')
-        self._createdAt = data.get('createdAt')
+        self._created_at = data.get('createdAt')
         self._environments = data.get('environments') if 'environments' in data else []
         self._workspace = data.get('workspace') if 'workspace' in data else {}
         self._type = data.get('type')

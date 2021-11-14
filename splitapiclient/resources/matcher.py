@@ -32,7 +32,7 @@ class Matcher():
         self._type = data.get('type') if 'type' in data else ""
         self._attribute = data.get('attribute') if 'attribute' in data else ""
         self._string = data.get('string') if 'string' in data else ""
-        self._boolean = data.get('bool') if 'bool' in data else ""
+        self._bool = data.get('bool') if 'bool' in data else ""
         self._strings = []
         if 'strings' in data:
             for item in data.get('strings'):
@@ -52,8 +52,8 @@ class Matcher():
             result['attribute'] = self._attribute
         if self._string != "":
             result['string'] = self._string
-        if self._boolean != "":
-            result['bool'] = self._boolean
+        if self._bool != "":
+            result['bool'] = self._bool
         if len(self._strings)>0:
             result['strings'] = self._strings
         if self._number != "":

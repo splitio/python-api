@@ -31,7 +31,7 @@ class SegmentDefinition(BaseResource):
         self._name = data.get('name')
         self._environment = data.get('environment')
         self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
-        self._creationTime = data.get('creationTime')
+        self._creationTime = data.get('creationTime') if 'creationTime' in data else 0
             
     @property
     def name(self):
@@ -103,3 +103,29 @@ class SegmentDefinition(BaseResource):
         imc = require_client('SegmentDefinition', self._client, apiclient)
         return imc.remove_keys(self._name, self._environment['id'], json_data)
 
+    def submit_change_request(self, keys, operation_type, title, comment, approvers, rollout_status_id, workspace_id, apiclient=None):
+        '''
+        submit a change request for segment definition
+
+        :param data: ChangeRequest
+        :param apiclient: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: ChangeRequest object
+        :rtype: ChangeRequest
+        '''
+        data = {
+            'segment': {
+                'name':self._name,
+                'keys': keys,
+            },
+            'operationType': operation_type,
+            'title': title,
+            'comment': comment,
+            'approvers': approvers,
+        }
+        if rollout_status_id is not None:
+            data['rolloutStatus'] = {'id': rollout_status_id}
+        imc = require_client('ChangeRequest', self._client, apiclient)
+        return imc.submit_change_request(self._environment['id'], workspace_id, data)

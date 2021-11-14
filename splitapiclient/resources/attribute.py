@@ -23,6 +23,7 @@ class Attribute(BaseResource):
         if not data:
             data = {}
         BaseResource.__init__(self, data.get('id'), client)
+        self._id = data.get('id')
         self._traffic_type_id = data.get('trafficTypeId')
         self._display_name = data.get('displayName')
         self._description = data.get('description')

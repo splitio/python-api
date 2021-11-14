@@ -86,7 +86,11 @@ class SegmentDefinitionMicroClient:
                 continue
             else:
                 break
-        return [SegmentDefinition(item, self._http_client) for item in final_list]
+        segment_definition_list = []
+        for item in final_list:
+            item['environment'] = {'id':environment_id, 'name':''}
+            segment_definition_list.append(SegmentDefinition(item, self._http_client))
+        return segment_definition_list
 
     def find(self, segment_name, environment_id, workspace_id):
         '''

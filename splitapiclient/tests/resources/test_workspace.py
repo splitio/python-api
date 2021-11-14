@@ -179,10 +179,11 @@ class TestWorkspace:
         }
         data['trafficType'] = None
         data['creationTime'] = None
-        data['id'] = '1'
+        data['id'] = None
         data['rolloutStatus'] = None
         data['rolloutStatusTimestamp'] = None
         data['tags'] = None
+        
         assert attr.to_dict() == data
 
     def test_delete_split(self, mocker):

@@ -34,7 +34,12 @@ class Split(BaseResource):
         self._description = data.get('description')
         self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._workspace_id = workspace_id
-            
+        self._creationTime = data.get('creationTime') if 'creationTime' in data else 0
+        self._tags = data.get('tags') if 'tags' in data else []
+        self._id = data.get('id') if 'id' in data else None
+        self._rolloutStatus = data.get('rolloutStatus') if 'rolloutStatus' in data else {}
+        self._rolloutStatusTimestamp = data.get('rolloutStatusTimestamp') if 'rolloutStatusTimestamp' in data else 0
+
     @property
     def name(self):
         return self._name

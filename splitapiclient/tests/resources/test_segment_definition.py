@@ -6,7 +6,7 @@ from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 from splitapiclient.microclients import SegmentDefinitionMicroClient
-
+from splitapiclient.microclients import ChangeRequestMicroClient
 class TestSegmentDefinition:
     '''
     Tests for the SegmentDefinition class' methods
@@ -135,3 +135,53 @@ class TestSegmentDefinition:
         )
         assert attr == True
 
+    def test_submit_change_request(self, mocker):
+        '''
+        '''
+        data = {
+            'segment': {
+                'name': 'segment1',
+                'keys': [],
+            },
+            'title': 'title',
+            'operationType': 'op',
+            'comment': 'com',
+            'approvers': ['approver'],
+        }
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = data
+        seg = SegmentDefinition(
+            {
+                'name': 'segment1',
+                'environment': {
+                    'id': 'env_id',
+                    'name': 'env'
+                },
+                'trafficType': {},
+            },
+            http_client_mock
+        )
+        definition = []
+
+        attr = seg.submit_change_request(definition, 'op', 'title', 'com', ['approver'], None, 'ws_id')
+
+        http_client_mock.make_request.assert_called_once_with(
+            ChangeRequestMicroClient._endpoint['submit_change_request'],
+            workspaceId = 'ws_id',
+            environmentId = 'env_id',
+            body = data
+        )
+        data1 = {
+            'split': None,
+            'segment': None,
+            'id': None,
+            'status': None,
+            'title': None,
+            'comment': None,
+            'approvers': None,
+            'operationType': None,
+            'comments': None,
+            'rolloutStatus': None
+        }
+
+        assert attr.to_dict() == data1

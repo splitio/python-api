@@ -125,7 +125,7 @@ class ChangeRequestMicroClient:
         )
         return ChangeRequest(response, self._http_client)
 
-    def submit_change_request(self, split_name, environment_id, workspace_id, data):
+    def submit_change_request(self, environment_id, workspace_id, data):
         '''
         Submit a split definition change request
 
@@ -134,7 +134,6 @@ class ChangeRequestMicroClient:
         '''
         response = self._http_client.make_request(
             self._endpoint['submit_change_request'],
-            splitName = split_name,
             environmentId = environment_id,
             workspaceId = workspace_id,
             body = data

@@ -20,6 +20,7 @@ class TrafficType(BaseResource):
         if not data:
             data = {}
         BaseResource.__init__(self, data.get('id'), client)
+        self._id = data.get('id')
         self._name = data.get('name')
         self._display_attribute_id = data.get('displayAttributeId')
         self._workspace_id = workspaceId
