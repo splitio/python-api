@@ -32,7 +32,7 @@ class ChangeRequestMicroClient:
         },
         'list_next': {
             'method': 'GET',
-            'url_template': 'changeRequests?limit=100&after={after}',
+            'url_template': 'changeRequests?limit=100&environmentId={environmentId}&after={after}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -43,7 +43,7 @@ class ChangeRequestMicroClient:
         },
         'list_next_all_environments': {
             'method': 'GET',
-            'url_template': 'changeRequests?limit=100&environmentId={environmentId}&after={after}',
+            'url_template': 'changeRequests?limit=100&after={after}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -109,7 +109,8 @@ class ChangeRequestMicroClient:
             else:
                 response = self._http_client.make_request(
                     self._endpoint['list_next'],
-                    after = afterMarker
+                    after = afterMarker,
+                    environmentId = environment_id
                 )
             for item in response['data']:
                 final_list.append(as_dict(item))
