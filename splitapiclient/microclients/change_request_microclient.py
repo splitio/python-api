@@ -19,7 +19,7 @@ class ChangeRequestMicroClient:
             'query_string': [],
             'response': True,
         },     
-        'list_initial_no_environment': {
+        'list_initial_all_environments': {
             'method': 'GET',
             'url_template': 'changeRequests?limit=100',
             'headers': [{
@@ -31,6 +31,17 @@ class ChangeRequestMicroClient:
             'response': True,
         },
         'list_next': {
+            'method': 'GET',
+            'url_template': 'changeRequests?limit=100&after={after}',
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'list_next_all_environments': {
             'method': 'GET',
             'url_template': 'changeRequests?limit=100&environmentId={environmentId}&after={after}',
             'headers': [{
@@ -88,8 +99,13 @@ class ChangeRequestMicroClient:
                 )
             elif afterMarker==0 and environment_id==None:
                 response = self._http_client.make_request(
-                    self._endpoint['list_initial_no_environment'],
+                    self._endpoint['list_initial_all_environments'],
                 ) 
+            elif environment_id==None:
+                response = self._http_client.make_request(
+                    self._endpoint['list_next_all_environments'],
+                    after = afterMarker
+                )
             else:
                 response = self._http_client.make_request(
                     self._endpoint['list_next'],
