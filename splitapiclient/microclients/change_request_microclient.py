@@ -10,7 +10,7 @@ class ChangeRequestMicroClient:
     _endpoint = {
         'list_initial': {
             'method': 'GET',
-            'url_template': 'changeRequests?limit=100',
+            'url_template': 'changeRequests?limit=100&environmentId={environmentId}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -21,7 +21,7 @@ class ChangeRequestMicroClient:
         },
         'list_next': {
             'method': 'GET',
-            'url_template': 'changeRequests?limit=100&after={after}',
+            'url_template': 'changeRequests?limit=100&environmentId={environmentId}&after={after}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -60,7 +60,7 @@ class ChangeRequestMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self):
+    def list(self, environment_id):
         '''
         Returns a list of change request objects.
 
@@ -72,7 +72,8 @@ class ChangeRequestMicroClient:
         while True:
             if afterMarker==0:
                 response = self._http_client.make_request(
-                    self._endpoint['list_initial']
+                    self._endpoint['list_initial'],
+                    environmentId = environment_id
                 )
             else:
                 response = self._http_client.make_request(
@@ -86,7 +87,7 @@ class ChangeRequestMicroClient:
             else:
                 afterMarker = response['nextMarker']
                 continue
-        return [ChangeRequest(item, self._http_client) for item in final_list]
+        return [ChangeRequest(item,  self._http_client) for item in final_list]
 
     def find(self, split_name=None, segment_name=None, environment_id=None):
         '''
@@ -96,11 +97,9 @@ class ChangeRequestMicroClient:
         :rtype: list(ChangeRequest)
         '''
         final_list = []
-        for item in self.list():
+        for item in self.list(environment_id):
             if item._split != None:
                 if item._split['name'] == split_name:
-                    final_list.append(item)
-                if item._split['environment']['id'] == environment_id:
                     final_list.append(item)
             if item._segment != None:
                 if item._segment['name'] == segment_name:
