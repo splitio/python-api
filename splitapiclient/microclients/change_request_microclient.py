@@ -18,7 +18,7 @@ class ChangeRequestMicroClient:
             }],
             'query_string': [],
             'response': True,
-        },
+        },     
         'list_next': {
             'method': 'GET',
             'url_template': 'changeRequests?limit=100&after={after}',
@@ -60,7 +60,7 @@ class ChangeRequestMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self):
+    def list(self, environment_id, status):
         '''
         Returns a list of change request objects.
 
@@ -69,14 +69,24 @@ class ChangeRequestMicroClient:
         '''
         final_list = []
         afterMarker = 0
+        if(environment_id!=None):
+            self._endpoint['list_next']['url_template'] = self._endpoint['list_next']['url_template'] + "&environmentId={environmentId}"
+            self._endpoint['list_initial']['url_template'] = self._endpoint['list_initial']['url_template'] + "&environmentId={environmentId}"
+        if(status!=None):
+            self._endpoint['list_next']['url_template'] = self._endpoint['list_next']['url_template'] + "&status={status}"
+            self._endpoint['list_initial']['url_template'] = self._endpoint['list_initial']['url_template'] + "&status={status}" 
         while True:
             if afterMarker==0:
                 response = self._http_client.make_request(
-                    self._endpoint['list_initial']
+                    self._endpoint['list_initial'],
+                    status=status,
+                    environmentId=environment_id               
                 )
             else:
                 response = self._http_client.make_request(
                     self._endpoint['list_next'],
+                    status=status,
+                    environmentId=environment_id,
                     after = afterMarker
                 )
             for item in response['data']:
@@ -86,9 +96,9 @@ class ChangeRequestMicroClient:
             else:
                 afterMarker = response['nextMarker']
                 continue
-        return [ChangeRequest(item, self._http_client) for item in final_list]
+        return [ChangeRequest(item,  self._http_client) for item in final_list]
 
-    def find(self, split_name=None, segment_name=None, environment_id=None):
+    def find(self, split_name=None, segment_name=None, environment_id=None, status=None):
         '''
         Find Change requests for optional environment, split name or segment name objects.
 
@@ -96,11 +106,9 @@ class ChangeRequestMicroClient:
         :rtype: list(ChangeRequest)
         '''
         final_list = []
-        for item in self.list():
+        for item in self.list(environment_id, status):
             if item._split != None:
                 if item._split['name'] == split_name:
-                    final_list.append(item)
-                if item._split['environment']['id'] == environment_id:
                     final_list.append(item)
             if item._segment != None:
                 if item._segment['name'] == segment_name:
