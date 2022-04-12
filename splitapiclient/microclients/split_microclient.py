@@ -45,7 +45,7 @@ class SplitMicroClient:
         },
         'all_items': {
             'method': 'GET',
-            'url_template': 'splits/ws/{workspaceId}?limit=20&offset={offset}',
+            'url_template': 'splits/ws/{workspaceId}?limit=20&offset={offset}{tags}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -95,7 +95,7 @@ class SplitMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, workspace_id):
+    def list(self, workspace_id, tags):
         '''
         Returns a list of Split objects.
 
@@ -104,11 +104,15 @@ class SplitMicroClient:
         '''
         offset_val = 0
         final_list = []
+        tags_list = ""
+        for tag in tags:
+            tags_list = tags_list + "&tag=" + tag
         while True:
             response = self._http_client.make_request(
                 self._endpoint['all_items'],
                 workspaceId = workspace_id,
-                offset = offset_val
+                offset = offset_val,
+                tags = tags_list
             )
             for item in response['objects']:
                 final_list.append(as_dict(item))
@@ -122,14 +126,14 @@ class SplitMicroClient:
                 break
         return [Split(item, workspace_id, self._http_client) for item in final_list]
 
-    def find(self, split_name, workspace_id):
+    def find(self, split_name, workspace_id, tags):
         '''
         Find Split in workspace objects.
 
         :returns: Split object
         :rtype: Split
         '''
-        for item in self.list(workspace_id):
+        for item in self.list(workspace_id, tags):
             if item.name == split_name:
                 return item
         LOGGER.error("Split Name does not exist")
