@@ -19,6 +19,17 @@ class TrafficTypeMicroClient:
             'query_string': [],
             'response': True,
         },
+        'delete': {
+            'method': 'DELETE',
+            'url_template': ('trafficTypes/{trafficTypeId}'),
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
     }
 
     def __init__(self, http_client):
@@ -56,3 +67,18 @@ class TrafficTypeMicroClient:
                 return TrafficType(item, workspace_id, self._http_client)
         LOGGER.error("TrafficType Name does not exist")
         return None
+
+    def delete(self, traffic_type_id):
+        '''
+        delete a traffic type
+
+        :param traffic type id:
+
+        :returns:
+        :rtype: True if successful
+        '''
+        response = self._http_client.make_request(
+            self._endpoint['delete'],
+            trafficTypeId = traffic_type_id,
+        )
+        return response

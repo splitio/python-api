@@ -19,9 +19,9 @@ class EnvironmentMicroClient:
             'query_string': [],
             'response': True,
         },
-        'update_name': {
+        'update': {
             'method': 'PATCH',
-            'url_template': ('environments/ws/{workspaceId}/{environmentName}'),
+            'url_template': ('environments/ws/{workspaceId}/{environmentId}'),
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -32,7 +32,7 @@ class EnvironmentMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': ('environments/ws/{workspaceId}/{environmentName}'),
+            'url_template': ('environments/ws/{workspaceId}/{environmentId}'),
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -103,31 +103,35 @@ class EnvironmentMicroClient:
         data = as_dict(environment)
         response = self._http_client.make_request(
             self._endpoint['create'],
-            body=data,
+            body = data,
             workspaceId = workspace_id
         )
         return Environment(response, workspace_id,  self._http_client)
 
-    def update_name(self, new_name, environment, workspace_id):
+    def update(self, environment_id, workspace_id, fieldName, fieldValue):
         '''
         update environment
 
-        :param environment: environment instance or dict containing name and production flag
-            properties
-
+        :param workspace_id: workspace id
+        :param environment_id: workspace id
+        :param fieldName: field to be changed
+        :param fieldValue: new field value
+        
         :returns: updated environment
         :rtype: Environment
         '''
-        data = as_dict(environment)
+        data = [{'op': 'replace',
+                'path': '/' + fieldName,
+                'value': fieldValue }]
         response = self._http_client.make_request(
-            self._endpoint['update_name'],
-            body= [as_dict({'op': 'replace', 'path': '/name', 'value':new_name})],
-            workspaceId =workspace_id,
-            environmentName = data['name']
+            self._endpoint['update'],
+            body=data,
+            workspaceId = workspace_id,
+            environmentId = environment_id
         )
-        return response
+        return Environment(response, workspace_id,  self._http_client)
 
-    def delete(self, environment_name, workspace_id):
+    def delete(self, environment_id, workspace_id):
         '''
         delete an environment
 
@@ -139,8 +143,8 @@ class EnvironmentMicroClient:
         '''
         response = self._http_client.make_request(
             self._endpoint['delete'],
-            workspaceId =workspace_id,
-            environmentName = environment_name
+            workspaceId = workspace_id,
+            environmentId = environment_id
         )
         return response
 

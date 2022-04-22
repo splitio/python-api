@@ -2,6 +2,8 @@ from splitapiclient.resources import Workspace
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
+from splitapiclient.util.helpers import as_dict
+
 
 class WorkspaceMicroClient:
     '''
@@ -21,6 +23,39 @@ class WorkspaceMicroClient:
         'get_rollout_statuses': {
             'method': 'GET',
             'url_template': 'rolloutStatuses?wsId={workspaceId}',
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'create': {
+            'method': 'POST',
+            'url_template': ('workspaces'),
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'update': {
+            'method': 'PATCH',
+            'url_template': ('workspaces/{workspaceId}'),
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'delete': {
+            'method': 'DELETE',
+            'url_template': ('workspaces/{workspaceId}'),
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -88,5 +123,55 @@ class WorkspaceMicroClient:
         response = self._http_client.make_request(
             self._endpoint['get_rollout_statuses'],
             workspaceId = workspace_id
+        )
+        return response
+
+    def add(self, workspace):
+        '''
+        add a workspace
+
+        :param workspace: workspace instance
+        :returns: newly created workspace
+        :rtype: Workspace
+        '''
+        data = as_dict(workspace)
+        response = self._http_client.make_request(
+            self._endpoint['create'],
+            body=data
+        )
+        return Workspace(response, self._http_client)
+
+    def update(self, workspace_id, fieldName, fieldValue):
+        '''
+        update a workspace
+
+        :param workspace_id: workspace id
+        :param fieldName: field to be changed
+        :param fieldValue: new field value
+        :returns: newly updated workspace
+        :rtype: Workspace
+        '''
+        data = [{'op': 'replace',
+                'path': '/' + fieldName,
+                'value': fieldValue }]
+        response = self._http_client.make_request(
+            self._endpoint['update'],
+            body=data,
+            workspaceId = workspace_id
+        )
+        return Workspace(response, self._http_client)
+
+    def delete(self, workspace_id):
+        '''
+        delete a workspace
+
+        :param workspace id:
+
+        :returns:
+        :rtype: True if successful
+        '''
+        response = self._http_client.make_request(
+            self._endpoint['delete'],
+            workspaceId =workspace_id,
         )
         return response

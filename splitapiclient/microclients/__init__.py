@@ -11,3 +11,4 @@ from splitapiclient.microclients.change_request_microclient import ChangeRequest
 from splitapiclient.microclients.user_microclient import UserMicroClient
 from splitapiclient.microclients.group_microclient import GroupMicroClient
 from splitapiclient.microclients.apikey_microclient import APIKeyMicroClient
+from splitapiclient.microclients.restriction_microclient import RestrictionMicroClient

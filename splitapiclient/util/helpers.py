@@ -37,8 +37,9 @@ def require_client(model, http_client, apiclient):
     from splitapiclient.microclients.traffic_type_microclient import TrafficTypeMicroClient
     from splitapiclient.microclients.change_request_microclient import ChangeRequestMicroClient
     from splitapiclient.microclients.apikey_microclient import APIKeyMicroClient
+    from splitapiclient.microclients.restriction_microclient import RestrictionMicroClient
 
-    if model not in ['Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey']:
+    if model not in ['Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey', 'Restriction']:
         raise InvalidModelException('Unknown model %s' % model)
 
     if apiclient and isinstance(apiclient, BaseApiClient):
@@ -55,6 +56,7 @@ def require_client(model, http_client, apiclient):
         if model == 'User': return apiclient.users
         if model == 'Group': return apiclient.groups
         if model == 'APIKey': return apiclient.apikeys
+        if model == 'Restriction': return apiclient.restrictions
     elif http_client and isinstance(http_client, BaseHttpClient):
         if model == 'Attribute': return AttributeMicroClient(http_client)
         if model == 'Environment': return EnvironmentMicroClient(http_client)
@@ -69,6 +71,7 @@ def require_client(model, http_client, apiclient):
         if model == 'User': return UserMicroClient(http_client)
         if model == 'Group': return GroupMicroClient(http_client)
         if model == 'APIKey': return APIKeyMicroClient(http_client)
+        if model == 'Restriction': return RestrictionMicroClient(http_client)
     else:
         raise ClientRequiredError(
             'Object created ad-hoc, you need to pass a SplitApiClient instance '

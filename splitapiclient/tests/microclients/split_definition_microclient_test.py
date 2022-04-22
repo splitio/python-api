@@ -65,6 +65,7 @@ class TestSplitDefinitionMicroClient:
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
+                'lastTrafficReceivedAt': None
             }, {
                 'name': 'split2',
                 'environment': None,
@@ -77,6 +78,7 @@ class TestSplitDefinitionMicroClient:
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
+                'lastTrafficReceivedAt': None
             }]
         assert result[0].to_dict() == data[0]
         assert result[1].to_dict() == data[1]

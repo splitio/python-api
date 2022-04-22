@@ -16,6 +16,7 @@ from splitapiclient.microclients import ChangeRequestMicroClient
 from splitapiclient.microclients import UserMicroClient
 from splitapiclient.microclients import GroupMicroClient
 from splitapiclient.microclients import APIKeyMicroClient
+from splitapiclient.microclients import RestrictionMicroClient
 
 
 class SyncApiClient(BaseApiClient):
@@ -64,6 +65,7 @@ class SyncApiClient(BaseApiClient):
         self._user_client = UserMicroClient(http_client)
         self._group_client = GroupMicroClient(http_client)
         self._apikey_client = APIKeyMicroClient(http_client)
+        self._restriction_client = RestrictionMicroClient(http_client)
 
     @property
     def traffic_types(self):
@@ -116,3 +118,7 @@ class SyncApiClient(BaseApiClient):
     @property
     def apikeys(self):
         return self._apikey_client
+
+    @property
+    def restrictions(self):
+        return self._restriction_client

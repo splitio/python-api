@@ -10,6 +10,7 @@ class Workspace(BaseResource):
     _schema = {
         'id': 'string',
         'name': 'string',
+        'requiresTitleAndComments': 'boolean'
     }
 
     def __init__(self, data=None, client=None):
@@ -20,6 +21,7 @@ class Workspace(BaseResource):
         BaseResource.__init__(self, data.get('id'), client)
         self._id = data.get('id')
         self._name = data.get('name')
+        self._requiresTitleAndComments = data.get('requiresTitleAndComments')
 
     @property
     def name(self):
@@ -110,3 +112,23 @@ class Workspace(BaseResource):
         imc = require_client('Workspace', self._client, apiclient)
         workspaceId = self._id
         return imc.get_rollout_statuses(workspaceId)
+
+    def update(self, fieldName, fieldValue, apiclient=None):
+        '''
+        update workspace field
+
+        :param fieldName: field name
+        :param fieldValue: new field value
+        '''
+        imc = require_client('Workspace', self._client, apiclient)
+        workspaceId = self._id
+        return imc.update(workspaceId, fieldName, fieldValue)
+
+    def delete(self, apiclient=None):
+        '''
+        delete current workspace instance
+        '''
+        imc = require_client('Workspace', self._client, apiclient)
+        workspaceId = self._id
+        return imc.delete(workspaceId)
+
