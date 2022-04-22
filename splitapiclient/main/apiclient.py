@@ -64,3 +64,7 @@ class BaseApiClient:
     @abc.abstractproperty
     def apikeys(self):
         pass
+
+    @abc.abstractproperty
+    def restrictions(self):
+        pass

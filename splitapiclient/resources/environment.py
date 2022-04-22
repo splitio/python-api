@@ -8,9 +8,39 @@ class Environment(BaseResource):
     '''
     '''
     _schema = {
-        'id': 'string',
-        'name': 'string',
-        'production': 'boolean'
+        "creationTime" : 0,
+        "production": False,
+        "dataExportPermissions" : {
+            "areExportersRestricted" : False,
+            "exporters" : [{
+              "name" : "string",
+              "id" : "string",
+              "type" : "string"
+            }]
+        },
+        "environmentType" : "string",
+        "workspaceIds" : [ "string" ],
+        "name" : "string",
+        "changePermissions" : {
+            "areApproversRestricted" : False,
+            "allowKills" : False,
+            "areEditorsRestricted" : False,
+            "areApprovalsRequired" : False,
+            "approvers" : [ {
+              "name" : "string",
+              "id" : "string",
+              "type" : "string"
+            }],
+            "editors" : [ {
+              "name" : "string",
+              "id" : "string",
+              "type" : "string"
+            }]
+        },
+        "type": "environment",
+        "id" : "string",
+        "orgId" : "string",
+        "status" : "string"
     }
 
     def __init__(self, data=None, workspace_id=None, client=None):
@@ -23,6 +53,12 @@ class Environment(BaseResource):
         self._name = data.get('name')
         self._production = data.get('production')
         self._workspace_id = workspace_id
+        self._creationTime = data.get('creationTime')
+        self._dataExportPermissions = data.get('dataExportPermissions')
+        self._status = data.get('status')
+        self._type = data.get('type')
+        self._orgId = data.get('orgId')
+        self._changePermissions = data.get("changePermissions") if "changePermissions" in data else {}
         self._client = client
 
     @property
@@ -84,3 +120,24 @@ class Environment(BaseResource):
         for item in identities:
             item['environmentId'] = self.id
         return imc.save_all(identities)
+
+    def update(self, fieldName, fieldValue, apiclient=None):
+        '''
+        update Environment field
+
+        :param fieldName: field name
+        :param fieldValue: new field value
+        '''
+        imc = require_client('Environment', self._client, apiclient)
+        environmentId = self._id
+        workspaceId = self._workspace_id
+        return imc.update(environmentId, workspaceId, fieldName, fieldValue)
+
+    def delete(self, apiclient=None):
+        '''
+        delete current environment instance
+        '''
+        imc = require_client('Environment', self._client, apiclient)
+        environmentId = self._id
+        workspaceId = self._workspace_id
+        return imc.delete(environmentId, workspaceId)

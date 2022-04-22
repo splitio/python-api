@@ -27,6 +27,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'name',
+                'requiresTitleAndComments': None
             },
             client
         )
@@ -37,9 +38,10 @@ class TestWorkspace:
         '''
         '''
         ws1 = Workspace(
-            {
+        {
                 'id': 'a',
                 'name': 'b',
+                'requiresTitleAndComments': None
         })
         assert ws1.name == 'b'
 
@@ -47,9 +49,17 @@ class TestWorkspace:
         '''
         '''
         data = {
-            'id': '1',
-            'name': 'e1',
-            'production': True
+            'id': '123',
+            'name': 'env1',
+            'production':None,
+            'creationTime' : None,
+            'dataExportPermissions' : None,
+            'environmentType' : None,
+            'workspaceIds' : None,
+            'changePermissions' : None,
+            'type': None,
+            'orgId' : None,
+            'status' : None
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -57,6 +67,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
@@ -73,23 +84,24 @@ class TestWorkspace:
     def test_delete_environment(self, mocker):
         '''
         '''
-        environment_name = 'e1'
+        environment_id = 'e1'
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = True
         ws1 = Workspace(
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
 
-        attr = ws1.delete_environment(environment_name)
+        attr = ws1.delete_environment(environment_id)
 
         http_client_mock.make_request.assert_called_once_with(
             EnvironmentMicroClient._endpoint['delete'],
             workspaceId = '1',
-            environmentName = environment_name,
+            environmentId = environment_id,
         )
         assert attr == True
 
@@ -106,6 +118,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
@@ -135,6 +148,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
@@ -161,6 +175,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
@@ -196,6 +211,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )
@@ -219,6 +235,7 @@ class TestWorkspace:
             {
                 'id': '1',
                 'name': 'e1',
+                'requiresTitleAndComments': None
             },
             http_client_mock
         )

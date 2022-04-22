@@ -25,8 +25,16 @@ class TestEnvironment:
         env = Environment(
             {
                 'id': '123',
-                'name': 'name',
-                'production': True
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
             },
             client
         )
@@ -40,10 +48,81 @@ class TestEnvironment:
         {
             'id': 'a',
             'name': 'b',
-            'production': True
+            'production':None,
+            'creationTime' : None,
+            'dataExportPermissions' : None,
+            'environmentType' : None,
+            'workspaceIds' : None,
+            'changePermissions' : None,
+            'type': None,
+            'orgId' : None,
+            'status' : None
         })
         assert env1.id == 'a'
         assert env1.name == 'b'
+
+    def test_update(self, mocker):
+        '''
+        '''
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        data = {
+            'id': '123',
+            'name': 'env1',
+            'production':None,
+            'creationTime' : None,
+            'dataExportPermissions' : None,
+            'environmentType' : None,
+            'workspaceIds' : None,
+            'changePermissions' : None,
+            'type': None,
+            'orgId' : None,
+            'status' : None
+        }
+        http_client_mock.make_request.return_value = data
+        env = Environment(
+            {
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
+            },
+            'ws_id',
+            http_client_mock
+        )
+        result = env.update('name', 'env_new')
+        assert data == result.to_dict()
+
+    def test_delete(self, mocker):
+        '''
+        '''
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = True
+        env = Environment(
+            {
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
+            },
+            'ws_id',
+            http_client_mock
+        )
+        result = env.delete()
+        assert result == True
 
     def test_add_identity(self, mocker):
         '''
@@ -58,9 +137,17 @@ class TestEnvironment:
         http_client_mock.make_request.return_value = data
         env1 = Environment(
             {
-                'id': '1',
-                'name': 'e1',
-                'production': True
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
             },
             'ws_id',
             http_client_mock
@@ -92,8 +179,17 @@ class TestEnvironment:
 
         env2 = Environment(
             {
-                'id': '1',
-                'name': 'e2',
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
             },
         )
 
@@ -133,9 +229,17 @@ class TestEnvironment:
         }
         env1 = Environment(
             {
-                'id': '1',
-                'name': 'e1',
-                'production': True
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
             },
             'ws_id',
             http_client_mock
@@ -169,8 +273,17 @@ class TestEnvironment:
 
         env2 = Environment(
             {
-                'id': '1',
-                'name': 'e2',
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
             },
         )
 
@@ -191,3 +304,4 @@ class TestEnvironment:
         assert [s.to_dict() for s in res3.successful] == data
         assert isinstance(res3.failed, list)
         assert isinstance(res3.metadata, dict)
+

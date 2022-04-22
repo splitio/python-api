@@ -231,7 +231,7 @@ class SplitMicroClient:
 
     def associate_tags(self, split_name, tags, workspace_id):
         '''
-        Add split to environment
+        Associate tags with Split
 
         :param split: split name, tags string array, workspace id
         
