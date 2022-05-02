@@ -4,6 +4,11 @@
 - Added Workspace and update base URL to use v2
 3.0 (Nov 2nd, 2021)
 - Added support for Users, Groups, Splits, Split Definitions, Segments, Segments Definitions, Rollout dashboard, Change requests and API Keys
-3.0.2 (Nov 11th, 20201)
+3.0.2 (Nov 11th, 2021)
 - Added Added lastUpdatedTime and lastTrafficReceivedAt fields to split_definition.py class
 - Fixed issues with Attributes and Identities classes
+3.1.0 (May 2nd, 2022)
+- Added support for new Workspace API (add/modify/delete and permissions) and Environment permissions.
+- Added support to pass tags to splits.list() and splits.find()
+- Added support to pass environment_id and status to change_requests.list()
+ 
