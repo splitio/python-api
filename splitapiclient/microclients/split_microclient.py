@@ -43,6 +43,17 @@ class SplitMicroClient:
             'query_string': [],
             'response': True,
         },
+        'get': {
+            'method': 'GET',
+            'url_template': ('splits/ws/{workspaceId}/{splitName}'),
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
         'all_items': {
             'method': 'GET',
             'url_template': 'splits/ws/{workspaceId}?limit=20&offset={offset}{tags}',
@@ -138,6 +149,24 @@ class SplitMicroClient:
                 return item
         LOGGER.error("Split Name does not exist")
         return None
+
+    def get(self, split_name, workspace_id):
+        '''
+        get a split details
+
+        :param split_name: split name
+        :param workspace_id: workspace id
+
+        :returns: split object
+        :rtype: Split
+        '''
+        response = self._http_client.make_request(
+            self._endpoint['get'],
+            workspaceId = workspace_id,
+            splitName = split_name
+        )
+        response['workspaceId'] = workspace_id
+        return Split(response, workspace_id, self._http_client)
 
     def add(self, split, traffic_type_name, workspace_id):
         '''

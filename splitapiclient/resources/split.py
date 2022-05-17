@@ -21,7 +21,8 @@ class Split(BaseResource):
             'name': 'string'
         },
         'rolloutStatusTimestamp': 'number',
-        'tags': [{'name': 'string'}]
+        'tags': [{'name': 'string'}],
+        'owners': [{'id':'string','type':'string'}]
     }
 
     def __init__(self, data=None, workspace_id=None, client=None):
@@ -39,6 +40,7 @@ class Split(BaseResource):
         self._id = data.get('id') if 'id' in data else None
         self._rolloutStatus = data.get('rolloutStatus') if 'rolloutStatus' in data else {}
         self._rolloutStatusTimestamp = data.get('rolloutStatusTimestamp') if 'rolloutStatusTimestamp' in data else 0
+        self._owners = data.get('owners') if 'owners' in data else []
 
     @property
     def name(self):
