@@ -131,7 +131,8 @@ class TestSplit:
             'id': 'split1',
             'rolloutStatus': None,
             'rolloutStatusTimestamp': None,
-            'tags': None
+            'tags': None,
+            'owners': None
         }
 
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
