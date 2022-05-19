@@ -11,4 +11,6 @@
 - Added support for new Workspace API (add/modify/delete and permissions) and Environment permissions.
 - Added support to pass tags to splits.list() and splits.find()
 - Added support to pass environment_id and status to change_requests.list()
- 
+3.1.2 (May 19th, 2022)
+- Added support for owners array in Split get and create endpoints.
+- Added support for get split details api endpoint.
