@@ -106,7 +106,7 @@ class SplitMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, workspace_id, tags):
+    def list(self, workspace_id, tags = []):
         '''
         Returns a list of Split objects.
 
@@ -137,7 +137,7 @@ class SplitMicroClient:
                 break
         return [Split(item, workspace_id, self._http_client) for item in final_list]
 
-    def find(self, split_name, workspace_id, tags):
+    def find(self, split_name, workspace_id, tags = []):
         '''
         Find Split in workspace objects.
 
