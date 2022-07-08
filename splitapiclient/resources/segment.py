@@ -12,9 +12,11 @@ class Segment(BaseResource):
         'description': 'string',
         'trafficType' : {
             'id': 'string',
-            'namr': 'string'
+            'name': 'string'
         },
-        'workspaceId' : 'string'
+        'workspaceId' : 'string',
+        'creationTime' : 'number',
+        'tags': [{'name': 'string'}]
     }
 
     def __init__(self, data=None, client=None):
@@ -27,6 +29,9 @@ class Segment(BaseResource):
         self._description = data.get('description')
         self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._workspace_id = data.get('workspaceId')
+        self._tags = data.get('tags') if 'tags' in data else []
+        self._creationTime = data.get('creationTime') if 'creationTime' in data else 0
+
             
     @property
     def name(self):

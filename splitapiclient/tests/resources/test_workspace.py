@@ -111,6 +111,8 @@ class TestWorkspace:
         data = {
             'name': '1',
             'description': 'e1',
+            'creationTime' : None,
+            'tags': None
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -133,6 +135,8 @@ class TestWorkspace:
         data = {
             'name': '1',
             'description': 'e1',
+            'creationTime' : None,
+            'tags': None
         }
         data['trafficType'] = None
         data['workspaceId'] = None
@@ -198,6 +202,7 @@ class TestWorkspace:
         data['rolloutStatus'] = None
         data['rolloutStatusTimestamp'] = None
         data['tags'] = None
+        data['owners'] = None
         
         assert attr.to_dict() == data
 
