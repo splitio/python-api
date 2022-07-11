@@ -16,9 +16,13 @@ class TestSegmentMicroClient:
         data = {'objects': [{
                 'name': 'seg1',
                 'description': 'desc',
+                'creationTime' : None,
+                'tags': None
                 }, {
                 'name': 'seg1',
                 'description': 'desc',
+                'creationTime' : None,
+                'tags': None
             }],
             'offset': 1,
             'totalCount': 2,
@@ -36,12 +40,16 @@ class TestSegmentMicroClient:
                 'name': 'seg1',
                 'description': 'desc',
                 'trafficType': None,
-                'workspaceId': None
+                'workspaceId': None,
+                'creationTime' : None,
+                'tags': None
                 }, {
                 'name': 'seg1',
                 'description': 'desc',
                 'trafficType': None,
-                'workspaceId': None
+                'workspaceId': None,
+                'creationTime' : None,
+                'tags': None
         }]
 
         assert result[0].to_dict() == data[0]
