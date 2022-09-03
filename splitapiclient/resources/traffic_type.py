@@ -89,6 +89,26 @@ class TrafficType(BaseResource):
         identity['trafficTypeId'] = self.id
         return imc.save(identity)
 
+    def import_attributes_from_json(self, json_data, apiclient=None):
+        '''
+        
+        import attributes from JSON file into Split
+
+        :param tt: workspace id,  json data, apiclient
+        
+        :returns: attribute
+        
+        :param apiclient: If this instance wasn't returned by the client,
+            the IdentifyClient instance should be passed in order to perform the
+            http call
+
+        :returns: True if successful
+        :rtype: boolean
+        '''
+        amc = require_client('Attribute', self._client, apiclient)
+        return amc.import_attributes_from_json(self._workspace_id, self.id, data=json_data)
+
+
     def add_identities(self, data, apiclient=None):
         '''
         Add multiple new identities associated with this traffic type.

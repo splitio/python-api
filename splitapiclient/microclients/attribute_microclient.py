@@ -1,3 +1,4 @@
+
 from splitapiclient.resources import Attribute
 from splitapiclient.util.exceptions import HTTPResponseError, \
     UnknownApiClientError
@@ -22,6 +23,17 @@ class AttributeMicroClient:
         'create': {
             'method': 'POST',
             'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}',
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'import_from_json': {
+            'method': 'POST',
+            'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}/attribute:bulk',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -134,3 +146,20 @@ class AttributeMicroClient:
             attribute._workspace_id,
             data.get('trafficTypeId')
         )
+    def import_attributes_from_json(self, workspaceId, trafficTypeId, data):
+        '''
+        import attributes from JSON file into Split
+
+        :param segment: workspace id, traffic type id, json data
+        
+        :returns: bool
+        '''
+        res = self._http_client.make_request(
+            self._endpoint['import_from_json'],
+            body=data,
+            workspaceId = workspaceId,
+            trafficTypeId = trafficTypeId,
+        )
+        
+        
+        return True
