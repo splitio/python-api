@@ -31,7 +31,7 @@ class AttributeMicroClient:
             'query_string': [],
             'response': True,
         },
-        'import_from_json': {
+        'import_attributes_from_json': {
             'method': 'POST',
             'url_template': 'schema/ws/{workspaceId}/trafficTypes/{trafficTypeId}/attribute:bulk',
             'headers': [{
@@ -155,7 +155,7 @@ class AttributeMicroClient:
         :returns: bool
         '''
         res = self._http_client.make_request(
-            self._endpoint['import_from_json'],
+            self._endpoint['import_attributes_from_json'],
             body=data,
             workspaceId = workspaceId,
             trafficTypeId = trafficTypeId,
