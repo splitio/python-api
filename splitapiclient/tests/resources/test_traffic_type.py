@@ -395,3 +395,51 @@ class TestTrafficType:
         assert [s.to_dict() for s in res3.successful] == data
         assert isinstance(res3.failed, list)
         assert isinstance(res3.metadata, dict)
+
+    def test_import_JSON(self, mocker):
+        '''
+        '''
+        data = {
+            'id': 'a1',
+            'trafficTypeId': '1',
+            'displayName': 'dn1',
+            'isSearchable': None,
+            'dataType': 'string',
+            'description': 'd1',
+            'workspaceId': 'ws_id'
+        }
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = data
+        tt1 = TrafficType(
+            {
+                'id': '1',
+                'displayAttributeId': 'asd',
+                'name': 'n1',
+            },
+            'ws_id',
+            http_client_mock
+        )
+        attrib_data = [ {
+                            "id": "anAttribute2",
+                            "displayName": "An Attribute2",
+                            "description": "my description here",
+                            "dataType": "string",
+                            "suggestedValues": [
+                                "suggested",
+                                "values"
+                            ]
+                        } ]
+
+
+        tt1.import_attributes_from_json(attrib_data)
+
+
+        http_client_mock.make_request.assert_called_once_with(
+            AttributeMicroClient._endpoint['import_attributes_from_json'],
+            body=attrib_data,
+            workspaceId = data['workspaceId'],
+            trafficTypeId = data['trafficTypeId']
+            
+        )
+
+
