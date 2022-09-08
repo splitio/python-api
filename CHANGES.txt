@@ -18,3 +18,5 @@
 - Made tags optional parameter for client_splits.list() and client_splits.find()
 3.1.4 (Jul 11th, 2022)
 - Added tags property support for segment object.
+3.1.5 (Sept 8th, 2022)
+- Added `import_attributes_from_json` for trafficType object
