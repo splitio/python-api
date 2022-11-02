@@ -20,3 +20,5 @@
 - Added tags property support for segment object.
 3.1.5 (Sept 8th, 2022)
 - Added `import_attributes_from_json` for trafficType object
+3.1.6 (Nov 2nd, 2022)
+- Added `baselineTreatment` for splitDefinition object

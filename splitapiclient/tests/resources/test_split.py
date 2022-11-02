@@ -54,6 +54,7 @@ class TestSplit:
             'killed': None,
             'treatments': [],
             'defaultTreatment': None,
+            'baselineTreatment': None,
             'trafficAllocation': None,
             'rules': [],
             'defaultRule': [],
@@ -87,6 +88,7 @@ class TestSplit:
         data['killed'] = None
         data['treatments'] = None
         data['defaultTreatment'] = None
+        data['baselineTreatment'] = None
         data['trafficAllocation'] = None
         data['rules'] = None
         data['defaultRule'] = None

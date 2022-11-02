@@ -30,6 +30,7 @@ class SplitDefinition(BaseResource):
             'segments': [ 'string' ]
         }],
         'defaultTreatment': 'string',
+        'baselineTreatment': 'string',      
         'trafficAllocation': 'number',
         'rules': [{
             'condition': {
@@ -76,6 +77,7 @@ class SplitDefinition(BaseResource):
             for item in data.get('treatments'):
                 self._treatments.append(Treatment(item))
         self._default_treatment = data.get('defaultTreatment') if 'defaultTreatment' in data else ''
+        self._baseline_treatment = data.get('baselineTreatment') if 'baselineTreatment' in data else ''
         self._traffic_allocation = data.get('trafficAllocation') if 'trafficAllocation' in data else 0
         self._rules = []
         for item in data.get('rules'):
