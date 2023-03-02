@@ -22,3 +22,6 @@
 - Added `import_attributes_from_json` for trafficType object
 3.1.6 (Nov 2nd, 2022)
 - Added `baselineTreatment` for splitDefinition object
+3.1.7 (Mar 2nd, 2023)
+- Added `comment` and `title` as optional parameters for the `remove_from_environment` method of a Split
+- Updated default logging to be more useful
