@@ -112,13 +112,17 @@ class TestSplit:
             'ws_id',
             http_client_mock
         )
-        attr = sp.remove_from_environment(environment_id)
+        title="title"
+        comment="comment"
+        attr = sp.remove_from_environment(environment_id, comment, title)
 
         http_client_mock.make_request.assert_called_once_with(
             SplitMicroClient._endpoint['remove_from_environment'],
             workspaceId = 'ws_id',
             splitName = 'name',
-            environmentId = environment_id
+            environmentId = environment_id,
+            title=title,
+            comment=comment
         )
         assert attr == True
 

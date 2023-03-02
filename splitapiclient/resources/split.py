@@ -73,11 +73,13 @@ class Split(BaseResource):
         imc = require_client('Split', self._client, apiclient)
         return imc.add_to_environment(self._name, environment_id, self._workspace_id, data)
 
-    def remove_from_environment(self, environment_id, apiclient=None):
+    def remove_from_environment(self, environment_id, comment="", title="", apiclient=None):
         '''
         Remove split from environment
 
         :param data: environment id
+        :param data: title
+        :param data: comment
         :param apiclient: If this instance wasn't returned by the client,
             the IdentifyClient instance should be passed in order to perform the
             http call
@@ -86,7 +88,7 @@ class Split(BaseResource):
         :rtype: SplitDefinition
         '''
         imc = require_client('Split', self._client, apiclient)
-        return imc.remove_from_environment(self._name, environment_id, self._workspace_id)
+        return imc.remove_from_environment(self._name, environment_id, comment, title, self._workspace_id)
 
     def associate_tags(self, tags, apiclient=None):
         '''

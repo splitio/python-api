@@ -78,7 +78,7 @@ class SplitMicroClient:
         },
         'remove_from_environment': {
             'method': 'DELETE',
-            'url_template': ('splits/ws/{workspaceId}/{splitName}/environments/{environmentId}'),
+            'url_template': ('splits/ws/{workspaceId}/{splitName}/environments/{environmentId}?title={title}&comment={comment}'),
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -240,11 +240,11 @@ class SplitMicroClient:
         )
         return SplitDefinition(response, environment_id, workspace_id, self._http_client)
 
-    def remove_from_environment(self, split_name, environment_id, workspace_id):
+    def remove_from_environment(self, split_name, environment_id,comment, title, workspace_id ):
         '''
         Remove split from environment
 
-        :param split: split name, environment id, workspace id
+        :param split: split name, environment id, workspace id, comment, title
         
         :returns: True if successful
         :rtype: boolean
@@ -254,7 +254,9 @@ class SplitMicroClient:
             self._endpoint['remove_from_environment'],
             workspaceId = workspace_id,
             environmentId = environment_id,
-            splitName = split_name
+            splitName = split_name,
+            comment = comment, 
+            title = title
         )
         return response
 

@@ -55,7 +55,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
         if exc:
             raise exc()
         else:
-            raise HTTPResponseError()
+            raise HTTPResponseError(response.text)
 
     def _handle_connection_error(self, e):
         '''
