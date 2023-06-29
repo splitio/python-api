@@ -58,7 +58,8 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }, {
             'id': 'a2',
             'trafficTypeId': '1',
@@ -66,7 +67,9 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
+            
         }]
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -94,7 +97,8 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }, {
             'id': 'a2',
             'trafficTypeId': '1',
@@ -102,7 +106,8 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }]
         assert attrs[0].to_dict() == data[0]
         assert attrs[1].to_dict() == data[1]
@@ -130,7 +135,8 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }, {
             'id': 'a2',
             'trafficTypeId': '1',
@@ -138,7 +144,8 @@ class TestTrafficType:
             'description': 'd1',
             'dataType': 'string',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }]
         assert attrs[0].to_dict() == data[0]
         assert attrs[1].to_dict() == data[1]
@@ -153,7 +160,8 @@ class TestTrafficType:
             'isSearchable': None,
             'dataType': 'string',
             'description': 'd1',
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -171,7 +179,8 @@ class TestTrafficType:
                 'description': 'd1',
                 'dataType': 'string',
                 'trafficTypeId': '1',
-                'workspaceId': 'ws_id'
+                'workspaceId': 'ws_id',
+                'suggestedValues': []
         }
 
         attr = tt1.add_attribute(attrib_data)
@@ -181,6 +190,8 @@ class TestTrafficType:
             'displayName': 'dn1',
             'dataType': 'string',
             'description': 'd1',
+            'suggestedValues': []
+            
         }
 
         http_client_mock.make_request.assert_called_once_with(
@@ -201,6 +212,7 @@ class TestTrafficType:
             'displayName': 'dn1',
             'dataType': 'string',
             'description': 'd1',
+            'suggestedValues': []
         }
         atinstance = Attribute(data)
         http_client_mock.reset_mock()
@@ -232,6 +244,7 @@ class TestTrafficType:
             'displayName': 'dn1',
             'dataType': 'string',
             'description': 'd1',
+            'suggestedValues': []
         }
 
         http_client_mock.make_request.assert_called_once_with(

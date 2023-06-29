@@ -64,6 +64,7 @@ class TestAttribute:
             'description': 'asd',
             'trafficTypeId': '111',
             'dataType': 'string',
+            'suggestedValues': ['string']
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = attr_data
@@ -87,6 +88,7 @@ class TestAttribute:
             'description': 'asd',
             'trafficTypeId': '111',
             'dataType': 'string',
+            'suggestedValues': ['string']
         }
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         SyncHttpClient.make_request.return_value = attr_data

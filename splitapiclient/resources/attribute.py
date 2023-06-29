@@ -15,6 +15,7 @@ class Attribute(BaseResource):
         'dataType': 'string',
         'isSearchable': 'bool',
         'workspaceId' : 'string',
+        'suggestedValues': ['string']
     }
 
     def __init__(self, data=None, client=None):
@@ -30,6 +31,7 @@ class Attribute(BaseResource):
         self._data_type = data.get('dataType')
         self._is_searchable = data.get('isSearchable')
         self._workspace_id = data.get('workspaceId')
+        self._suggested_values = data.get('suggestedValues')
 
     @property
     def traffic_type_id(self):
@@ -50,6 +52,10 @@ class Attribute(BaseResource):
     @property
     def is_searchable(self):
         return self._is_searchable
+
+    @property
+    def suggested_values(self):
+        return self._suggested_values
 
     @traffic_type_id.setter
     def traffic_type_id(self, new):

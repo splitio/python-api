@@ -25,3 +25,5 @@
 3.1.7 (Mar 2nd, 2023)
 - Added `comment` and `title` as optional parameters for the `remove_from_environment` method of a Split
 - Updated default logging to be more useful
+3.1.8 (Jun 29nd, 2023)
+- Added suggestedValues for attributes

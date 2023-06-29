@@ -20,7 +20,8 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }, {
             'id': '124',
             'trafficTypeId': '456',
@@ -28,7 +29,8 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }]
         SyncHttpClient.make_request.return_value = data
         result = amc.list('456', 'ws_id')
@@ -44,7 +46,8 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }, {
             'id': '124',
             'trafficTypeId': '456',
@@ -52,7 +55,8 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': None
+            'workspaceId': None,
+            'suggestedValues': []
         }]
         assert result[0].to_dict() == data[0]
         assert result[1].to_dict() == data[1]
@@ -70,7 +74,8 @@ class TestAttributeMicroClient:
             'description': 'desc',
             'dataType': 'dt',
             'isSearchable': False,
-            'workspaceId': 'ws_id'
+            'workspaceId': 'ws_id',
+            'suggestedValues': []
         }
         amc.save(Attribute(data))
         data = {
@@ -79,6 +84,7 @@ class TestAttributeMicroClient:
             'displayName': 'name',
             'description': 'desc',
             'dataType': 'dt',
+            'suggestedValues': []
         }
         SyncHttpClient.make_request.assert_called_once_with(
             AttributeMicroClient._endpoint['create'],
