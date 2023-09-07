@@ -53,7 +53,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
 
         exc = status_codes_exceptions.get(response.status_code)
         if exc:
-            raise exc()
+            raise exc(response.text)
         else:
             raise HTTPResponseError(response.text)
 

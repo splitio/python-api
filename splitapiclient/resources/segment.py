@@ -40,7 +40,23 @@ class Segment(BaseResource):
     @property
     def description(self):
         return self._description
+
+    @property
+    def traffic_type(self):
+        return None if self._trafficType == {} else self._trafficType
         
+    @property
+    def workspace_id(self):
+        return self._workspace_id
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def creation_time(self):
+        return self._creationTime
+
     def add_to_environment(self, environment_id, apiclient=None):
         '''
         Add segment to environment

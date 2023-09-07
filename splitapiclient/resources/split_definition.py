@@ -94,7 +94,57 @@ class SplitDefinition(BaseResource):
     @property
     def name(self):
         return self._name
-        
+
+
+    @property
+    def environment(self):
+        return None if self._environment.id == "" else self._environment
+    
+    @property
+    def traffic_type(self):
+        return self._trafficType
+    
+    @property
+    def killed(self):
+        return self._killed
+   
+    @property
+    def treatments(self):
+        return None if len(self._treatments) == 0 else self._treatments 
+
+    @property
+    def default_treatment(self):
+        return self._default_treatment
+    
+    @property
+    def baseline_treatment(self):
+        return self._baseline_treatment
+
+
+    @property
+    def traffic_allocation(self):
+        return self._traffic_allocation
+    
+    @property
+    def rules(self):
+        return None if len(self._rules) == 0 else self._rules 
+    
+    @property
+    def default_rule(self):
+        return None if len(self._default_rule) == 0 else self._default_rule 
+    
+    @property
+    def creation_time(self):
+        return None if self._creationTime == 0 else self._creationTime
+
+    @property
+    def last_update_time(self):
+        return None if self._lastUpdateTime == 0 else self._lastUpdateTime
+    
+    @property
+    def last_traffic_received_at(self):
+        return None if self._lastTrafficReceivedAt == 0 else self._lastTrafficReceivedAt
+
     def update_definition(self, data, apiclient=None):
         '''
         Update split definition in environment

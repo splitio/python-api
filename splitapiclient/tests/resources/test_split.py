@@ -6,6 +6,27 @@ from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 from splitapiclient.microclients import SplitMicroClient
+from splitapiclient.resources import Environment
+
+def object_to_stringified_dict(obj):
+    """
+    Recursively converts an object and its nested objects to a stringified dictionary.
+    Assumes that the object has a 'to_dict()' method for serialization.
+    
+    Args:
+        obj: The object to be converted to a stringified dictionary.
+        
+    Returns:
+        A stringified dictionary representation of the object.
+    """
+    if hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
+        return object_to_stringified_dict(obj.to_dict())  # Recursively call to_dict()
+    elif isinstance(obj, dict):
+        return {key: object_to_stringified_dict(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [object_to_stringified_dict(item) for item in obj]
+    else:
+        return obj  # For non-dict, non-list, and non-object types, return as is
 
 class TestSplit:
     '''
@@ -83,8 +104,8 @@ class TestSplit:
         data = {
             'name': 'split1',
         }
-        data['trafficType'] = None
-        data['environment'] = None
+        data['trafficType'] = {'displayAttributeId': None, 'id': None, 'name': None}
+        data['environment'] = Environment(data={'changePermissions': None, 'creationTime': None, 'dataExportPermissions': None, 'environmentType': None, 'workspaceIds': ['ws_id'], 'name':None, 'type': None, 'orgId': None, 'id':None, 'status':None}).to_dict()
         data['killed'] = None
         data['treatments'] = None
         data['defaultTreatment'] = None
@@ -96,7 +117,7 @@ class TestSplit:
         data['lastUpdateTime'] = None
         data['lastTrafficReceivedAt'] = None
         
-        assert attr.to_dict() == data
+        assert object_to_stringified_dict(attr) == data
 
     def test_remove_from_environment(self, mocker):
         '''

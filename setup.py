@@ -112,8 +112,8 @@ setup(
     description='This Python Library provide full support for Split REST Admin API',
     long_description=(this_directory / "README.md").read_text(),
     long_description_content_type='text/markdown',
-    author='Patricio Echague, Sebastian Arrubia, Martin Redolatti',
-    author_email='pato@split.io, sebastian@split.io, martin@split.io',
+    author='Patricio Echague, Sebastian Arrubia, Martin Redolatti, Josh Klein, Bilal Al-Shawany',
+    author_email='pato@split.io, sebastian@split.io, martin@split.io, joshua.klein@split.io, bilal@split.io',
     url='https://github.com/splitio/python-api',
     download_url=(
         'https://github.com/splitio/python-api/tarball/' + __version__
