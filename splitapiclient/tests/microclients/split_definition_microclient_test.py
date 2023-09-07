@@ -3,7 +3,26 @@ from __future__ import absolute_import, division, print_function, \
 
 from splitapiclient.microclients import SplitDefinitionMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
-
+from splitapiclient.resources import Environment
+def object_to_stringified_dict(obj):
+    """
+    Recursively converts an object and its nested objects to a stringified dictionary.
+    Assumes that the object has a 'to_dict()' method for serialization.
+    
+    Args:
+        obj: The object to be converted to a stringified dictionary.
+        
+    Returns:
+        A stringified dictionary representation of the object.
+    """
+    if hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
+        return object_to_stringified_dict(obj.to_dict())  # Recursively call to_dict()
+    elif isinstance(obj, dict):
+        return {key: object_to_stringified_dict(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [object_to_stringified_dict(item) for item in obj]
+    else:
+        return obj  # For non-dict, non-list, and non-object types, return as is
 
 class TestSplitDefinitionMicroClient:
 
@@ -57,13 +76,13 @@ class TestSplitDefinitionMicroClient:
         )
         data = [{
                 'name': 'split1',
-                'environment': None,
-                'trafficType': None,
-                'killed': None,
+                'environment': Environment(data={'changePermissions': None, 'creationTime': None, 'dataExportPermissions': None, 'environmentType': None, 'workspaceIds': ['ws_id'], 'name':None, 'type': None, 'orgId': None, 'id':None, 'status':None}).to_dict(),
+                'trafficType': {'displayAttributeId': None, 'id': None, 'name': None},
+                'killed': False,
                 'treatments': None,
-                'defaultTreatment': None,
-                'baselineTreatment': None,
-                'trafficAllocation': None,
+                'defaultTreatment': 'off',
+                'baselineTreatment': 'off',
+                'trafficAllocation': 100,
                 'rules': None,
                 'defaultRule': None,
                 'creationTime': None,
@@ -71,18 +90,18 @@ class TestSplitDefinitionMicroClient:
                 'lastTrafficReceivedAt': None
             }, {
                 'name': 'split2',
-                'environment': None,
-                'trafficType': None,
-                'killed': None,
+                'environment': Environment(data={'changePermissions': None, 'creationTime': None, 'dataExportPermissions': None, 'environmentType': None, 'workspaceIds': ['ws_id'], 'name':None, 'type': None, 'orgId': None, 'id':None, 'status':None}).to_dict(),
+                'trafficType': {'displayAttributeId': None, 'id': None, 'name': None},
+                'killed': False,
                 'treatments': None,
-                'defaultTreatment': None,
-                'baselineTreatment': None,
-                'trafficAllocation': None,
+                'defaultTreatment': 'off',
+                'baselineTreatment': 'off',
+                'trafficAllocation': 100,
                 'rules': None,
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
                 'lastTrafficReceivedAt': None
             }]
-        assert result[0].to_dict() == data[0]
-        assert result[1].to_dict() == data[1]
+        assert object_to_stringified_dict(result[0]) == data[0]
+        assert object_to_stringified_dict(result[1]) == data[1]

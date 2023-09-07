@@ -36,7 +36,24 @@ class SegmentDefinition(BaseResource):
     @property
     def name(self):
         return self._name
-            
+
+    @property
+    def traffic_type(self):
+        return None if self._trafficType == {} else self._trafficType
+        
+    @property
+    def environment(self):
+        return self._environment
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def creation_time(self):
+        return None if  self._creationTime==0 else self._creationTime
+
+
     def get_keys(self, apiclient=None):
         '''
         Get list of keys in segment in environment
