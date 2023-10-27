@@ -27,3 +27,5 @@
 - Updated default logging to be more useful
 3.1.8 (Jun 29nd, 2023)
 - Added suggestedValues for attributes
+3.1.9 (Aug 18, 2023)
+- Added scope options for admin api

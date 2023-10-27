@@ -30,6 +30,7 @@ class APIKey(BaseResource):
             'type': 'string',
             'id': 'string'
         },
+        'roles': ['string'],
         type: 'api_key'
     }
 
@@ -47,6 +48,7 @@ class APIKey(BaseResource):
         self._environments = data.get('environments') if 'environments' in data else []
         self._workspace = data.get('workspace') if 'workspace' in data else {}
         self._type = data.get('type')
+        self._roles = data.get('roles')
 
     @property
     def key(self):

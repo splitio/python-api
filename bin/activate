@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/joshuaklein/code/py_add_suggest_values/python-api"
+VIRTUAL_ENV="/Users/joshuaklein/code/py_add_scopes/python-api"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
