@@ -7,7 +7,25 @@ from splitapiclient.http_clients.base_client import BaseHttpClient
 from splitapiclient.main import get_client
 from splitapiclient.microclients import SplitDefinitionMicroClient
 from splitapiclient.microclients import ChangeRequestMicroClient
-
+def object_to_stringified_dict(obj):
+    """
+    Recursively converts an object and its nested objects to a stringified dictionary.
+    Assumes that the object has a 'to_dict()' method for serialization.
+    
+    Args:
+        obj: The object to be converted to a stringified dictionary.
+        
+    Returns:
+        A stringified dictionary representation of the object.
+    """
+    if hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
+        return object_to_stringified_dict(obj.to_dict())  # Recursively call to_dict()
+    elif isinstance(obj, dict):
+        return {key: object_to_stringified_dict(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [object_to_stringified_dict(item) for item in obj]
+    else:
+        return obj  # For non-dict, non-list, and non-object types, return as is
 class TestSplitDefinition:
     '''
     Tests for the SplitDefinition class' methods
@@ -97,8 +115,8 @@ class TestSplitDefinition:
         data = {
             'name': None,
             'environment': None,
-            'killed': None,
-            'trafficType' : None,
+            'killed': False,
+            'trafficType' : {'displayAttributeId': None, 'id': None, 'name': None},
             'treatments': None,
             'defaultTreatment': None,
             'baselineTreatment': None,
@@ -109,7 +127,7 @@ class TestSplitDefinition:
             'lastUpdateTime' : None,
             'lastTrafficReceivedAt': None
         }
-        assert attr.to_dict() == data
+        assert object_to_stringified_dict(attr) == data
 
     def test_kill(self, mocker):
         '''

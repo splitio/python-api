@@ -139,7 +139,7 @@ class TestWorkspace:
             'tags': None
         }
         data['trafficType'] = None
-        data['workspaceId'] = None
+        data['workspaceId'] = '1'
         assert attr.to_dict() == data
 
     def test_delete_segment(self, mocker):

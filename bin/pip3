@@ -1,4 +1,6 @@
+
 #!/Users/joshuaklein/code/py_add_scopes/python-api/bin/python3.11
+
 # -*- coding: utf-8 -*-
 import re
 import sys
