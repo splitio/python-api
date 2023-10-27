@@ -38,11 +38,11 @@ class APIKeyMicroClient:
         '''
         self._http_client = http_client
 
-    def create_apikey(self, api_key_name, api_key_type, environment_ids, workspace_id):
+    def create_apikey(self, api_key_name, api_key_type, environment_ids, workspace_id, roles = None):
         '''
         create new apikey
 
-        :param: apikey info, environment and workaspce
+        :param: apikey info, environment workspace and (optional) roles array
 
         :returns: APIKey object
         :rtype: APIKey
@@ -55,6 +55,8 @@ class APIKeyMicroClient:
             data['environments'] = environmentIds
         if workspace_id is not None:
             data['workspace'] = {'type':'workspace', 'id': workspace_id}
+        if roles is not None:
+            data['roles'] = roles
         response = self._http_client.make_request(
             self._endpoint['create_apikey'],
             body = data
@@ -75,3 +77,5 @@ class APIKeyMicroClient:
             apikeyId = apikey_id
         )
         return True
+
+

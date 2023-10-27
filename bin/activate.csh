@@ -8,7 +8,9 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/Users/joshuaklein/code/py_fix_splitDef_dict/python-api"
+
+setenv VIRTUAL_ENV "/Users/joshuaklein/code/py_add_scopes/python-api"
+
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"
