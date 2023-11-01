@@ -29,6 +29,6 @@
 - Added suggestedValues for attributes
 3.1.9 (Sept 7th, 2023)
 - Fixed `to_dict()` method for Segments, Segment Definitions and Split Definitions
-3.1.10 (Aug 18, 2023)
+3.1.10 (Oct 30, 2023)
 - Added scope options for admin api
 
