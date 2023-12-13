@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "splitapiclient"
+version = "3.1.11"
+description = "This Python Library provide full support for Split REST Admin API, allow creating, deleting and editing Environments, Splits, Split Definitions, Segments, Segment Keys, Users, Groups, API Keys, Change Requests, Attributes and Identities"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+]
+authors = [
+  {name = "Patricio Echague", email = "pato@split.io"},
+  {name = "Sebastian Arrubia", email = "sebastian@split.io"},
+  {name = "Martin Redolatti", email = "martin@split.io"},
+  {name = "Bilal Al-Shawany", email = "bilal@split.io"},
+]
+maintainers = [
+  {name = "Josh Klein", email = "joshua.klein@split.io"}
+]
+
+
+[project.license]
+text = "Apache License 2.0"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/splitio/python-api"
+"Bug Tracker" = "https://github.com/splitio/python-api/issues"
+Documentation = "https://help.split.io/hc/en-us/articles/4412331052685-Python-PyPi-library-for-Split-REST-Admin-API"
+
+[tool.aliases]
+test = "pytest"
+
+[tool.pytest.ini_options]
+addopts = "--verbose"
+
+[tool.setuptools]
+include-package-data = false
+
+[aliases]
+test = "pytest"
+
+[tool.pytest]
+addopts = "--verbose"
+
+[options]
+packages = "find:"
+setup_requires = "pytest-runner"
+
+[options.install_requires]
+"argparse>" = "1.1"
+"requests>" = "2.14.2"
+"six>" = "1.10.0"
+
+[options.tests_require]
+mock = "=2.0.0"
+pytest-mock = "=1.6.0"
+pytest = "=6.2.4"

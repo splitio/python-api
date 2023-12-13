@@ -1,5 +1,5 @@
 from splitapiclient.resources import SplitDefinition
-from splitapiclient.util.exceptions import HTTPResponseError, \
+from splitapiclient.util.exceptions import HTTPNotFoundError, HTTPResponseError, \
     UnknownApiClientError
 from splitapiclient.util.logger import LOGGER
 from splitapiclient.util.helpers import as_dict
@@ -11,6 +11,17 @@ class SplitDefinitionMicroClient:
         'all_items': {
             'method': 'GET',
             'url_template': 'splits/ws/{workspaceId}/environments/{environmentId}?limit=20&offset={offset}',
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
+        },
+        'get_definition': {
+            'method': 'GET',
+            'url_template': ('splits/ws/{workspaceId}/{splitName}/environments/{environmentId}'),
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -101,6 +112,26 @@ class SplitDefinitionMicroClient:
         LOGGER.error("Split Name does not exist")
         return None
 
+    def get_definition(self, split_name, environment_id, workspace_id):
+        '''
+        Get a Split definition in a single API request.
+
+        :returns: SplitDefinition object
+        :rtype: SplitDefinition
+        '''
+        try:
+            response = self._http_client.make_request(
+                    self._endpoint['get_definition'],
+                    workspaceId = workspace_id,
+                    environmentId = environment_id,
+                    splitName = split_name
+            )
+            item = as_dict(response)
+            return SplitDefinition(item, environment_id, workspace_id, self._http_client)
+        except HTTPNotFoundError as e:
+            LOGGER.error("Split Name '%s' does not exist", split_name)
+            return None
+        
     def update_definition(self, split_name, environment_id, workspace_id, new_definition):
         '''
         update a split definition
@@ -155,4 +186,3 @@ class SplitDefinitionMicroClient:
             splitName = split_name
         )
         return response
-

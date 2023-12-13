@@ -31,4 +31,5 @@
 - Fixed `to_dict()` method for Segments, Segment Definitions and Split Definitions
 3.1.10 (Oct 30, 2023)
 - Added scope options for admin api
-
+3.1.11 (Dec 13, 2023)
+- Added ability to get individual flag definitions with the `get_definition` method of splitDefinition
