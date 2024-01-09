@@ -24,7 +24,8 @@ class TestEnvironmentMicroClient:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }]
         SyncHttpClient.make_request.return_value = data
         result = emc.list('ws_id')
@@ -67,7 +68,8 @@ class TestEnvironmentMicroClient:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }
         SyncHttpClient.make_request.return_value = data
         result = emc.update('env_1', 'ws_1', 'name', 'env_new')
@@ -89,7 +91,8 @@ class TestEnvironmentMicroClient:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }
         assert response == result.to_dict()
 
@@ -111,7 +114,8 @@ class TestEnvironmentMicroClient:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }
         SyncHttpClient.make_request.return_value = data
         result = emc.add(data, 'ws_1')
@@ -131,6 +135,7 @@ class TestEnvironmentMicroClient:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }
         assert response == result.to_dict()

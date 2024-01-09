@@ -33,3 +33,5 @@
 - Added scope options for admin api
 3.1.11 (Dec 13, 2023)
 - Added ability to get individual flag definitions with the `get_definition` method of splitDefinition
+3.1.12 (Jan 13, 2024)
+- Added ability to retrieve API keys when creating an environment

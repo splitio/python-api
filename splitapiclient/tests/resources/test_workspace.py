@@ -59,7 +59,8 @@ class TestWorkspace:
             'changePermissions' : None,
             'type': None,
             'orgId' : None,
-            'status' : None
+            'status' : None,
+            'apiTokens' : None
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data

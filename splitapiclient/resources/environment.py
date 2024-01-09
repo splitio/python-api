@@ -20,7 +20,16 @@ class Environment(BaseResource):
         },
         "environmentType" : "string",
         "workspaceIds" : [ "string" ],
+
         "name" : "string",
+        "apiTokens" : [
+            {
+                "name" : "string",
+                "type" : "string",
+                "id" : "id",
+                "apiKeyType" : "string"
+            }
+        ],
         "changePermissions" : {
             "areApproversRestricted" : False,
             "allowKills" : False,
@@ -59,7 +68,12 @@ class Environment(BaseResource):
         self._type = data.get('type')
         self._orgId = data.get('orgId')
         self._changePermissions = data.get("changePermissions") if "changePermissions" in data else {}
+        self._apiTokens = data.get("apiTokens") if "apiTokens" in data else {}
         self._client = client
+
+    @property
+    def apiTokens(self):
+        return self._apiTokens
 
     @property
     def workspace_id(self):
