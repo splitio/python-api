@@ -39,7 +39,7 @@ class APIKey(BaseResource):
         '''
         if not data:
             data = {}
-        BaseResource.__init__(self, data.get('key'), client)
+        BaseResource.__init__(self, data.get('id'), client)
         self._key = data.get('key')
         self._name = data.get('name')
         self._apiKeyType = data.get('apiKeyType')

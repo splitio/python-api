@@ -35,3 +35,5 @@
 - Added ability to get individual flag definitions with the `get_definition` method of splitDefinition
 3.1.12 (Jan 13, 2024)
 - Added ability to retrieve API keys when creating an environment
+3.1.13 (Jan 31, 2024)
+- Updated keyId of an API KEY to be the actual ID and not the key itself
