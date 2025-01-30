@@ -4,6 +4,7 @@ from splitapiclient.resources.base_resource import BaseResource
 from splitapiclient.util.helpers import require_client, as_dict
 from splitapiclient.resources import Environment
 from splitapiclient.resources import TrafficType
+from splitapiclient.resources.flag_set import FlagSet
 from splitapiclient.resources.default_rule import DefaultRule
 from splitapiclient.resources.rule import Rule
 from splitapiclient.resources.treatment import Treatment
@@ -44,7 +45,7 @@ class SplitDefinition(BaseResource):
                     'strings' : [ 'string' ],
                     'number' : 'number',
                     'date' : 'number',
-                    'between': { 'from': 'number', 'to' : 'umber' },
+                    'between': { 'from': 'number', 'to' : 'number' },
                     'depends': { 'splitName': 'string', 'treatment': 'string' }
                 }]
             },
@@ -59,7 +60,12 @@ class SplitDefinition(BaseResource):
         }],
         'creationTime' : 'number',
         'lastUpdateTime' : 'number',
-        'lastTrafficReceivedAt': 'number'
+        'lastTrafficReceivedAt': 'number',
+        'impressionsDisabled': 'boolean',
+        'flagSets': [{
+            'id': 'string',
+            'type': 'string'
+        }]
     }
 
     def __init__(self, data=None, environment_id=None, workspace_id=None, client=None):
@@ -73,6 +79,7 @@ class SplitDefinition(BaseResource):
         self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._treatments = []
         self._killed = data.get('killed') if 'killed' in data else False
+        self._impressionsDisabled = data.get('impressionsDisabled') if 'impressionsDisabled' in data else False        
         if 'treatments' in data:
             for item in data.get('treatments'):
                 self._treatments.append(Treatment(item))
@@ -82,6 +89,10 @@ class SplitDefinition(BaseResource):
         self._rules = []
         for item in data.get('rules'):
             self._rules.append(Rule(item))
+        self._flagSets = []
+        if 'flagSets' in data:
+            for item in data.get('flagSets'):
+                self._flagSets.append(FlagSet(item))
         self._default_rule = []
         for item in data.get('defaultRule'):
             self._default_rule.append(DefaultRule(item))
@@ -101,6 +112,10 @@ class SplitDefinition(BaseResource):
         return None if self._environment.id == "" else self._environment
     
     @property
+    def flag_sets(self):
+        return None if len(self._flagSets) == 0 else self._flagSets 
+    
+    @property
     def traffic_type(self):
         return self._trafficType
     
@@ -108,6 +123,10 @@ class SplitDefinition(BaseResource):
     def killed(self):
         return self._killed
    
+    @property
+    def impressions_disabled(self):
+        return self._impressionsDisabled
+    
     @property
     def treatments(self):
         return None if len(self._treatments) == 0 else self._treatments 

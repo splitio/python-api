@@ -13,3 +13,4 @@ from splitapiclient.resources.user import User
 from splitapiclient.resources.group import Group
 from splitapiclient.resources.apikey import APIKey
 from splitapiclient.resources.restriction import Restriction
+from splitapiclient.resources.flag_set import FlagSet

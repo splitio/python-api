@@ -80,7 +80,9 @@ class TestSplit:
             'rules': [],
             'defaultRule': [],
             'creationTime' : None,
-            'lastUpdateTime' : None
+            'lastUpdateTime' : None,
+            'flagSets': [],
+            'impressionsDisabled': False
         }
         http_client_mock = mocker.Mock(spec=BaseHttpClient)
         http_client_mock.make_request.return_value = data
@@ -116,6 +118,8 @@ class TestSplit:
         data['creationTime'] = None
         data['lastUpdateTime'] = None
         data['lastTrafficReceivedAt'] = None
+        data['flagSets'] = None
+        data['impressionsDisabled'] = False
         
         assert object_to_stringified_dict(attr) == data
 
