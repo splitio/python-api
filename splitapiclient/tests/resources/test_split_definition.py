@@ -125,7 +125,9 @@ class TestSplitDefinition:
             'defaultRule': None,
             'creationTime' : None,
             'lastUpdateTime' : None,
-            'lastTrafficReceivedAt': None
+            'lastTrafficReceivedAt': None,
+            'flagSets': None,
+            'impressionsDisabled': False
         }
         assert object_to_stringified_dict(attr) == data
 
@@ -142,6 +144,8 @@ class TestSplitDefinition:
             'trafficAllocation': None,
             'rules': [],
             'defaultRule': [],
+            'flagSets': [],
+            'impressionsDisabled': False
         },
             'env_id',
             'ws_id',
@@ -242,6 +246,7 @@ class TestSplitDefinition:
         data = {
             'split': None,
             'segment': None,
+            'largeSegment': None,
             'id': None,
             'status': None,
             'title': None,

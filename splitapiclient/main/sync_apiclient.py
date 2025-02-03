@@ -17,13 +17,16 @@ from splitapiclient.microclients import UserMicroClient
 from splitapiclient.microclients import GroupMicroClient
 from splitapiclient.microclients import APIKeyMicroClient
 from splitapiclient.microclients import RestrictionMicroClient
+from splitapiclient.microclients import FlagSetMicroClient
+from splitapiclient.microclients import LargeSegmentMicroClient
+from splitapiclient.microclients import LargeSegmentDefinitionMicroClient
 
 
 class SyncApiClient(BaseApiClient):
     '''
     Synchronous Split API client
     '''
-
+    BASE_PROD_URL_V3 = 'https://api.split.io/api/v3'
     BASE_PROD_URL = 'https://api.split.io/internal/api/v2'
     BASE_PROD_URL_OLD = 'https://api.split.io/internal/api/v1'
 
@@ -41,6 +44,11 @@ class SyncApiClient(BaseApiClient):
         else:
             self._base_url = self.BASE_PROD_URL
             self._base_url_old = self.BASE_PROD_URL_OLD
+            
+        if 'base_url_v3' in config:
+            self._base_url_v3 = config['base_url_v3']
+        else:
+            self._base_url_v3 = self.BASE_PROD_URL_V3
 
         missing = [i for i in ['apikey'] if i not in config]
         if missing:
@@ -52,11 +60,15 @@ class SyncApiClient(BaseApiClient):
         self._apikey = config['apikey']
         
         http_client = SyncHttpClient(self._base_url, self._apikey)
+        http_clientv3 = SyncHttpClient(self._base_url_v3, self._apikey)
+        
         self._environment_client = EnvironmentMicroClient(http_client)
         self._split_client = SplitMicroClient(http_client)
         self._split_definition_client = SplitDefinitionMicroClient(http_client)
         self._segment_client = SegmentMicroClient(http_client)
         self._segment_definition_client = SegmentDefinitionMicroClient(http_client)
+        self._large_segment_client = LargeSegmentMicroClient(http_client)
+        self._large_segment_definition_client = LargeSegmentDefinitionMicroClient(http_client)
         self._workspace_client = WorkspaceMicroClient(http_client)
         self._traffic_type_client = TrafficTypeMicroClient(http_client)
         self._attribute_client = AttributeMicroClient(http_client)
@@ -66,6 +78,7 @@ class SyncApiClient(BaseApiClient):
         self._group_client = GroupMicroClient(http_client)
         self._apikey_client = APIKeyMicroClient(http_client)
         self._restriction_client = RestrictionMicroClient(http_client)
+        self._flag_set_client = FlagSetMicroClient(http_clientv3)
 
     @property
     def traffic_types(self):
@@ -90,6 +103,14 @@ class SyncApiClient(BaseApiClient):
     @property
     def segment_definitions(self):
         return self._segment_definition_client
+    
+    @property
+    def large_segments(self):
+        return self._large_segment_client
+
+    @property
+    def large_segment_definitions(self):
+        return self._large_segment_definition_client
 
     @property
     def workspaces(self):
@@ -122,3 +143,7 @@ class SyncApiClient(BaseApiClient):
     @property
     def restrictions(self):
         return self._restriction_client
+    
+    @property
+    def flag_sets(self):
+        return self._flag_set_client

@@ -37,3 +37,5 @@
 - Added ability to retrieve API keys when creating an environment
 3.1.13 (Jan 31, 2024)
 - Updated keyId of an API KEY to be the actual ID and not the key itself
+3.2.0 (Feb 2, 2025)
+- Updated to support flag sets, large segments and the impressionsDisabled boolean value

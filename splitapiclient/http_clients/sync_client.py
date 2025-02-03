@@ -109,7 +109,7 @@ class SyncHttpClient(base_client.BaseHttpClient):
             else:
                 break
             
-        if not (response.status_code == 200 or response.status_code == 204):
+        if not (response.status_code == 200 or response.status_code == 204 or response.status_code == 201):
             LOGGER.warning('RESPONSE CODE: %s' % response.status_code)
             self._handle_invalid_response(response)
 

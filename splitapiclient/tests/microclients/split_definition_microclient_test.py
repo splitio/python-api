@@ -45,7 +45,9 @@ class TestSplitDefinitionMicroClient:
                 'rules': [],
                 'defaultRule': [],
                 'creationTime': 0,
-                'lastUpdateTime': 0
+                'lastUpdateTime': 0,
+                'flagSets': [],
+                'impressionsDisabled': False
             }, {
                 'name': 'split2',
                 'environment': {},
@@ -59,7 +61,9 @@ class TestSplitDefinitionMicroClient:
                 'rules': [],
                 'defaultRule': [],
                 'creationTime': 0,
-                'lastUpdateTime': 0
+                'lastUpdateTime': 0,
+                'flagSets': [],
+                'impressionsDisabled': False
             }],
             'offset': 1,
             'totalCount': 2,
@@ -87,7 +91,9 @@ class TestSplitDefinitionMicroClient:
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
-                'lastTrafficReceivedAt': None
+                'lastTrafficReceivedAt': None,
+                'flagSets': None,
+                'impressionsDisabled': False
             }, {
                 'name': 'split2',
                 'environment': Environment(data={'changePermissions': None, 'creationTime': None, 'dataExportPermissions': None, 'environmentType': None, 'workspaceIds': ['ws_id'], 'name':None, 'type': None, 'orgId': None, 'id':None, 'status':None}).to_dict(),
@@ -101,7 +107,9 @@ class TestSplitDefinitionMicroClient:
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
-                'lastTrafficReceivedAt': None
+                'lastTrafficReceivedAt': None,
+                'flagSets': None,
+                'impressionsDisabled': False
             }]
         assert object_to_stringified_dict(result[0]) == data[0]
         assert object_to_stringified_dict(result[1]) == data[1]
@@ -149,6 +157,8 @@ class TestSplitDefinitionMicroClient:
                 'defaultRule': None,
                 'creationTime': None,
                 'lastUpdateTime': None,
-                'lastTrafficReceivedAt': None
+                'lastTrafficReceivedAt': None,
+                'flagSets': None,
+                'impressionsDisabled': False
             }
         assert object_to_stringified_dict(result) == data
