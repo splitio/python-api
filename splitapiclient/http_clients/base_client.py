@@ -52,7 +52,7 @@ class BaseHttpClient(six.with_metaclass(abc.ABCMeta)):
 
         :rtype: list.
         '''
-        regex = '{([\w-]+)}*'
+        regex = r'{([\w-]+)}*'
         url_params = re.findall(regex, url)
         return list(set(url_params)) if url_params else []
 
