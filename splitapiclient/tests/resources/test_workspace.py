@@ -9,7 +9,7 @@ from splitapiclient.microclients import EnvironmentMicroClient
 from splitapiclient.microclients import SegmentMicroClient
 from splitapiclient.microclients import SplitMicroClient
 from splitapiclient.microclients import WorkspaceMicroClient
-
+from splitapiclient.microclients import LargeSegmentMicroClient
 class TestWorkspace:
     '''
     Tests for the Workspace class' methods
@@ -253,3 +253,58 @@ class TestWorkspace:
             workspaceId = '1',
         )
         assert attr == data
+
+    def test_add_large_segment(self, mocker):
+        '''
+        '''
+        data = {
+            'name': '1',
+            'description': 'e1',
+            'creationTime': None,
+            'tags': None
+        }
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = data
+        ws1 = Workspace(
+            {
+                'id': '1',
+                'name': 'e1',
+                'requiresTitleAndComments': None
+            },
+            http_client_mock
+        )
+        attr = ws1.add_large_segment(data, 'traffictypename')
+
+        http_client_mock.make_request.assert_called_once_with(
+            LargeSegmentMicroClient._endpoint['create'],
+            body=data,
+            workspaceId='1',
+            trafficTypeName='traffictypename'
+        )
+        data['trafficType'] = None
+        data['workspaceId'] = '1'
+        assert attr.to_dict() == data
+
+    def test_delete_large_segment(self, mocker):
+        '''
+        '''
+        large_segment_name = 'e1'
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = True
+        ws1 = Workspace(
+            {
+                'id': '1',
+                'name': 'e1',
+                'requiresTitleAndComments': None
+            },
+            http_client_mock
+        )
+
+        attr = ws1.delete_large_segment(large_segment_name)
+
+        http_client_mock.make_request.assert_called_once_with(
+            LargeSegmentMicroClient._endpoint['delete'],
+            workspaceId='1',
+            segmentName=large_segment_name,
+        )
+        assert attr == True

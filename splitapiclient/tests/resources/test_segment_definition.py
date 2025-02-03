@@ -175,6 +175,7 @@ class TestSegmentDefinition:
             'split': None,
             'segment': None,
             'id': None,
+            'largeSegment': None,
             'status': None,
             'title': None,
             'comment': None,

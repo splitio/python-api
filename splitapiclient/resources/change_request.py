@@ -60,6 +60,20 @@ class ChangeRequest(BaseResource):
             'name': 'string',
             'keys': ['string']
         },
+        'largeSegment': {
+            'id': 'string',
+            'name': 'string',
+            'environment': {
+                'id': 'string',
+                'name': 'string'
+            },
+            'trafficType' : {
+                'id': 'string',
+                'name': 'string'
+            },
+            'creationTime': 'number',
+        },
+                
         'id': 'string',
         'status': 'string',
         'title': 'string',

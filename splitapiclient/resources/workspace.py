@@ -77,6 +77,33 @@ class Workspace(BaseResource):
         workspaceId = self._id
         return imc.delete(segment_name, workspaceId)
 
+
+    def add_large_segment(self, data, traffic_type_name, apiclient=None):
+        '''
+        Add a new large segment associated with this workspace.
+
+        :param apiclient: If this instance wasn't returned by the client,
+            the segmentClient instance should be passed in order to perform the
+            http call
+        '''
+        imc = require_client('LargeSegment', self._client, apiclient)
+        segment = as_dict(data)
+        workspaceId = self._id
+        return imc.add(segment, traffic_type_name, workspaceId)
+        
+    def delete_large_segment(self, large_segment_name, apiclient=None):
+        '''
+        delete large segment associated with this workspace.
+
+        :param apiclient: If this instance wasn't returned by the client,
+            the largesegmentClient instance should be passed in order to perform the
+            http call
+        '''
+        imc = require_client('LargeSegment', self._client, apiclient)
+        workspaceId = self._id
+        return imc.delete(large_segment_name, workspaceId)
+
+
     def add_split(self, data, traffic_type_name, apiclient=None):
         '''
         Add a new split associated with this workspace.

@@ -39,8 +39,10 @@ def require_client(model, http_client, apiclient):
     from splitapiclient.microclients.apikey_microclient import APIKeyMicroClient
     from splitapiclient.microclients.restriction_microclient import RestrictionMicroClient
     from splitapiclient.microclients.flag_set_microclient import FlagSetMicroClient
+    from splitapiclient.microclients.large_segment_microclient import LargeSegmentMicroClient
+    from splitapiclient.microclients.large_segment_definition_microclient import LargeSegmentDefinitionMicroClient
 
-    if model not in ['FlagSet','Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey', 'Restriction']:
+    if model not in ['LargeSegment','LargeSegmentDefinition', 'FlagSet','Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey', 'Restriction']:
         raise InvalidModelException('Unknown model %s' % model)
 
     if apiclient and isinstance(apiclient, BaseApiClient):
@@ -59,6 +61,8 @@ def require_client(model, http_client, apiclient):
         if model == 'APIKey': return apiclient.apikeys
         if model == 'Restriction': return apiclient.restrictions
         if model == 'FlagSet': return apiclient.flag_sets
+        if model == 'LargeSegment': return apiclient.large_segments
+        if model == 'LargeSegmentDefinition': return apiclient.large_segment_definitions
     elif http_client and isinstance(http_client, BaseHttpClient):
         if model == 'Attribute': return AttributeMicroClient(http_client)
         if model == 'Environment': return EnvironmentMicroClient(http_client)
@@ -75,6 +79,8 @@ def require_client(model, http_client, apiclient):
         if model == 'APIKey': return APIKeyMicroClient(http_client)
         if model == 'Restriction': return RestrictionMicroClient(http_client)
         if model == 'FlagSet': return FlagSetMicroClient(http_client)
+        if model == 'LargeSegment': return LargeSegmentMicroClient(http_client)
+        if model == 'LargeSegmentDefinition': return LargeSegmentDefinitionMicroClient(http_client)
     else:
         raise ClientRequiredError(
             'Object created ad-hoc, you need to pass a SplitApiClient instance '

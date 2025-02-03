@@ -246,6 +246,7 @@ class TestSplitDefinition:
         data = {
             'split': None,
             'segment': None,
+            'largeSegment': None,
             'id': None,
             'status': None,
             'title': None,
