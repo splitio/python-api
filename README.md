@@ -20,6 +20,64 @@ from splitapiclient.main import get_client
 client = get_client({'apikey': 'ADMIN API KEY'})
 ```
 
+### Harness Mode
+
+Split has been acquired by Harness. This client now supports a 'harness_mode' which uses a different authentication mechanism and provides access to Harness-specific resources.
+
+In harness mode:
+- Existing, non-deprecated Split endpoints continue to use the Split base URLs
+- New Harness-specific endpoints use the Harness base URL
+- Authentication can be configured in two ways:
+  - Use `harness_token` for Harness endpoints and `apikey` for Split endpoints
+  - If `harness_token` is not provided, `apikey` will be used for all operations
+
+The following endpoints are deprecated and cannot be used in harness mode:
+- `/workspaces`: POST, PATCH, DELETE verbs
+- `/apiKeys`: POST for apiKeyType == 'admin'
+- `/users`: all verbs
+- `/groups`: all verbs
+- `/restrictions`: all verbs
+
+To use the client in harness mode:
+
+```python
+from splitapiclient.main import get_client
+
+# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
+    'apikey': 'YOUR_SPLIT_API_KEY'         # Used for existing Split endpoints
+})
+
+# Option 2: Use apikey for all operations (if harness_token is not provided)
+client = get_client({
+    'harness_mode': True,
+    'apikey': 'YOUR_API_KEY'  # Used for both Split and Harness endpoints
+})
+
+# Access standard Split resources (with restrictions)
+for ws in client.workspaces.list():
+    print(f"Workspace: {ws.name}, Id: {ws.id}")
+
+# Access harness-specific resources
+for token in client.token.list():
+    print(f"Token: {token.name}")
+
+for user in client.harness_user.list():
+    print(f"User: {user.name}, Email: {user.email}")
+```
+
+Harness mode provides the following additional microclients:
+- `token`: Manage authentication tokens
+- `harness_apikey`: Manage Harness API keys
+- `service_account`: Manage service accounts
+- `harness_user`: Manage Harness users
+- `harness_group`: Manage Harness groups
+- `role`: Manage roles
+- `resource_group`: Manage resource groups
+- `role_assignment`: Manage role assignments
+
 
 Enable optional logging:
 

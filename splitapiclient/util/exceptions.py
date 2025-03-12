@@ -104,3 +104,10 @@ class InvalidModelException(SplitException):
     retrieve a client
     '''
     pass
+
+
+class HarnessDeprecatedEndpointError(SplitException):
+    '''
+    Exception to be thrown when attempting to access a deprecated endpoint in harness mode
+    '''
+    pass
