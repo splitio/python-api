@@ -22,7 +22,7 @@ class HarnessHttpClient(base_client.BaseHttpClient):
     DEPRECATED_ENDPOINTS = {
         'workspaces': ['POST', 'PATCH', 'DELETE', 'PUT'],
         'apiKeys': {
-            'admin': ['POST', 'DELETE']
+            'admin': ['POST']
         },
         'users': ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
         'groups': ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
@@ -80,7 +80,7 @@ class HarnessHttpClient(base_client.BaseHttpClient):
             
         # Check for apiKeys endpoint with admin type
         if url_template.startswith('apiKeys') and method in self.DEPRECATED_ENDPOINTS['apiKeys']['admin']:
-            if body and (body.get('apiKeyType') == 'admin' or method != 'DELETE'):
+            if body and body.get('apiKeyType') == 'admin':
                 return True
                 
         # Check for users endpoint

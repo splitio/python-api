@@ -39,3 +39,5 @@
 - Updated keyId of an API KEY to be the actual ID and not the key itself
 3.2.0 (Feb 2, 2025)
 - Updated to support flag sets, large segments and the impressionsDisabled boolean value
+3.5.0 (Mar 14, 2025)
+- Updated to support harness mode

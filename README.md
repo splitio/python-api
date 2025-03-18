@@ -15,7 +15,7 @@ pip install splitapiclient
 
 Import the client object and initialize connection using an Admin API Key:
 
-```
+```python
 from splitapiclient.main import get_client
 client = get_client({'apikey': 'ADMIN API KEY'})
 ```
@@ -24,19 +24,30 @@ client = get_client({'apikey': 'ADMIN API KEY'})
 
 Split has been acquired by Harness. This client now supports a 'harness_mode' which uses a different authentication mechanism and provides access to Harness-specific resources.
 
-In harness mode:
+#### Authentication
+
+In harness mode, authentication can be configured in two ways:
+- Use `harness_token` for Harness endpoints and `apikey` for Split endpoints
+- If `harness_token` is not provided, `apikey` will be used for all operations
+
+Harness endpoints use the 'x-api-key' header instead of the standard Split authentication.
+
+#### Base URLs and Endpoints
+
 - Existing, non-deprecated Split endpoints continue to use the Split base URLs
-- New Harness-specific endpoints use the Harness base URL
-- Authentication can be configured in two ways:
-  - Use `harness_token` for Harness endpoints and `apikey` for Split endpoints
-  - If `harness_token` is not provided, `apikey` will be used for all operations
+- New Harness-specific endpoints use the Harness base URL (https://app.harness.io/)
+- There is no v3 version for the Harness API
+
+#### Deprecated Endpoints
 
 The following endpoints are deprecated and cannot be used in harness mode:
-- `/workspaces`: POST, PATCH, DELETE verbs
-- `/apiKeys`: POST for apiKeyType == 'admin'
-- `/users`: all verbs
-- `/groups`: all verbs
-- `/restrictions`: all verbs
+- `/workspaces`: POST, PATCH, DELETE, PUT verbs are deprecated
+- `/apiKeys`: POST verb for apiKeyType == 'admin' is deprecated
+- `/users`: all verbs are deprecated
+- `/groups`: all verbs are deprecated
+- `/restrictions`: all verbs are deprecated
+
+#### Basic Usage
 
 To use the client in harness mode:
 
@@ -55,237 +66,175 @@ client = get_client({
     'harness_mode': True,
     'apikey': 'YOUR_API_KEY'  # Used for both Split and Harness endpoints
 })
+```
 
-# Access standard Split resources (with restrictions)
+#### Working with Split Resources in Harness Mode
+
+You can still access standard Split resources with some restrictions:
+
+```python
+# List workspaces (read-only in harness mode)
 for ws in client.workspaces.list():
     print(f"Workspace: {ws.name}, Id: {ws.id}")
 
-# Access harness-specific resources
-for token in client.token.list():
-    print(f"Token: {token.name}")
+# Find a specific workspace
+ws = client.workspaces.find("Default")
 
-for user in client.harness_user.list():
-    print(f"User: {user.name}, Email: {user.email}")
-```
-
-Harness mode provides the following additional microclients:
-- `token`: Manage authentication tokens
-- `harness_apikey`: Manage Harness API keys
-- `service_account`: Manage service accounts
-- `harness_user`: Manage Harness users
-- `harness_group`: Manage Harness groups
-- `role`: Manage roles
-- `resource_group`: Manage resource groups
-- `role_assignment`: Manage role assignments
-
-
-Enable optional logging:
-
-```
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
-
-**Workspaces**
-
-Fetch all workspaces:
-
-```
-for ws in client.workspaces.list():
-    print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
-```
-
-Find a specific workspaces:
-
-```
-ws = client.workspaces.find("Defaults")
-print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
-```
-
-**Environments**
-
-Fetch all Environments:
-
-```
-ws = client.workspaces.find("Defaults")
+# List environments in a workspace
 for env in client.environments.list(ws.id):
-    print ("\nEnvironment: "+env.name+", Id: "+env.id)
-```
+    print(f"Environment: {env.name}, Id: {env.id}")
 
-Add new environment:
-
-```
-ws = client.workspaces.find("Defaults")
-env = ws.add_environment({'name':'new_environment', 'production':False})
-```
-
-**Splits**
-Fetch all Splits:
-
-```
-ws = client.workspaces.find("Defaults")
+# List splits in a workspace
 for split in client.splits.list(ws.id):
-    print ("\nSplit: "+split.name+", "+split._workspace_id)
+    print(f"Split: {split.name}")
 ```
 
-Add new Split:
+#### Working with Harness-specific Resources
 
-```
-split = ws.add_split({'name':'split_name', 'description':'new UI feature'}, "user")
-print(split.name)
-```
+Harness mode provides access to several Harness-specific resources:
 
-Add tags:
+```python
+# Account identifier is required for Harness operations
+account_id = 'YOUR_ACCOUNT_IDENTIFIER'
 
-```
-split.associate_tags(['my_new_tag', 'another_new_tag'])
-```
+# List tokens
+for token in client.token.list(account_id):
+    print(f"Token: {token.name}, ID: {token.id}")
 
-Add Split to environment:
+# Get a specific token
+token = client.token.get('TOKEN_ID', account_id)
 
-```
-ws = client.workspaces.find("Defaults")
-split = client.splits.find("new_feature", ws.id) 
-env = client.environments.find("Production", ws.id)
-tr1 = treatment.Treatment({"name":"on","configurations":""})
-tr2 = treatment.Treatment({"name":"off","configurations":""})
-bk1 = bucket.Bucket({"treatment":"on","size":50})
-bk2 = bucket.Bucket({"treatment":"off","size":50})
-match = matcher.Matcher({"attribute":"group","type":"IN_LIST_STRING","strings":["employees"]})
-cond = condition.Condition({'matchers':[match.export_dict()]})
-rl = rule.Rule({'condition':cond.export_dict(), 'buckets':[bk1.export_dict(), bk2.export_dict()]})
-defrl = default_rule.DefaultRule({"treatment":"off","size":100}) 
-data={"treatments":[tr1.export_dict() ,tr2.export_dict()],"defaultTreatment":"off", "baselineTreatment": "off","rules":[rl.export_dict()],"defaultRule":[defrl.export_dict()], "comment": "adding split to production"}
-splitdef = split.add_to_environment(env.id, data)
-```
+# List Harness API keys
+for api_key in client.harness_apikey.list(api_key_type="STANDARD", account_identifier=account_id):
+    print(f"API Key: {api_key.name}, ID: {api_key.id}")
 
-Kill Split:
+# List service accounts
+for sa in client.service_account.list(account_id):
+    print(f"Service Account: {sa.name}, ID: {sa.id}")
 
-```
-ws = client.workspaces.find("Defaults")
-env = client.environments.find("Production", ws.id)
-splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
-splitDef.kill()
-```
+# List Harness users
+for user in client.harness_user.list(account_id):
+    print(f"User: {user.name}, Email: {user.email}")
 
-Restore Split:
+# List Harness groups
+for group in client.harness_group.list(account_id):
+    print(f"Group: {group.name}, ID: {group.id}")
 
-```
-splitDef.restore()
-```
+# List roles
+for role in client.role.list(account_id):
+    print(f"Role: {role.name}, ID: {role.id}")
 
-Fetch all Splits in an Environment:
+# List resource groups
+for rg in client.resource_group.list(account_id):
+    print(f"Resource Group: {rg.name}, ID: {rg.id}")
 
-```
-ws = client.workspaces.find("Defaults")
-env = client.environments.find("Production", ws.id)
-for spDef in client.split_definitions.list(env.id, ws.id):
-    print(spDef.name+str(spDef._default_rule))
+# List role assignments
+for ra in client.role_assignment.list(account_id):
+    print(f"Role Assignment: {ra.id}, Role: {ra.role_identifier}")
+
+# List Harness projects
+for project in client.harness_project.list(account_identifier=account_id):
+    print(f"Project: {project.name}, ID: {project.identifier}")
+
+# Get a specific project
+project = client.harness_project.get('PROJECT_ID', account_identifier=account_id)
 ```
 
-Submit a Change request to update a Split definition:
+#### Account Identifier
 
+The `account_identifier` is a required parameter for all Harness operations. You have two options for providing it:
+
+1. Specify it during client initialization (recommended):
+
+```python
+from splitapiclient.main import get_client
+
+# Specify account_identifier during initialization
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN', 
+    'apikey': 'YOUR_SPLIT_API_KEY',
+    'account_identifier': 'YOUR_ACCOUNT_ID'  # Will be used for all Harness operations
+})
+
+# Now you can make calls without specifying account_identifier in each request
+tokens = client.token.list()  # account_identifier is automatically included
+projects = client.harness_project.list()  # account_identifier is automatically included
 ```
-splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
-definition= {"treatments":[ {"name":"on"},{"name":"off"}],
-    "defaultTreatment":"off", "baselineTreatment": "off",
-    "rules": [],
-    "defaultRule":[{"treatment":"off","size":100}],"comment": "updating default rule"
+
+2. Provide it with each API call:
+
+```python
+from splitapiclient.main import get_client
+
+# Initialize without account_identifier
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'apikey': 'YOUR_SPLIT_API_KEY'
+})
+
+# Must specify account_identifier with each API call
+tokens = client.token.list(account_identifier='YOUR_ACCOUNT_ID')
+projects = client.harness_project.list(account_identifier='YOUR_ACCOUNT_ID')
+```
+
+If you don't provide the account_identifier either during initialization or with each API call, the client will raise a ValueError when you try to access Harness resources.
+
+You can still override the account_identifier for specific calls even if you provided it during initialization:
+
+```python
+# Override the default account_identifier for a specific call
+other_account_projects = client.harness_project.list(account_identifier='DIFFERENT_ACCOUNT_ID')
+```
+
+The account identifier can be found in your Harness account settings or through the Harness UI. It is typically in the format of a unique string identifying your organization in the Harness platform.
+
+### Testing API Endpoints
+
+#### Example: Creating and Managing Split Resources
+
+```python
+# Initialize client
+client = get_client({
+    'apikey': 'YOUR_SPLIT_API_KEY'
+})
+
+# Create a workspace
+workspace_data = {
+    'name': 'My New Workspace',
+    'requiresTitleAndComments': True
 }
-splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'comment', ['user@email.com'], '')
-```
+workspace = client.workspaces.create(workspace_data)
 
-List all change requests:
+# Create an environment in the workspace
+environment_data = {
+    'name': 'Production',
+    'production': True
+}
+environment = client.environments.create(workspace.id, environment_data)
 
-```
-for cr in client.change_requests.list():
-    if cr._split is not None:
-        print (cr._id+", "+cr._split['name']+", "+cr._title+", "+str(cr._split['environment']['id'])) 
-    if cr._segment is not None:
-        print (cr._id+", "+cr._segment['name']+", "+cr._title)
-```
+# Create a traffic type
+traffic_type_data = {
+    'name': 'user',
+    'displayAttributeId': 'email'
+}
+traffic_type = client.traffic_types.create(workspace.id, traffic_type_data)
 
-Approve specific change request:
+# Create a split
+split_data = {
+    'name': 'new_feature',
+    'description': 'A new feature flag'
+}
+split = client.splits.create(workspace.id, traffic_type.name, split_data)
 
-```
-for cr in client.change_requests.list():
-    if cr._split['name']=='new_feature':
-        cr.update_status("APPROVED", "done")
-```
-
-**Users and Groups**
-
-Fetch all Active users:
-
-```
-for user in client.users.list('ACTIVE'):
-    print(user.email+", "+user._id) 
-```
-
-Invite new user:
-
-```
-group = client.groups.find('Administrators')
-userData = {'email':'user@email.com', 'groups':[{'id':'', 'type':'group'}]}
-userData['groups'][0]['id'] = group._id
-client.users.invite_user(userData)
-```
-
-Delete a pending invite:
-
-```
-for user in client.users.list('PENDING'):
-    print(user.email+", "+user._id+", "+user._status)
-    if user.email == 'user@email.com': 
-        client.users.delete(user._id)
-```
-
-Update user info:
-
-```
-data = {'name':'new_name', 'email':'user@email.com', '2fa':False, 'status':'ACTIVE'}
-user = client.users.find('user@email.com')
-user.update_user(user._id, data)
-```
-
-Fetch all Groups:
-
-```
-for group in client.groups.list():
-    print (group._id+", "+group._name)
-```
-
-Create Group:
-
-```
-client.groups.create_group({'name':'new_group', 'description':''})
-```
-
-Delete Group:
-
-```
-group = client.groups.find('new_group')
-client.groups.delete_group(group._id)
-```
-
-Replace existing user group:
-
-```
-user = client.users.find('user@email.com')
-group = client.groups.find('Administrators')
-data = [{'op': 'replace', 'path': '/groups/0', 'value': {'id': '<groupId>', 'type':'group'}}]
-data[0]['value']['id'] = group._id
-user.update_user_group(data)
-```
-
-Add user to new group
-
-```
-user = client.users.find('user@email.com')
-group = client.groups.find('Administrators')
-data = [{'op': 'add', 'path': '/groups/-', 'value': {'id': '<groupId>', 'type':'group'}}]
-data[0]['value']['id'] = group._id
-user.update_user_group(data)
+# Add split to environment
+split_definition_data = {
+    'treatment': 'on',
+    'keys': ['user_123', 'user_456'],
+    'rules': []
+}
+client.splits.add_to_environment(split.name, environment.id, workspace.id, split_definition_data)
 ```
 
 ### Commitment to Quality:
@@ -294,7 +243,7 @@ Split’s APIs are in active development and are constantly tested for quality. 
 
 ### About Split:
 
-Split is the leading platform for intelligent software delivery, helping businesses of all sizes deliver exceptional user experiences, and mitigate risk, by providing an easy, secure way to target features to customers. Companies like WePay, LendingTree and thredUP rely on Split to safely launch and test new features and derive insights on their use. Founded in 2015, Split's team comes from some of the most innovative enterprises in Silicon Valley, including Google, LinkedIn, Salesforce and Splunk. Split is based in Redwood City, California and backed by Accel Partners and Lightspeed Venture Partners. To learn more about Split, contact hello@split.io, or start a 14-day free trial at www.split.io/trial.
+Split is the leading platform for intelligent software delivery, helping businesses of all sizes deliver exceptional user experiences, and mitigate risk, by providing an easy, secure way to target features to customers. Companies like WePay, LendingTree and thredUP rely on Split to safely launch and test new features and derive insights on their use. Founded in 2015, Split’s team comes from some of the most innovative enterprises in Silicon Valley, including Google, LinkedIn, Salesforce and Splunk. Split is based in Redwood City, California and backed by Accel Partners and Lightspeed Venture Partners. To learn more about Split, contact hello@split.io, or start a 14-day free trial at www.split.io/trial.
 
 **Try Split for Free:**
 
@@ -307,4 +256,3 @@ Visit [split.io/product](https://www.split.io/product) for an overview of Split,
 **System Status:**
 
 We use a status page to monitor the availability of Split’s various services. You can check the current status at [status.split.io](http://status.split.io).
-

@@ -26,7 +26,7 @@ class ResourceGroup(BaseResource):
       ],
       "includedScopes": [
         {
-          "filter": "EXCLUDING_CHILD_SCOPES",
+          "filter": "string",
           "accountIdentifier": "string",
           "orgIdentifier": "string",
           "projectIdentifier": "string"
@@ -42,12 +42,12 @@ class ResourceGroup(BaseResource):
             "attributeFilter": {
               "attributeName": "string",
               "attributeValues": [
-                null
+                "string"
               ]
             }
           }
         ],
-        "includeAllResources": true
+        "includeAllResources": "boolean"
       }
     }
    
@@ -64,7 +64,7 @@ class ResourceGroup(BaseResource):
         BaseResource.__init__(self, data.get('identifier'), client)
         
         # Dynamically set properties based on schema
-        schema_data_fields = self._schema.get('data', {}).keys()
+        schema_data_fields = self._schema.keys()
         for field in schema_data_fields:
             # Convert camelCase to snake_case for property names
             snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
@@ -78,26 +78,40 @@ class ResourceGroup(BaseResource):
         :returns: Property value
         :raises: AttributeError if property doesn't exist
         '''
+        # Convert camelCase to snake_case
+        snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in name]).lstrip('_')
+        
         # Check if this is a property defined in the schema
-        snake_field = name
-        if name in self._schema.get('data', {}).keys():
-            attr_name = f"_{snake_field}"
-            if hasattr(self, attr_name):
-                return getattr(self, attr_name)
+        for schema_field in self._schema.keys():
+            # Try direct match with schema field
+            if name == schema_field:
+                attr_name = f"_{snake_field}"
+                if hasattr(self, attr_name):
+                    return getattr(self, attr_name)
+            
+            # Try snake_case version of schema field
+            schema_snake = ''.join(['_' + c.lower() if c.isupper() else c for c in schema_field]).lstrip('_')
+            if name == schema_snake:
+                attr_name = f"_{schema_snake}"
+                if hasattr(self, attr_name):
+                    return getattr(self, attr_name)
         
         # If not found, raise AttributeError
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def export_dict(self):
         '''
-        Export the resource group as a dictionary
+        Export the group as a dictionary
         
-        :returns: Resource group data as a dictionary
+        :returns: Group data as a dictionary
         :rtype: dict
         '''
         # Export properties based on schema
-        schema_data_fields = self._schema.get('data', {}).keys()
-        return {
-            field: getattr(self, f"_{field}")
-            for field in schema_data_fields
-        }
+        result = {}
+        for field in self._schema.keys():
+            # Convert camelCase to snake_case for attribute lookup
+            snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
+            attr_name = f"_{snake_field}"
+            if hasattr(self, attr_name):
+                result[field] = getattr(self, attr_name)
+        return result

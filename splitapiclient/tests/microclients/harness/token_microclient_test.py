@@ -1,152 +1,282 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-import pytest
 from splitapiclient.microclients.harness import TokenMicroClient
-from splitapiclient.http_clients.harness_client import HarnessHttpClient
+from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.resources.harness import Token
 
 
 class TestTokenMicroClient:
-    '''
-    Tests for the TokenMicroClient class' methods
-    '''
-    
+
     def test_list(self, mocker):
         '''
-        Test that the list method properly returns a list of Token objects
+        Test listing tokens
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        token_client = TokenMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
         
-        # Mock response data
-        response_data = {
-            'items': [
-                {
-                    'identifier': 'token-1',
-                    'name': 'Token 1',
-                    'valid': True,
-                    'accountIdentifier': 'account-1'
-                },
-                {
-                    'identifier': 'token-2',
-                    'name': 'Token 2',
-                    'valid': True,
-                    'accountIdentifier': 'account-1'
-                }
-            ]
+        # Mock the API response for the first page
+        first_page_data = {
+            'data': {
+                'content': [
+                    {
+                        'token': {
+                            'identifier': 'token1',
+                            'name': 'Test Token 1',
+                            'validFrom': 1234567890,
+                            'validTo': 1234567899,
+                            'scheduledExpireTime': 1234567899,
+                            'valid': True,
+                            'accountIdentifier': 'test_account',
+                            'apiKeyIdentifier': 'api_key1',
+                            'parentIdentifier': 'parent1',
+                            'apiKeyType': 'USER',
+                            'description': 'Test token 1',
+                            'tags': {}
+                        }
+                    },
+                    {
+                        'token': {
+                            'identifier': 'token2',
+                            'name': 'Test Token 2',
+                            'validFrom': 1234567890,
+                            'validTo': 1234567899,
+                            'scheduledExpireTime': 1234567899,
+                            'valid': True,
+                            'accountIdentifier': 'test_account',
+                            'apiKeyIdentifier': 'api_key2',
+                            'parentIdentifier': 'parent2',
+                            'apiKeyType': 'USER',
+                            'description': 'Test token 2',
+                            'tags': {}
+                        }
+                    }
+                ]
+            }
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Mock the API response for the second page (empty to end pagination)
+        second_page_data = {
+            'data': {
+                'content': []
+            }
+        }
         
-        # Call the method
-        result = token_client.list()
+        # Set up the mock to return different responses for different calls
+        SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['all_items']
+        # Call the method being tested
+        result = tmc.list()
+        
+        # Verify the make_request calls
+        assert SyncHttpClient.make_request.call_count == 2
+        SyncHttpClient.make_request.assert_any_call(
+            TokenMicroClient._endpoint['all_items'],
+            accountIdentifier='test_account',
+            pageIndex=0
+        )
+        SyncHttpClient.make_request.assert_any_call(
+            TokenMicroClient._endpoint['all_items'],
+            accountIdentifier='test_account',
+            pageIndex=1
         )
         
         # Verify the result
         assert len(result) == 2
         assert isinstance(result[0], Token)
-        assert result[0].identifier == 'token-1'
-        assert result[0].name == 'Token 1'
-        assert result[1].identifier == 'token-2'
-        assert result[1].name == 'Token 2'
-    
+        assert isinstance(result[1], Token)
+        assert result[0]._identifier == 'token1'
+        assert result[1]._identifier == 'token2'
+
     def test_get(self, mocker):
         '''
-        Test that the get method properly returns a Token object
+        Test getting a specific token
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        token_client = TokenMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
         
-        # Mock response data
-        response_data = {
-            'identifier': 'token-1',
-            'name': 'Token 1',
+        # Create mock tokens to be returned by the list method
+        token1 = Token({
+            'identifier': 'token1',
+            'name': 'Test Token 1',
+            'validFrom': 1234567890,
+            'validTo': 1234567899,
+            'scheduledExpireTime': 1234567899,
             'valid': True,
-            'accountIdentifier': 'account-1'
-        }
+            'accountIdentifier': 'test_account',
+            'apiKeyIdentifier': 'api_key1',
+            'parentIdentifier': 'parent1',
+            'apiKeyType': 'USER',
+            'description': 'Test token 1',
+            'tags': {}
+        }, sc)
         
-        HarnessHttpClient.make_request.return_value = response_data
+        token2 = Token({
+            'identifier': 'token2',
+            'name': 'Test Token 2',
+            'validFrom': 1234567890,
+            'validTo': 1234567899,
+            'scheduledExpireTime': 1234567899,
+            'valid': True,
+            'accountIdentifier': 'test_account',
+            'apiKeyIdentifier': 'api_key2',
+            'parentIdentifier': 'parent2',
+            'apiKeyType': 'USER',
+            'description': 'Test token 2',
+            'tags': {}
+        }, sc)
         
-        # Call the method
-        result = token_client.get('token-1')
+        # Mock the list method to return our predefined tokens
+        mocker.patch.object(tmc, 'list', return_value=[token1, token2])
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['get_token'],
-            tokenId='token-1'
-        )
+        # Call the method being tested
+        result = tmc.get('token2')
+        
+        # Verify the list method was called with the correct parameters
+        tmc.list.assert_called_once_with(account_identifier='test_account')
         
         # Verify the result
         assert isinstance(result, Token)
-        assert result.identifier == 'token-1'
-        assert result.name == 'Token 1'
-        assert result.valid is True
-        assert result.account_identifier == 'account-1'
-    
+        assert result._identifier == 'token2'
+        assert result._name == 'Test Token 2'
+
     def test_create(self, mocker):
         '''
-        Test that the create method properly creates and returns a Token object
+        Test creating a token
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        token_client = TokenMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
         
         # Token data to create
         token_data = {
             'name': 'New Token',
-            'description': 'A new token',
-            'accountIdentifier': 'account-1'
+            'description': 'Test token',
+            'apiKeyType': 'SERVICE_ACCOUNT',
+            'parentIdentifier': 'parent1',
+            'apiKeyIdentifier': 'api_key1'
         }
         
-        # Mock response data (usually the same as input but with additional fields)
-        response_data = token_data.copy()
-        response_data['identifier'] = 'token-new'
-        response_data['valid'] = True
+        # Mock the API response
+        response_data = {
+            'data': 'token123abc'
+        }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = token_client.create(token_data)
+        # Call the method being tested
+        result = tmc.create(token_data)
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             TokenMicroClient._endpoint['create'],
-            body=token_data
+            body=token_data,
+            accountIdentifier='test_account'
+        )
+        
+        # Verify the result
+        assert result == 'token123abc'
+
+    def test_update(self, mocker):
+        '''
+        Test updating a token
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
+        
+        # Token data to update
+        update_data = {
+            'name': 'Updated Token',
+            'description': 'Updated description'
+        }
+        
+        # Mock the API response
+        response_data = {
+            'data': {
+                'identifier': 'token1',
+                'name': 'Updated Token',
+                'description': 'Updated description',
+                'validFrom': 1234567890,
+                'validTo': 1234567899,
+                'valid': True,
+                'accountIdentifier': 'test_account'
+            }
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = tmc.update('token1', update_data)
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            TokenMicroClient._endpoint['update_token'],
+            body=update_data,
+            tokenId='token1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert isinstance(result, Token)
-        assert result.identifier == 'token-new'
-        assert result.name == 'New Token'
-        assert result.description == 'A new token'
-        assert result.account_identifier == 'account-1'
-        assert result.valid is True
-    
+        assert result._identifier == 'token1'
+        assert result._name == 'Updated Token'
+        assert result._description == 'Updated description'
+
+    def test_rotate(self, mocker):
+        '''
+        Test rotating a token
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
+        
+        # Mock the API response
+        response_data = {
+            'data': 'new_token_value_123'
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = tmc.rotate('token1', 'parent1', 'api_key1')
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            TokenMicroClient._endpoint['rotate_token'],
+            tokenId='token1',
+            parentIdentifier='parent1',
+            apiKeyIdentifier='api_key1',
+            accountIdentifier='test_account'
+        )
+        
+        # Verify the result
+        assert result == 'new_token_value_123'
+
     def test_delete(self, mocker):
         '''
-        Test that the delete method properly deletes a token
+        Test deleting a token
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        token_client = TokenMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        tmc = TokenMicroClient(sc, 'test_account')
         
-        # Mock response data (usually empty for delete operations)
-        HarnessHttpClient.make_request.return_value = None
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = {}
         
-        # Call the method
-        result = token_client.delete('token-1')
+        # Call the method being tested
+        result = tmc.delete('token1')
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             TokenMicroClient._endpoint['delete'],
-            tokenId='token-1'
+            tokenId='token1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result

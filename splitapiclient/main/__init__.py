@@ -16,8 +16,8 @@ def get_client(config):
         For harness mode:
             - 'harness_mode': Set to True to use harness mode
             - 'harness_token': Harness authentication token for x-api-key header
+            - 'account_identifier': (optional) Account identifier for Harness operations
             - 'base_url': (optional) Base URL for the Harness API
-            - 'base_url_v3': (optional) Base URL for the Harness API v3
     '''
     _async = config.get('async', False)
     if _async:

@@ -1,358 +1,215 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-import pytest
 from splitapiclient.microclients.harness import ServiceAccountMicroClient
-from splitapiclient.http_clients.harness_client import HarnessHttpClient
+from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.resources.harness import ServiceAccount
 
 
 class TestServiceAccountMicroClient:
-    '''
-    Tests for the ServiceAccountMicroClient class' methods
-    '''
-    
+
     def test_list(self, mocker):
         '''
-        Test that the list method properly returns a list of ServiceAccount objects
+        Test listing service accounts
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        samc = ServiceAccountMicroClient(sc, 'test_account')
         
-        # Mock response data
+        # Mock the API response
         response_data = {
-            'items': [
+            'data': [
                 {
-                    'identifier': 'sa-1',
+                    'identifier': 'sa1',
                     'name': 'Service Account 1',
+                    'description': 'Test service account 1',
+                    'accountIdentifier': 'test_account',
                     'email': 'sa1@example.com',
-                    'accountIdentifier': 'account-1'
+                    'tags': {}
                 },
                 {
-                    'identifier': 'sa-2',
+                    'identifier': 'sa2',
                     'name': 'Service Account 2',
+                    'description': 'Test service account 2',
+                    'accountIdentifier': 'test_account',
                     'email': 'sa2@example.com',
-                    'accountIdentifier': 'account-1'
+                    'tags': {}
                 }
             ]
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = sa_client.list()
+        # Call the method being tested
+        result = samc.list()
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             ServiceAccountMicroClient._endpoint['all_items'],
-            query_params={}
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert len(result) == 2
         assert isinstance(result[0], ServiceAccount)
-        assert result[0].identifier == 'sa-1'
-        assert result[0].name == 'Service Account 1'
-        assert result[1].identifier == 'sa-2'
-        assert result[1].name == 'Service Account 2'
-    
-    def test_list_with_filters(self, mocker):
-        '''
-        Test that the list method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
-        
-        # Mock response data
-        response_data = {
-            'items': [
-                {
-                    'identifier': 'sa-1',
-                    'name': 'Service Account 1',
-                    'email': 'sa1@example.com',
-                    'accountIdentifier': 'account-1',
-                    'orgIdentifier': 'org-1',
-                    'projectIdentifier': 'project-1'
-                }
-            ]
-        }
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = sa_client.list(account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['all_items'],
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert len(result) == 1
-        assert result[0].identifier == 'sa-1'
-        assert result[0].account_identifier == 'account-1'
-        assert result[0].org_identifier == 'org-1'
-        assert result[0].project_identifier == 'project-1'
-    
+        assert isinstance(result[1], ServiceAccount)
+        assert result[0]._identifier == 'sa1'
+        assert result[1]._identifier == 'sa2'
+
     def test_get(self, mocker):
         '''
-        Test that the get method properly returns a ServiceAccount object
+        Test getting a specific service account
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        samc = ServiceAccountMicroClient(sc, 'test_account')
         
-        # Mock response data
+        # Mock the API response
         response_data = {
-            'identifier': 'sa-1',
-            'name': 'Service Account 1',
-            'email': 'sa1@example.com',
-            'accountIdentifier': 'account-1'
+            'data': {
+                'serviceAccount': {
+                    'identifier': 'sa1',
+                    'name': 'Service Account 1',
+                    'description': 'Test service account 1',
+                    'accountIdentifier': 'test_account',
+                    'email': 'sa1@example.com',
+                    'tags': {}
+                }
+            }
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = sa_client.get('sa-1')
+        # Call the method being tested
+        result = samc.get('sa1')
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['get_service_account'],
-            serviceAccountId='sa-1',
-            query_params={}
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            ServiceAccountMicroClient._endpoint['item'],
+            serviceAccountId='sa1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert isinstance(result, ServiceAccount)
-        assert result.identifier == 'sa-1'
-        assert result.name == 'Service Account 1'
-        assert result.email == 'sa1@example.com'
-        assert result.account_identifier == 'account-1'
-    
-    def test_get_with_filters(self, mocker):
-        '''
-        Test that the get method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
-        
-        # Mock response data
-        response_data = {
-            'identifier': 'sa-1',
-            'name': 'Service Account 1',
-            'email': 'sa1@example.com',
-            'accountIdentifier': 'account-1',
-            'orgIdentifier': 'org-1',
-            'projectIdentifier': 'project-1'
-        }
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = sa_client.get('sa-1', account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['get_service_account'],
-            serviceAccountId='sa-1',
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert result.identifier == 'sa-1'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-    
+        assert result._identifier == 'sa1'
+        assert result._name == 'Service Account 1'
+        assert result._description == 'Test service account 1'
+
     def test_create(self, mocker):
         '''
-        Test that the create method properly creates and returns a ServiceAccount object
+        Test creating a service account
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        samc = ServiceAccountMicroClient(sc, 'test_account')
         
-        # Service Account data to create
+        # Service account data to create
         sa_data = {
             'name': 'New Service Account',
-            'email': 'new-sa@example.com',
-            'description': 'A new service account',
-            'accountIdentifier': 'account-1',
-            'orgIdentifier': 'org-1',
-            'projectIdentifier': 'project-1'
+            'description': 'Test service account',
+            'email': 'new_sa@example.com',
+            'tags': {}
         }
         
-        # Mock response data (usually the same as input but with additional fields)
-        response_data = sa_data.copy()
-        response_data['identifier'] = 'sa-new'
+        # Mock the API response
+        response_data = {
+            'data': {
+                'identifier': 'new_sa',
+                'name': 'New Service Account',
+                'description': 'Test service account',
+                'accountIdentifier': 'test_account',
+                'email': 'new_sa@example.com',
+                'tags': {}
+            }
+        }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = sa_client.create(sa_data)
+        # Call the method being tested
+        result = samc.create(sa_data)
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             ServiceAccountMicroClient._endpoint['create'],
-            body=sa_data
+            body=sa_data,
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert isinstance(result, ServiceAccount)
-        assert result.identifier == 'sa-new'
-        assert result.name == 'New Service Account'
-        assert result.email == 'new-sa@example.com'
-        assert result.description == 'A new service account'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-    
+        assert result._identifier == 'new_sa'
+        assert result._name == 'New Service Account'
+        assert result._description == 'Test service account'
+
     def test_update(self, mocker):
         '''
-        Test that the update method properly updates and returns a ServiceAccount object
+        Test updating a service account
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        samc = ServiceAccountMicroClient(sc, 'test_account')
         
-        # Service Account data to update
-        sa_data = {
+        # Service account data to update
+        update_data = {
             'name': 'Updated Service Account',
-            'description': 'An updated service account'
+            'description': 'Updated description'
         }
         
-        # Mock response data (usually the same as input but with all fields)
-        response_data = sa_data.copy()
-        response_data['identifier'] = 'sa-1'
-        response_data['email'] = 'sa1@example.com'
-        response_data['accountIdentifier'] = 'account-1'
+        # Mock the API response
+        response_data = {
+            'data': {
+                'identifier': 'sa1',
+                'name': 'Updated Service Account',
+                'description': 'Updated description',
+                'accountIdentifier': 'test_account',
+                'email': 'sa1@example.com',
+                'tags': {}
+            }
+        }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = sa_client.update('sa-1', sa_data)
+        # Call the method being tested
+        result = samc.update('sa1', update_data)
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             ServiceAccountMicroClient._endpoint['update'],
-            serviceAccountId='sa-1',
-            body=sa_data,
-            query_params={}
+            body=update_data,
+            serviceAccountId='sa1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert isinstance(result, ServiceAccount)
-        assert result.identifier == 'sa-1'
-        assert result.name == 'Updated Service Account'
-        assert result.description == 'An updated service account'
-        assert result.email == 'sa1@example.com'
-        assert result.account_identifier == 'account-1'
-    
-    def test_update_with_filters(self, mocker):
-        '''
-        Test that the update method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
-        
-        # Service Account data to update
-        sa_data = {
-            'name': 'Updated Service Account',
-            'description': 'An updated service account'
-        }
-        
-        # Mock response data
-        response_data = sa_data.copy()
-        response_data['identifier'] = 'sa-1'
-        response_data['email'] = 'sa1@example.com'
-        response_data['accountIdentifier'] = 'account-1'
-        response_data['orgIdentifier'] = 'org-1'
-        response_data['projectIdentifier'] = 'project-1'
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = sa_client.update('sa-1', sa_data, account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['update'],
-            serviceAccountId='sa-1',
-            body=sa_data,
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert result.identifier == 'sa-1'
-        assert result.name == 'Updated Service Account'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-    
+        assert result._identifier == 'sa1'
+        assert result._name == 'Updated Service Account'
+        assert result._description == 'Updated description'
+
     def test_delete(self, mocker):
         '''
-        Test that the delete method properly deletes a service account
+        Test deleting a service account
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        samc = ServiceAccountMicroClient(sc, 'test_account')
         
-        # Mock response data (usually empty for delete operations)
-        HarnessHttpClient.make_request.return_value = None
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = {}
         
-        # Call the method
-        result = sa_client.delete('sa-1')
+        # Call the method being tested
+        result = samc.delete('sa1')
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             ServiceAccountMicroClient._endpoint['delete'],
-            serviceAccountId='sa-1',
-            query_params={}
-        )
-        
-        # Verify the result
-        assert result is True
-    
-    def test_delete_with_filters(self, mocker):
-        '''
-        Test that the delete method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        sa_client = ServiceAccountMicroClient(http_client)
-        
-        # Mock response data (usually empty for delete operations)
-        HarnessHttpClient.make_request.return_value = None
-        
-        # Call the method with filters
-        result = sa_client.delete('sa-1', account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['delete'],
-            serviceAccountId='sa-1',
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
+            serviceAccountId='sa1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result

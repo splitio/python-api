@@ -10,6 +10,7 @@ from splitapiclient.resources.harness.role import Role
 from splitapiclient.resources.harness.resource_group import ResourceGroup
 from splitapiclient.resources.harness.role_assignment import RoleAssignment
 from splitapiclient.resources.harness.harness_project import HarnessProject
+from splitapiclient.resources.harness.harness_invite import HarnessInvite
 
 __all__ = [
     'Token',
@@ -20,5 +21,6 @@ __all__ = [
     'Role',
     'ResourceGroup',
     'RoleAssignment',
-    'HarnessProject'
+    'HarnessProject',
+    'HarnessInvite'
 ]

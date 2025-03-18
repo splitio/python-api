@@ -4,93 +4,47 @@ from splitapiclient.resources.base_resource import BaseResource
 from splitapiclient.util.helpers import require_client, as_dict
 
 
-class HarnessGroup(BaseResource):
+class HarnessInvite(BaseResource):
     '''
-    HarnessGroup resource representing a Harness group
+    HarnessInvite resource representing a Harness Invite
     '''
     _schema = {
-    "accountIdentifier": "string",
-    "orgIdentifier": "string",
-    "projectIdentifier": "string",
-    "identifier": "string",
-    "name": "string",
-    "users": [
-      {
-        "uuid": "string",
+
+        "id": "string",
         "name": "string",
         "email": "string",
-        "token": "string",
-        "defaultAccountId": "string",
-        "intent": "string",
-        "accounts": [
+        "accountIdentifier": "string",
+        "orgIdentifier": "string",
+        "projectIdentifier": "string",
+        "roleBindings": [
           {
-            "uuid": "string",
-            "accountName": "string",
-            "companyName": "string",
-            "defaultExperience": "NG",
-            "createdFromNG": "boolean",
-            "nextGenEnabled": "boolean"
+            "roleIdentifier": "string",
+            "roleName": "string",
+            "roleScopeLevel": "string",
+            "resourceGroupIdentifier": "string",
+            "resourceGroupName": "string",
+            "managedRole": "boolean"
           }
         ],
-        "admin": "boolean",
-        "twoFactorAuthenticationEnabled": "boolean",
-        "emailVerified": "boolean",
-        "locked": "boolean",
-        "disabled": "boolean",
-        "signupAction": "string",
-        "edition": "string",
-        "billingFrequency": "string",
-        "utmInfo": {
-          "utmSource": "string",
-          "utmContent": "string",
-          "utmMedium": "string",
-          "utmTerm": "string",
-          "utmCampaign": "string"
-        },
-        "externallyManaged": "boolean",
-        "givenName": "string",
-        "familyName": "string",
-        "externalId": "string",
-        "createdAt": 'number',
-        "lastUpdatedAt": 'number',
-        "userPreferences": {
-          "property1": "string",
-          "property2": "string"
-        },
-        "isEnrichedInfoCollected": "boolean",
-        "lastLogin": 'number'
-      }
-    ],
-    "notificationConfigs": [
-      {
-        "type": "string"
-      }
-    ],
-    "linkedSsoId": "string",
-    "linkedSsoDisplayName": "string",
-    "ssoGroupId": "string",
-    "ssoGroupName": "string",
-    "linkedSsoType": "string",
-    "externallyManaged": "boolean",
-    "description": "string",
-    "tags": {
-      "property1": "string",
-      "property2": "string"
-    },
-    "harnessManaged": "boolean",
-    "ssoLinked": "boolean"
-  }
+        "userGroups": [
+          "string"
+        ],
+        "inviteType": "string",
+        "approved": "boolean"
+      
+}
+
     def __init__(self, data=None, client=None):
         '''
-        Initialize a HarnessGroup resource
+        Initialize a HarnessInvite resource
         
-        :param data: Dictionary containing group data
+        :param data: Dictionary containing Invite data
         :param client: HTTP client for making API requests
         '''
         if not data:
             data = {}
         # Initialize BaseResource with identifier
-        BaseResource.__init__(self, data.get('identifier'), client)
+        BaseResource.__init__(self, data.get('id'), client)
         
         # Dynamically set properties based on schema
         schema_data_fields = self._schema.keys()
@@ -102,9 +56,9 @@ class HarnessGroup(BaseResource):
     @property
     def name(self):
         '''
-        Get the group name
+        Get the invite name
         
-        :returns: Group name
+        :returns: Invite name
         :rtype: str
         '''
         return self._name

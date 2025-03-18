@@ -1,42 +1,36 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from splitapiclient.microclients.harness import RoleMicroClient
+from splitapiclient.microclients.harness import HarnessGroupMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
-from splitapiclient.resources.harness import Role
+from splitapiclient.resources.harness import HarnessGroup
 
 
-class TestRoleMicroClient:
+class TestHarnessGroupMicroClient:
 
     def test_list(self, mocker):
         '''
-        Test listing roles
+        Test listing groups
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
         
         # Mock the API response for the first page
         first_page_data = {
             'data': {
                 'content': [
                     {
-                        'role': {
-                            'identifier': 'role1',
-                            'name': 'Role 1',
-                            'description': 'Test role 1',
-                            'accountIdentifier': 'test_account',
-                            'permissions': ['permission1', 'permission2']
-                        }
+                        'identifier': 'group1',
+                        'name': 'Group 1',
+                        'accountIdentifier': 'test_account',
+                        'users': []
                     },
                     {
-                        'role': {
-                            'identifier': 'role2',
-                            'name': 'Role 2',
-                            'description': 'Test role 2',
-                            'accountIdentifier': 'test_account',
-                            'permissions': ['permission3', 'permission4']
-                        }
+                        'identifier': 'group2',
+                        'name': 'Group 2',
+                        'accountIdentifier': 'test_account',
+                        'users': []
                     }
                 ]
             }
@@ -53,182 +47,174 @@ class TestRoleMicroClient:
         SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
         
         # Call the method being tested
-        result = rmc.list()
+        result = gmc.list()
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
-            accountIdentifier='test_account',
-            pageIndex=0
+            HarnessGroupMicroClient._endpoint['all_items'],
+            pageIndex=0,
+            accountIdentifier='test_account'
         )
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
-            accountIdentifier='test_account',
-            pageIndex=1
+            HarnessGroupMicroClient._endpoint['all_items'],
+            pageIndex=1,
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert len(result) == 2
-        assert isinstance(result[0], Role)
-        assert isinstance(result[1], Role)
-        assert result[0]._identifier == 'role1'
-        assert result[1]._identifier == 'role2'
+        assert isinstance(result[0], HarnessGroup)
+        assert isinstance(result[1], HarnessGroup)
+        assert result[0]._identifier == 'group1'
+        assert result[1]._identifier == 'group2'
 
     def test_get(self, mocker):
         '''
-        Test getting a specific role
+        Test getting a specific group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
         
         # Mock the API response
         response_data = {
-            'data': {
-                'role': {
-                    'identifier': 'role1',
-                    'name': 'Role 1',
-                    'description': 'Test role 1',
-                    'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2']
-                }
-            }
+            'identifier': 'group1',
+            'name': 'Group 1',
+            'accountIdentifier': 'test_account',
+            'users': []
         }
         
         # Set up the mock to return the response
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.get('role1')
+        result = gmc.get('group1')
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['get_role'],
-            roleId='role1',
+            HarnessGroupMicroClient._endpoint['get_group'],
+            groupIdentifier='group1',
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'role1'
-        assert result._name == 'Role 1'
-        assert result._description == 'Test role 1'
+        assert isinstance(result, HarnessGroup)
+        assert result._identifier == 'group1'
+        assert result._name == 'Group 1'
 
     def test_create(self, mocker):
         '''
-        Test creating a role
+        Test creating a group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
         
-        # Role data to create
-        role_data = {
-            'name': 'New Role',
-            'description': 'Test role',
+        # Group data to create
+        group_data = {
+            'name': 'New Group',
+            'description': 'Test group',
             'accountIdentifier': 'test_account',
-            'permissions': ['permission1', 'permission2']
+            'isSSOLinked': False,
+            'linkedSSO': None,
+            'users': []
         }
         
         # Mock the API response
         response_data = {
-            'data': {
-                'role': {
-                    'identifier': 'new_role',
-                    'name': 'New Role',
-                    'description': 'Test role',
-                    'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2']
-                }
-            }
+            'identifier': 'new_group',
+            'name': 'New Group',
+            'description': 'Test group',
+            'accountIdentifier': 'test_account',
+            'isSSOLinked': False,
+            'linkedSSO': None,
+            'users': []
         }
         
         # Set up the mock to return the response
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.create(role_data)
+        result = gmc.create(group_data)
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['create'],
-            body=role_data,
+            HarnessGroupMicroClient._endpoint['create'],
+            body=group_data,
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'new_role'
-        assert result._name == 'New Role'
-        assert result._description == 'Test role'
+        assert isinstance(result, HarnessGroup)
+        assert result._identifier == 'new_group'
+        assert result._name == 'New Group'
+        assert result._description == 'Test group'
 
     def test_update(self, mocker):
         '''
-        Test updating a role
+        Test updating a group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
         
-        # Role data to update
+        # Group data to update
         update_data = {
-            'name': 'Updated Role',
+            'identifier': 'group1',
+            'name': 'Updated Group',
             'description': 'Updated description',
-            'permissions': ['permission1', 'permission2', 'permission3']
+            'accountIdentifier': 'test_account'
         }
         
         # Mock the API response
         response_data = {
-            'data': {
-                'role': {
-                    'identifier': 'role1',
-                    'name': 'Updated Role',
-                    'description': 'Updated description',
-                    'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2', 'permission3']
-                }
-            }
+            'identifier': 'group1',
+            'name': 'Updated Group',
+            'description': 'Updated description',
+            'accountIdentifier': 'test_account',
+            'isSSOLinked': False,
+            'linkedSSO': None,
+            'users': []
         }
         
         # Set up the mock to return the response
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.update('role1', update_data)
+        result = gmc.update(update_data)
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['update'],
+            HarnessGroupMicroClient._endpoint['update'],
             body=update_data,
-            roleId='role1',
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'role1'
-        assert result._name == 'Updated Role'
+        assert isinstance(result, HarnessGroup)
+        assert result._identifier == 'group1'
+        assert result._name == 'Updated Group'
         assert result._description == 'Updated description'
 
     def test_delete(self, mocker):
         '''
-        Test deleting a role
+        Test deleting a group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
         
         # Set up the mock to return the response
         SyncHttpClient.make_request.return_value = {}
         
         # Call the method being tested
-        result = rmc.delete('role1')
+        result = gmc.delete('group1')
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['delete'],
-            roleId='role1',
+            HarnessGroupMicroClient._endpoint['delete'],
+            groupIdentifier='group1',
             accountIdentifier='test_account'
         )
         

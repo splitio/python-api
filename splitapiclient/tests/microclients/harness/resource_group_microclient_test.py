@@ -1,41 +1,49 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from splitapiclient.microclients.harness import RoleMicroClient
+from splitapiclient.microclients.harness import ResourceGroupMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
-from splitapiclient.resources.harness import Role
+from splitapiclient.resources.harness import ResourceGroup
 
 
-class TestRoleMicroClient:
+class TestResourceGroupMicroClient:
 
     def test_list(self, mocker):
         '''
-        Test listing roles
+        Test listing resource groups
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        rgmc = ResourceGroupMicroClient(sc, 'test_account')
         
         # Mock the API response for the first page
         first_page_data = {
             'data': {
                 'content': [
                     {
-                        'role': {
-                            'identifier': 'role1',
-                            'name': 'Role 1',
-                            'description': 'Test role 1',
+                        'resourceGroup': {
+                            'identifier': 'rg1',
+                            'name': 'Resource Group 1',
+                            'description': 'Test resource group 1',
                             'accountIdentifier': 'test_account',
-                            'permissions': ['permission1', 'permission2']
+                            'resourceFilter': {
+                                'includeAllResources': False,
+                                'resources': [
+                                    {'identifier': 'resource1', 'type': 'FEATURE_FLAG'}
+                                ]
+                            }
                         }
                     },
                     {
-                        'role': {
-                            'identifier': 'role2',
-                            'name': 'Role 2',
-                            'description': 'Test role 2',
+                        'resourceGroup': {
+                            'identifier': 'rg2',
+                            'name': 'Resource Group 2',
+                            'description': 'Test resource group 2',
                             'accountIdentifier': 'test_account',
-                            'permissions': ['permission3', 'permission4']
+                            'resourceFilter': {
+                                'includeAllResources': True,
+                                'resources': []
+                            }
                         }
                     }
                 ]
@@ -53,45 +61,50 @@ class TestRoleMicroClient:
         SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
         
         # Call the method being tested
-        result = rmc.list()
+        result = rgmc.list()
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
+            ResourceGroupMicroClient._endpoint['all_items'],
             accountIdentifier='test_account',
             pageIndex=0
         )
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
+            ResourceGroupMicroClient._endpoint['all_items'],
             accountIdentifier='test_account',
             pageIndex=1
         )
         
         # Verify the result
         assert len(result) == 2
-        assert isinstance(result[0], Role)
-        assert isinstance(result[1], Role)
-        assert result[0]._identifier == 'role1'
-        assert result[1]._identifier == 'role2'
+        assert isinstance(result[0], ResourceGroup)
+        assert isinstance(result[1], ResourceGroup)
+        assert result[0]._identifier == 'rg1'
+        assert result[1]._identifier == 'rg2'
 
     def test_get(self, mocker):
         '''
-        Test getting a specific role
+        Test getting a specific resource group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        rgmc = ResourceGroupMicroClient(sc, 'test_account')
         
         # Mock the API response
         response_data = {
             'data': {
-                'role': {
-                    'identifier': 'role1',
-                    'name': 'Role 1',
-                    'description': 'Test role 1',
+                'resourceGroup': {
+                    'identifier': 'rg1',
+                    'name': 'Resource Group 1',
+                    'description': 'Test resource group 1',
                     'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2']
+                    'resourceFilter': {
+                        'includeAllResources': False,
+                        'resources': [
+                            {'identifier': 'resource1', 'type': 'FEATURE_FLAG'}
+                        ]
+                    }
                 }
             }
         }
@@ -100,46 +113,56 @@ class TestRoleMicroClient:
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.get('role1')
+        result = rgmc.get('rg1')
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['get_role'],
-            roleId='role1',
+            ResourceGroupMicroClient._endpoint['get_resource_group'],
+            resourceGroupId='rg1',
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'role1'
-        assert result._name == 'Role 1'
-        assert result._description == 'Test role 1'
+        assert isinstance(result, ResourceGroup)
+        assert result._identifier == 'rg1'
+        assert result._name == 'Resource Group 1'
+        assert result._description == 'Test resource group 1'
 
     def test_create(self, mocker):
         '''
-        Test creating a role
+        Test creating a resource group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        rgmc = ResourceGroupMicroClient(sc, 'test_account')
         
-        # Role data to create
-        role_data = {
-            'name': 'New Role',
-            'description': 'Test role',
+        # Resource group data to create
+        rg_data = {
+            'name': 'New Resource Group',
+            'description': 'Test resource group',
             'accountIdentifier': 'test_account',
-            'permissions': ['permission1', 'permission2']
+            'resourceFilter': {
+                'includeAllResources': False,
+                'resources': [
+                    {'identifier': 'resource1', 'type': 'FEATURE_FLAG'}
+                ]
+            }
         }
         
         # Mock the API response
         response_data = {
             'data': {
-                'role': {
-                    'identifier': 'new_role',
-                    'name': 'New Role',
-                    'description': 'Test role',
+                'resourceGroup': {
+                    'identifier': 'new_rg',
+                    'name': 'New Resource Group',
+                    'description': 'Test resource group',
                     'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2']
+                    'resourceFilter': {
+                        'includeAllResources': False,
+                        'resources': [
+                            {'identifier': 'resource1', 'type': 'FEATURE_FLAG'}
+                        ]
+                    }
                 }
             }
         }
@@ -148,45 +171,51 @@ class TestRoleMicroClient:
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.create(role_data)
+        result = rgmc.create(rg_data)
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['create'],
-            body=role_data,
+            ResourceGroupMicroClient._endpoint['create'],
+            body=rg_data,
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'new_role'
-        assert result._name == 'New Role'
-        assert result._description == 'Test role'
+        assert isinstance(result, ResourceGroup)
+        assert result._identifier == 'new_rg'
+        assert result._name == 'New Resource Group'
+        assert result._description == 'Test resource group'
 
     def test_update(self, mocker):
         '''
-        Test updating a role
+        Test updating a resource group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        rgmc = ResourceGroupMicroClient(sc, 'test_account')
         
-        # Role data to update
+        # Resource group data to update
         update_data = {
-            'name': 'Updated Role',
+            'name': 'Updated Resource Group',
             'description': 'Updated description',
-            'permissions': ['permission1', 'permission2', 'permission3']
+            'resourceFilter': {
+                'includeAllResources': True,
+                'resources': []
+            }
         }
         
         # Mock the API response
         response_data = {
             'data': {
-                'role': {
-                    'identifier': 'role1',
-                    'name': 'Updated Role',
+                'resourceGroup': {
+                    'identifier': 'rg1',
+                    'name': 'Updated Resource Group',
                     'description': 'Updated description',
                     'accountIdentifier': 'test_account',
-                    'permissions': ['permission1', 'permission2', 'permission3']
+                    'resourceFilter': {
+                        'includeAllResources': True,
+                        'resources': []
+                    }
                 }
             }
         }
@@ -195,40 +224,40 @@ class TestRoleMicroClient:
         SyncHttpClient.make_request.return_value = response_data
         
         # Call the method being tested
-        result = rmc.update('role1', update_data)
+        result = rgmc.update('rg1', update_data)
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['update'],
+            ResourceGroupMicroClient._endpoint['update'],
             body=update_data,
-            roleId='role1',
+            resourceGroupId='rg1',
             accountIdentifier='test_account'
         )
         
         # Verify the result
-        assert isinstance(result, Role)
-        assert result._identifier == 'role1'
-        assert result._name == 'Updated Role'
+        assert isinstance(result, ResourceGroup)
+        assert result._identifier == 'rg1'
+        assert result._name == 'Updated Resource Group'
         assert result._description == 'Updated description'
 
     def test_delete(self, mocker):
         '''
-        Test deleting a role
+        Test deleting a resource group
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
-        rmc = RoleMicroClient(sc, 'test_account')
+        rgmc = ResourceGroupMicroClient(sc, 'test_account')
         
         # Set up the mock to return the response
         SyncHttpClient.make_request.return_value = {}
         
         # Call the method being tested
-        result = rmc.delete('role1')
+        result = rgmc.delete('rg1')
         
         # Verify the make_request call
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['delete'],
-            roleId='role1',
+            ResourceGroupMicroClient._endpoint['delete'],
+            resourceGroupId='rg1',
             accountIdentifier='test_account'
         )
         

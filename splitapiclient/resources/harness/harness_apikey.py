@@ -46,126 +46,34 @@ class HarnessApiKey(BaseResource):
         self._governance_metadata = data.get('governanceMetadata')
 
 
-    @property
-    def identifier(self):
+    def __getattr__(self, name):
         '''
-        Get the API key identifier
+        Dynamic getter for properties based on schema fields
         
-        :returns: API key identifier
-        :rtype: str
+        :param name: Property name
+        :returns: Property value
+        :raises: AttributeError if property doesn't exist
         '''
-        return self._identifier
-
-    @property
-    def name(self):
-        '''
-        Get the API key name
+        # Convert camelCase to snake_case
+        snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in name]).lstrip('_')
         
-        :returns: API key name
-        :rtype: str
-        '''
-        return self._name
-
-    @property
-    def description(self):
-        '''
-        Get the API key description
+        # Check if this is a property defined in the schema
+        for schema_field in self._schema.keys():
+            # Try direct match with schema field
+            if name == schema_field:
+                attr_name = f"_{snake_field}"
+                if hasattr(self, attr_name):
+                    return getattr(self, attr_name)
+            
+            # Try snake_case version of schema field
+            schema_snake = ''.join(['_' + c.lower() if c.isupper() else c for c in schema_field]).lstrip('_')
+            if name == schema_snake:
+                attr_name = f"_{schema_snake}"
+                if hasattr(self, attr_name):
+                    return getattr(self, attr_name)
         
-        :returns: API key description
-        :rtype: str
-        '''
-        return self._description
-
-    @property
-    def value(self):
-        '''
-        Get the API key value
-        
-        :returns: API key value
-        :rtype: str
-        '''
-        return self._value
-
-    @property
-    def api_key_type(self):
-        '''
-        Get the API key type
-        
-        :returns: API key type
-        :rtype: str
-        '''
-        return self._api_key_type
-
-    @property
-    def parent_identifier(self):
-        '''
-        Get the parent identifier of the API key
-        
-        :returns: Parent identifier
-        :rtype: str
-        '''
-        return self._parent_identifier
-
-    @property
-    def default_time_to_expire_token(self):
-        '''
-        Get the default time to expire token
-        
-        :returns: Default time to expire token
-        :rtype: int
-        '''
-        return self._default_time_to_expire_token
-
-    @property
-    def account_identifier(self):
-        '''
-        Get the account identifier of the API key
-        
-        :returns: Account identifier
-        :rtype: str
-        '''
-        return self._account_identifier
-
-    @property
-    def project_identifier(self):
-        '''
-        Get the project identifier of the API key
-        
-        :returns: Project identifier
-        :rtype: str
-        '''
-        return self._project_identifier
-
-    @property
-    def org_identifier(self):
-        '''
-        Get the organization identifier of the API key
-        
-        :returns: Organization identifier
-        :rtype: str
-        '''
-        return self._org_identifier
-
-    @property
-    def governance_metadata(self):
-        '''
-        Get the governance metadata of the API key
-        
-        :returns: Governance metadata
-        :rtype: dict
-        '''
-        return self._governance_metadata
-
-    @property
-    def correlation_id(self):
-        '''
-        Get the correlation ID of the API key
-        
-        :returns: Correlation ID
-        :rtype: str
-        '''
-        return self._correlation_id
-
+        # If not found, raise AttributeError
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def export_dict(self):
         '''
@@ -174,19 +82,12 @@ class HarnessApiKey(BaseResource):
         :returns: API key data as a dictionary
         :rtype: dict
         '''
-        return {
-
-                'identifier': self._identifier,
-                'name': self._name,
-                'description': self._description,
-                'value': self._value,
-                'apiKeyType': self._api_key_type,
-                'parentIdentifier': self._parent_identifier,
-                'defaultTimeToExpireToken': self._default_time_to_expire_token,
-                'accountIdentifier': self._account_identifier,
-                'projectIdentifier': self._project_identifier,
-                'orgIdentifier': self._org_identifier,
-                'governanceMetadata': self._governance_metadata,
-                'correlationId': self._correlation_id
-            }
-
+        # Export properties based on schema
+        result = {}
+        for field in self._schema.keys():
+            # Convert camelCase to snake_case for attribute lookup
+            snake_field = ''.join(['_' + c.lower() if c.isupper() else c for c in field]).lstrip('_')
+            attr_name = f"_{snake_field}"
+            if hasattr(self, attr_name):
+                result[field] = getattr(self, attr_name)
+        return result

@@ -1,360 +1,277 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-import pytest
 from splitapiclient.microclients.harness import HarnessApiKeyMicroClient
-from splitapiclient.http_clients.harness_client import HarnessHttpClient
+from splitapiclient.http_clients.sync_client import SyncHttpClient
 from splitapiclient.resources.harness import HarnessApiKey
 
 
 class TestHarnessApiKeyMicroClient:
-    '''
-    Tests for the HarnessApiKeyMicroClient class' methods
-    '''
-    
+
     def test_list(self, mocker):
         '''
-        Test that the list method properly returns a list of HarnessApiKey objects
+        Test listing API keys
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
         
-        # Mock response data
+        # Mock the API response
         response_data = {
-            'items': [
+            'data': [
                 {
-                    'identifier': 'apikey-1',
+                    'identifier': 'apikey1',
                     'name': 'API Key 1',
-                    'apiKeyType': 'CLIENT',
-                    'accountIdentifier': 'account-1'
+                    'description': 'Test API key 1',
+                    'accountIdentifier': 'test_account',
+                    'parentIdentifier': 'parent1',
+                    'apiKeyType': 'SERVICE_ACCOUNT'
                 },
                 {
-                    'identifier': 'apikey-2',
+                    'identifier': 'apikey2',
                     'name': 'API Key 2',
-                    'apiKeyType': 'CLIENT',
-                    'accountIdentifier': 'account-1'
+                    'description': 'Test API key 2',
+                    'accountIdentifier': 'test_account',
+                    'parentIdentifier': 'parent1',
+                    'apiKeyType': 'SERVICE_ACCOUNT'
                 }
             ]
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = apikey_client.list()
+        # Call the method being tested
+        result = akmc.list('parent1')
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             HarnessApiKeyMicroClient._endpoint['all_items'],
-            query_params={}
+            accountIdentifier='test_account',
+            parentIdentifier='parent1'
         )
         
         # Verify the result
         assert len(result) == 2
         assert isinstance(result[0], HarnessApiKey)
-        assert result[0].identifier == 'apikey-1'
-        assert result[0].name == 'API Key 1'
-        assert result[1].identifier == 'apikey-2'
-        assert result[1].name == 'API Key 2'
-    
-    def test_list_with_filters(self, mocker):
+        assert isinstance(result[1], HarnessApiKey)
+        assert result[0]._identifier == 'apikey1'
+        assert result[1]._identifier == 'apikey2'
+
+    def test_list_empty_parent(self, mocker):
         '''
-        Test that the list method properly handles account, org, and project filters
+        Test listing API keys with empty parent identifier
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
         
-        # Mock response data
+        # Mock the API response
         response_data = {
-            'items': [
-                {
-                    'identifier': 'apikey-1',
+            'data': []
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = akmc.list()
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            HarnessApiKeyMicroClient._endpoint['all_items'],
+            accountIdentifier='test_account',
+            parentIdentifier=""
+        )
+        
+        # Verify the result
+        assert len(result) == 0
+
+    def test_get(self, mocker):
+        '''
+        Test getting a specific API key
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
+        
+        # Mock the API response
+        response_data = {
+            'data': {
+                'apiKey': {
+                    'identifier': 'apikey1',
                     'name': 'API Key 1',
-                    'apiKeyType': 'CLIENT',
-                    'accountIdentifier': 'account-1',
-                    'orgIdentifier': 'org-1',
-                    'projectIdentifier': 'project-1'
+                    'description': 'Test API key 1',
+                    'accountIdentifier': 'test_account',
+                    'parentIdentifier': 'parent1',
+                    'apiKeyType': 'SERVICE_ACCOUNT'
+                }
+            }
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = akmc.get('apikey1', 'parent1')
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            apiKeyIdentifier='apikey1',
+            accountIdentifier='test_account',
+            parentIdentifier='parent1'
+        )
+        
+        # Verify the result
+        assert isinstance(result, HarnessApiKey)
+        assert result._identifier == 'apikey1'
+        assert result._name == 'API Key 1'
+        assert result._description == 'Test API key 1'
+
+    def test_get_not_found(self, mocker):
+        '''
+        Test getting a non-existent API key
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
+        
+        # Mock the API response for a non-existent key
+        response_data = {
+            'data': {}
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = akmc.get('nonexistent', 'parent1')
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            apiKeyIdentifier='nonexistent',
+            accountIdentifier='test_account',
+            parentIdentifier='parent1'
+        )
+        
+        # Verify the result
+        assert result is None
+
+    def test_create(self, mocker):
+        '''
+        Test creating an API key
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
+        
+        # API key data to create
+        apikey_data = {
+            'name': 'New API Key',
+            'description': 'Test API key',
+            'parentIdentifier': 'parent1',
+            'apiKeyType': 'SERVICE_ACCOUNT'
+        }
+        
+        # Mock the API response
+        response_data = {
+            'data': {
+                'identifier': 'new_apikey',
+                'name': 'New API Key',
+                'description': 'Test API key',
+                'accountIdentifier': 'test_account',
+                'parentIdentifier': 'parent1',
+                'apiKeyType': 'SERVICE_ACCOUNT',
+                'createdAt': 1234567890,
+                'lastModifiedAt': 1234567890
+            }
+        }
+        
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
+        
+        # Call the method being tested
+        result = akmc.create(apikey_data)
+        
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            HarnessApiKeyMicroClient._endpoint['create'],
+            body=apikey_data,
+            accountIdentifier='test_account'
+        )
+        
+        # Verify the result
+        assert isinstance(result, HarnessApiKey)
+        assert result._identifier == 'new_apikey'
+        assert result._name == 'New API Key'
+        assert result._description == 'Test API key'
+
+    def test_add_permissions(self, mocker):
+        '''
+        Test adding permissions to an API key
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
+        
+        # Permissions data
+        permissions = {
+            'roleAssignments': [
+                {
+                    'roleIdentifier': 'role1',
+                    'resourceGroupIdentifier': 'resourceGroup1',
+                    'principal': {
+                        'identifier': 'apikey1',
+                        'type': 'SERVICE_ACCOUNT'
+                    }
                 }
             ]
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = apikey_client.list(account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['all_items'],
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert len(result) == 1
-        assert result[0].identifier == 'apikey-1'
-        assert result[0].account_identifier == 'account-1'
-        assert result[0].org_identifier == 'org-1'
-        assert result[0].project_identifier == 'project-1'
-    
-    def test_get(self, mocker):
-        '''
-        Test that the get method properly returns a HarnessApiKey object
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # Mock response data
+        # Mock the API response
         response_data = {
-            'identifier': 'apikey-1',
-            'name': 'API Key 1',
-            'apiKeyType': 'CLIENT',
-            'accountIdentifier': 'account-1'
+            'data': True
         }
         
-        HarnessHttpClient.make_request.return_value = response_data
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = response_data
         
-        # Call the method
-        result = apikey_client.get('apikey-1')
+        # Call the method being tested
+        result = akmc.add_permissions('apikey1', permissions)
         
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
-            apiKeyId='apikey-1',
-            query_params={}
-        )
-        
-        # Verify the result
-        assert isinstance(result, HarnessApiKey)
-        assert result.identifier == 'apikey-1'
-        assert result.name == 'API Key 1'
-        assert result.api_key_type == 'CLIENT'
-        assert result.account_identifier == 'account-1'
-    
-    def test_get_with_filters(self, mocker):
-        '''
-        Test that the get method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # Mock response data
-        response_data = {
-            'identifier': 'apikey-1',
-            'name': 'API Key 1',
-            'apiKeyType': 'CLIENT',
-            'accountIdentifier': 'account-1',
-            'orgIdentifier': 'org-1',
-            'projectIdentifier': 'project-1'
-        }
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = apikey_client.get('apikey-1', account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
-            apiKeyId='apikey-1',
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert result.identifier == 'apikey-1'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-    
-    def test_create(self, mocker):
-        '''
-        Test that the create method properly creates and returns a HarnessApiKey object
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # API Key data to create
-        apikey_data = {
-            'name': 'New API Key',
-            'description': 'A new API key',
-            'apiKeyType': 'CLIENT',
-            'accountIdentifier': 'account-1',
-            'orgIdentifier': 'org-1',
-            'projectIdentifier': 'project-1'
-        }
-        
-        # Mock response data (usually the same as input but with additional fields)
-        response_data = apikey_data.copy()
-        response_data['identifier'] = 'apikey-new'
-        response_data['createdAt'] = 1615000000000
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method
-        result = apikey_client.create(apikey_data)
-        
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['create'],
-            body=apikey_data
-        )
-        
-        # Verify the result
-        assert isinstance(result, HarnessApiKey)
-        assert result.identifier == 'apikey-new'
-        assert result.name == 'New API Key'
-        assert result.description == 'A new API key'
-        assert result.api_key_type == 'CLIENT'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-        assert result.created_at == 1615000000000
-    
-    def test_update(self, mocker):
-        '''
-        Test that the update method properly updates and returns a HarnessApiKey object
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # API Key data to update
-        apikey_data = {
-            'name': 'Updated API Key',
-            'description': 'An updated API key'
-        }
-        
-        # Mock response data (usually the same as input but with all fields)
-        response_data = apikey_data.copy()
-        response_data['identifier'] = 'apikey-1'
-        response_data['apiKeyType'] = 'CLIENT'
-        response_data['accountIdentifier'] = 'account-1'
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method
-        result = apikey_client.update('apikey-1', apikey_data)
-        
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['update'],
-            apiKeyId='apikey-1',
-            body=apikey_data,
-            query_params={}
-        )
-        
-        # Verify the result
-        assert isinstance(result, HarnessApiKey)
-        assert result.identifier == 'apikey-1'
-        assert result.name == 'Updated API Key'
-        assert result.description == 'An updated API key'
-        assert result.api_key_type == 'CLIENT'
-        assert result.account_identifier == 'account-1'
-    
-    def test_update_with_filters(self, mocker):
-        '''
-        Test that the update method properly handles account, org, and project filters
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # API Key data to update
-        apikey_data = {
-            'name': 'Updated API Key',
-            'description': 'An updated API key'
-        }
-        
-        # Mock response data
-        response_data = apikey_data.copy()
-        response_data['identifier'] = 'apikey-1'
-        response_data['apiKeyType'] = 'CLIENT'
-        response_data['accountIdentifier'] = 'account-1'
-        response_data['orgIdentifier'] = 'org-1'
-        response_data['projectIdentifier'] = 'project-1'
-        
-        HarnessHttpClient.make_request.return_value = response_data
-        
-        # Call the method with filters
-        result = apikey_client.update('apikey-1', apikey_data, account_id='account-1', org_id='org-1', project_id='project-1')
-        
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['update'],
-            apiKeyId='apikey-1',
-            body=apikey_data,
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
-        )
-        
-        # Verify the result
-        assert result.identifier == 'apikey-1'
-        assert result.name == 'Updated API Key'
-        assert result.account_identifier == 'account-1'
-        assert result.org_identifier == 'org-1'
-        assert result.project_identifier == 'project-1'
-    
-    def test_delete(self, mocker):
-        '''
-        Test that the delete method properly deletes an API key
-        '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
-        
-        # Mock response data (usually empty for delete operations)
-        HarnessHttpClient.make_request.return_value = None
-        
-        # Call the method
-        result = apikey_client.delete('apikey-1')
-        
-        # Verify the HTTP request was made correctly
-        HarnessHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['delete'],
-            apiKeyId='apikey-1',
-            query_params={}
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
+            HarnessApiKeyMicroClient._endpoint['add_permissions'],
+            body=permissions,
+            apiKeyIdentifier='apikey1',
+            accountIdentifier='test_account'
         )
         
         # Verify the result
         assert result is True
-    
-    def test_delete_with_filters(self, mocker):
+
+    def test_delete(self, mocker):
         '''
-        Test that the delete method properly handles account, org, and project filters
+        Test deleting an API key
         '''
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request')
-        http_client = HarnessHttpClient('https://app.harness.io/gateway/ff/api/v2', 'test-token')
-        apikey_client = HarnessApiKeyMicroClient(http_client)
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        akmc = HarnessApiKeyMicroClient(sc, 'test_account')
         
-        # Mock response data (usually empty for delete operations)
-        HarnessHttpClient.make_request.return_value = None
+        # Set up the mock to return the response
+        SyncHttpClient.make_request.return_value = {}
         
-        # Call the method with filters
-        result = apikey_client.delete('apikey-1', account_id='account-1', org_id='org-1', project_id='project-1')
+        # Call the method being tested
+        result = akmc.delete('apikey1', 'parent1')
         
-        # Verify the HTTP request was made correctly with query parameters
-        HarnessHttpClient.make_request.assert_called_once_with(
+        # Verify the make_request call
+        SyncHttpClient.make_request.assert_called_once_with(
             HarnessApiKeyMicroClient._endpoint['delete'],
-            apiKeyId='apikey-1',
-            query_params={
-                'accountIdentifier': 'account-1',
-                'orgIdentifier': 'org-1',
-                'projectIdentifier': 'project-1'
-            }
+            apiKeyIdentifier='apikey1',
+            accountIdentifier='test_account',
+            parentIdentifier='parent1'
         )
         
         # Verify the result
