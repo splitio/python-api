@@ -130,7 +130,7 @@ Example:
             'identifier': sa_identifier,
             'email': "test@harness.io",
             'accountIdentifier': account_id,
-            'description': 'Service account for dependency chain test',
+            'description': 'Service account for test',
             'tags': {'test': 'test tag'}
         }
         
