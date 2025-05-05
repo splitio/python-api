@@ -25,7 +25,7 @@ class ServiceAccountMicroClient:
         },
         'item': {
             'method': 'GET',
-            'url_template': '/ng/api/serviceaccount/{serviceAccountId}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/serviceaccount/aggregate/{serviceAccountId}?accountIdentifier={accountIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',

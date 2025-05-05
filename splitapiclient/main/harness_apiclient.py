@@ -82,12 +82,13 @@ class HarnessApiClient(BaseApiClient):
         self._apikey = config.get('apikey')
         self._harness_token = config.get('harness_token')
         
+        # If harness_token is not provided, use apikey for all operations
+        # If apikey is not provided, use harness_token for all operations
+        split_auth_token = self._apikey if self._apikey else self._harness_token
+        harness_auth_token = self._harness_token if self._harness_token else self._apikey
+        
         # Store the account identifier
         self._account_identifier = config.get('account_identifier')
-        
-        # If harness_token is not provided, use apikey for all operations
-        split_auth_token = self._apikey
-        harness_auth_token = self._harness_token if self._harness_token else self._apikey
         
         # Create HTTP clients for Split endpoints
         split_http_client = HarnessHttpClient(self._base_url, split_auth_token)

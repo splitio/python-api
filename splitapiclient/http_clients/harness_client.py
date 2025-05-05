@@ -8,7 +8,7 @@ from splitapiclient.http_clients import base_client
 from splitapiclient.util.logger import LOGGER
 from splitapiclient.util.exceptions import HTTPResponseError, \
     HTTPNotFoundError, HTTPIncorrectParametersError, HTTPUnauthorizedError, \
-    SplitBackendUnreachableError, HarnessDeprecatedEndpointError
+    SplitBackendUnreachableError, HarnessDeprecatedEndpointError, MissingParametersException
 
 
 class HarnessHttpClient(base_client.BaseHttpClient):
@@ -36,11 +36,13 @@ class HarnessHttpClient(base_client.BaseHttpClient):
         :param baseurl: string. Harness host and base url.
         :param auth_token: string. Harness authentication token needed to make API calls.
         '''
-        super(HarnessHttpClient, self).__init__(baseurl, auth_token)
-        # Override the authorization header to use x-api-key
-        self.config['base_args'] = {
-            'x-api-key': auth_token
+        # Initialize with empty base_args - we'll handle auth differently in harness mode
+        self.config = {
+            'base_url': baseurl,
+            'base_args': {}
         }
+        # Store the auth token
+        self._auth_token = auth_token
 
     def setup_method(self, method, body=None):
         '''
@@ -97,6 +99,18 @@ class HarnessHttpClient(base_client.BaseHttpClient):
             
         return False
 
+    def _is_harness_endpoint(self, endpoint):
+        '''
+        Determines if the endpoint is a Harness-specific endpoint based on the base URL.
+        
+        :param endpoint: dict. Endpoint description.
+        :return: bool. True if the endpoint is a Harness endpoint, False otherwise.
+        '''
+        # In the harness client, we can determine if it's a Harness endpoint by checking the base URL
+        # Split API base URLs are typically api.split.io
+        # Harness API base URLs are typically app.harness.io
+        return 'app.harness.io' in self.config['base_url']
+
     def _handle_invalid_response(self, response):
         '''
         Handle responses that are not okay and throw an appropriate exception.
@@ -128,6 +142,77 @@ class HarnessHttpClient(base_client.BaseHttpClient):
         raise SplitBackendUnreachableError(
             'Unable to reach Harness backend'
         )
+        
+    @staticmethod
+    def validate_params(endpoint, all_arguments):
+        '''
+        Override the base client validation to handle harness mode authentication.
+        In harness mode, we use x-api-key instead of Authorization, so we need to
+        modify the validation logic to not require the Authorization header.
+        
+        :param endpoint: dict. Endpoint description
+        :param all_arguments: Parameter values
+        
+        :rtype: None
+        '''
+        # Get required parameters from URL template and query string
+        url_params = base_client.BaseHttpClient.get_params_from_url_template(endpoint['url_template'])
+        query_params = [i['name'] for i in endpoint['query_string'] if i['required']]
+        
+        # Add required headers, but exclude 'Authorization' since we're using 'x-api-key' in harness mode
+        header_params = []
+        for header in endpoint['headers']:
+            if header['required'] and header['name'] != 'Authorization':
+                header_params.append(header['name'])
+        
+        # Combine all required parameters
+        required_params = url_params + header_params + query_params
+        
+        # Check if any required parameters are missing
+        missing = [p for p in required_params if p not in all_arguments]
+        
+        if missing:
+            raise MissingParametersException(
+                'The following required parameters are missing: {missing}'
+                .format(missing=', '.join(missing))
+            )
+
+    def _setup_headers(self, endpoint, params):
+        '''
+        Override the base client _setup_headers method to handle harness mode authentication.
+        In harness mode, we need to skip 'Authorization' headers and use 'x-api-key' instead.
+        
+        :param endpoint: dict. Endpoint description
+        :param params: dict. List of parameter values
+        
+        :rtype: dict.
+        '''
+        # Set up required headers except 'Authorization'
+        headers = {}
+        for header in endpoint['headers']:
+            if header.get('required', False):
+                # Skip 'Authorization' header in harness mode
+                if header['name'] == 'Authorization':
+                    continue
+                if header['name'] in params:
+                    headers[header['name']] = base_client.BaseHttpClient._process_single_header(
+                        header, params[header['name']]
+                    )
+        
+        # Add optional headers
+        headers.update({
+            header['name']: base_client.BaseHttpClient._process_single_header(
+                header, params[header['name']]
+            )
+            for header in endpoint['headers']
+            if (not header.get('required', False)) and header['name'] in params
+        })
+        
+        # Add x-api-key header
+        if 'x-api-key' in params:
+            headers['x-api-key'] = params['x-api-key']
+        
+        return headers
 
     def make_request(self, endpoint, body=None, **kwargs):
         '''
@@ -147,6 +232,9 @@ class HarnessHttpClient(base_client.BaseHttpClient):
             raise HarnessDeprecatedEndpointError(
                 f"Endpoint {endpoint['url_template']} with method {endpoint['method']} is deprecated in harness mode"
             )
+            
+        # In harness mode, use x-api-key header for all endpoints
+        kwargs['x-api-key'] = self._auth_token
             
         kwargs.update(self.config['base_args'])
         self.validate_params(endpoint, kwargs)
