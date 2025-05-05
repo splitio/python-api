@@ -42,7 +42,7 @@ The client supports multiple authentication scenarios:
 
 ### Deprecated Endpoints
 
-The following endpoints are deprecated and cannot be used in harness mode:
+The following Split endpoints are deprecated and cannot be used in harness mode:
 - `/workspaces`: POST, PATCH, DELETE, PUT verbs are deprecated
 - `/apiKeys`: POST verb for apiKeyType == 'admin' is deprecated
 - `/users`: all verbs are deprecated
@@ -119,6 +119,22 @@ for token in tokens:
 service_accounts = client.service_account.list(account_id)
 for sa in service_accounts:
     print(f"Service Account: {sa.name}, ID: {sa.id}")
+```
+For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
+
+Example:
+```python
+# Create a new service account
+        sa_data = {
+            'name': sa_name,
+            'identifier': sa_identifier,
+            'email': "test@harness.io",
+            'accountIdentifier': account_id,
+            'description': 'Service account for dependency chain test',
+            'tags': {'test': 'test tag'}
+        }
+        
+        new_sa = client.service_account.create(sa_data, account_id)
 ```
 
 For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
