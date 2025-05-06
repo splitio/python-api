@@ -123,13 +123,15 @@ class TestHarnessGroupMicroClient:
         
         # Mock the API response
         response_data = {
-            'identifier': 'new_group',
-            'name': 'New Group',
-            'description': 'Test group',
-            'accountIdentifier': 'test_account',
-            'isSSOLinked': False,
-            'linkedSSO': None,
-            'users': []
+            'data': {
+                'identifier': 'new_group',
+                'name': 'New Group',
+                'description': 'Test group',
+                'accountIdentifier': 'test_account',
+                'isSSOLinked': False,
+                'linkedSSO': None,
+                'users': []
+            }
         }
         
         # Set up the mock to return the response
