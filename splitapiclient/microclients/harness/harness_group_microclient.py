@@ -150,7 +150,7 @@ class HarnessGroupMicroClient:
             body=group_data,
             accountIdentifier=account_id
         )
-        return HarnessGroup(response, self._http_client)
+        return HarnessGroup(response['data'], self._http_client)
 
     def update(self, update_data, account_identifier=None):
         '''
