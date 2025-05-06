@@ -8,7 +8,7 @@ Full documentation on this Python wrapper is available in [this link](https://he
 
 ## Using in Harness Mode
 
-Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness Feature Flags APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
+Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
 
 For detailed information about Harness API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
 
