@@ -6,6 +6,144 @@ For specific instructions on how to use Split Admin REST API refer to our [offic
 
 Full documentation on this Python wrapper is available in [this link](https://help.split.io/hc/en-us/articles/4412331052685-Python-PyPi-library-for-Split-REST-Admin-API).
 
+## Using in Harness Mode
+
+Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness Feature Flags APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
+
+For detailed information about Harness API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
+
+### Authentication in Harness Mode
+
+The client supports multiple authentication scenarios:
+
+1. Harness-specific endpoints always use the 'x-api-key' header format
+2. Split endpoints will use the 'x-api-key' header when using the harness_token
+3. Split endpoints will use the normal 'Authorization' header when using the apikey
+4. If both harness_token and apikey are provided, the client will use the harness_token for Harness endpoints and the apikey for Split endpoints
+
+### Base URLs and Endpoints
+
+- Existing, non-deprecated Split endpoints continue to use the Split base URLs
+- New Harness-specific endpoints use the Harness base URL (https://app.harness.io/)
+
+### Deprecated Endpoints
+
+The following Split endpoints are deprecated and cannot be used in harness mode:
+- `/workspaces`: POST, PATCH, DELETE, PUT verbs are deprecated
+- `/apiKeys`: POST verb for apiKeyType == 'admin' is deprecated
+- `/users`: all verbs are deprecated
+- `/groups`: all verbs are deprecated
+- `/restrictions`: all verbs are deprecated
+
+Non-deprecated endpoints will continue to function as they did before the migration.
+
+### Basic Usage
+
+To use the client in harness mode:
+
+```python
+from splitapiclient.main import get_client
+
+# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
+    'apikey': 'YOUR_SPLIT_API_KEY',         # Used for existing Split endpoints
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'  # Required for Harness operations
+})
+
+# Option 2: Use harness_token for all operations (if apikey is not provided)
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
+})
+```
+
+### Working with Split Resources in Harness Mode
+
+You can still access standard Split resources with some restrictions:
+
+```python
+# List workspaces (read-only in harness mode)
+for ws in client.workspaces.list():
+    print(f"Workspace: {ws.name}, Id: {ws.id}")
+
+# Find a specific workspace
+ws = client.workspaces.find("Default")
+
+# List environments in a workspace
+for env in client.environments.list(ws.id):
+    print(f"Environment: {env.name}, Id: {env.id}")
+```
+
+### Working with Harness-specific Resources
+
+Harness mode provides access to several Harness-specific resources through dedicated microclients:
+
+- token
+- harness_apikey
+- service_account
+- harness_user
+- harness_group
+- role
+- resource_group
+- role_assignment
+- harness_project
+
+Basic example:
+
+```python
+# Account identifier is required for all Harness operations
+account_id = 'YOUR_ACCOUNT_IDENTIFIER'
+
+# List all tokens
+tokens = client.token.list(account_id)
+for token in tokens:
+    print(f"Token: {token.name}, ID: {token.id}")
+
+# List service accounts
+service_accounts = client.service_account.list(account_id)
+for sa in service_accounts:
+    print(f"Service Account: {sa.name}, ID: {sa.id}")
+```
+
+For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
+
+Example:
+```python
+# Create a new service account
+sa_data = {
+    'name': sa_name,
+    'identifier': sa_identifier,
+    'email': "test@harness.io",
+    'accountIdentifier': account_id,
+    'description': 'Service account for test',
+    'tags': {'test': 'test tag'}
+}
+        
+new_sa = client.service_account.create(sa_data, account_id)
+```
+
+For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
+
+### Setting Default Account Identifier
+
+To avoid specifying the account identifier with every request:
+
+```python
+# Set default account identifier when creating the client
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER'
+})
+
+# Now you can make calls without specifying account_identifier in each request
+tokens = client.token.list()  # account_identifier is automatically included
+projects = client.harness_project.list()  # account_identifier is automatically included
+```
+
 ## Quick Setup
 
 Install the splitapiclient:
@@ -229,142 +367,6 @@ group = client.groups.find('Administrators')
 data = [{'op': 'add', 'path': '/groups/-', 'value': {'id': '<groupId>', 'type': 'group'}}]
 data[0]['value']['id'] = group._id
 user.update_user_group(data)
-```
-
-## Using in Harness Mode
-
-Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness Feature Flags APIs.
-
-For detailed information about Harness Feature Flags API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
-
-### Authentication in Harness Mode
-
-The client supports multiple authentication scenarios:
-
-1. Harness-specific endpoints always use the 'x-api-key' header format
-2. Split endpoints will use the 'x-api-key' header when using the harness_token
-3. Split endpoints will use the normal 'Authorization' header when using the apikey
-4. If both harness_token and apikey are provided, the client will use the harness_token for Harness endpoints and the apikey for Split endpoints
-
-### Base URLs and Endpoints
-
-- Existing, non-deprecated Split endpoints continue to use the Split base URLs
-- New Harness-specific endpoints use the Harness base URL (https://app.harness.io/)
-
-### Deprecated Endpoints
-
-The following Split endpoints are deprecated and cannot be used in harness mode:
-- `/workspaces`: POST, PATCH, DELETE, PUT verbs are deprecated
-- `/apiKeys`: POST verb for apiKeyType == 'admin' is deprecated
-- `/users`: all verbs are deprecated
-- `/groups`: all verbs are deprecated
-- `/restrictions`: all verbs are deprecated
-
-### Basic Usage
-
-To use the client in harness mode:
-
-```python
-from splitapiclient.main import get_client
-
-# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
-client = get_client({
-    'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
-    'apikey': 'YOUR_SPLIT_API_KEY',         # Used for existing Split endpoints
-    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'  # Required for Harness operations
-})
-
-# Option 2: Use harness_token for all operations (if apikey is not provided)
-client = get_client({
-    'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
-    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
-})
-```
-
-### Working with Split Resources in Harness Mode
-
-You can still access standard Split resources with some restrictions:
-
-```python
-# List workspaces (read-only in harness mode)
-for ws in client.workspaces.list():
-    print(f"Workspace: {ws.name}, Id: {ws.id}")
-
-# Find a specific workspace
-ws = client.workspaces.find("Default")
-
-# List environments in a workspace
-for env in client.environments.list(ws.id):
-    print(f"Environment: {env.name}, Id: {env.id}")
-```
-
-### Working with Harness-specific Resources
-
-Harness mode provides access to several Harness-specific resources through dedicated microclients:
-
-- token
-- harness_apikey
-- service_account
-- harness_user
-- harness_group
-- role
-- resource_group
-- role_assignment
-- harness_project
-
-Basic example:
-
-```python
-# Account identifier is required for all Harness operations
-account_id = 'YOUR_ACCOUNT_IDENTIFIER'
-
-# List all tokens
-tokens = client.token.list(account_id)
-for token in tokens:
-    print(f"Token: {token.name}, ID: {token.id}")
-
-# List service accounts
-service_accounts = client.service_account.list(account_id)
-for sa in service_accounts:
-    print(f"Service Account: {sa.name}, ID: {sa.id}")
-```
-
-For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
-
-Example:
-```python
-# Create a new service account
-sa_data = {
-    'name': sa_name,
-    'identifier': sa_identifier,
-    'email': "test@harness.io",
-    'accountIdentifier': account_id,
-    'description': 'Service account for test',
-    'tags': {'test': 'test tag'}
-}
-        
-new_sa = client.service_account.create(sa_data, account_id)
-```
-
-For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
-
-### Setting Default Account Identifier
-
-To avoid specifying the account identifier with every request:
-
-```python
-# Set default account identifier when creating the client
-client = get_client({
-    'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',
-    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER'
-})
-
-# Now you can make calls without specifying account_identifier in each request
-tokens = client.token.list()  # account_identifier is automatically included
-projects = client.harness_project.list()  # account_identifier is automatically included
 ```
 
 ## About Split
