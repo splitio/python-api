@@ -6,7 +6,151 @@ For specific instructions on how to use Split Admin REST API refer to our [offic
 
 Full documentation on this Python wrapper is available in [this link](https://help.split.io/hc/en-us/articles/4412331052685-Python-PyPi-library-for-Split-REST-Admin-API).
 
-### Quick setup
+## Using in Harness Mode
+
+Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness Feature Flags APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
+
+For detailed information about Harness API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
+
+### Authentication in Harness Mode
+
+The client supports multiple authentication scenarios:
+
+1. Harness-specific endpoints always use the 'x-api-key' header format
+2. Split endpoints will use the 'x-api-key' header when using the harness_token
+3. Split endpoints will use the normal 'Authorization' header when using the apikey
+4. If both harness_token and apikey are provided, the client will use the harness_token for Harness endpoints and the apikey for Split endpoints
+
+### Base URLs and Endpoints
+
+- Existing, non-deprecated Split endpoints continue to use the Split base URLs
+- New Harness-specific endpoints use the Harness base URL (https://app.harness.io/)
+
+### Deprecated Endpoints
+
+The following Split endpoints are deprecated and cannot be used in harness mode:
+- `/workspaces`: POST, PATCH, DELETE, PUT verbs are deprecated
+- `/apiKeys`: POST verb for apiKeyType == 'admin' is deprecated
+- `/users`: all verbs are deprecated
+- `/groups`: all verbs are deprecated
+- `/restrictions`: all verbs are deprecated
+
+Non-deprecated endpoints will continue to function as they did before the migration.
+
+### Basic Usage
+
+To use the client in harness mode:
+
+```python
+from splitapiclient.main import get_client
+
+# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
+    'apikey': 'YOUR_SPLIT_API_KEY',         # Used for existing Split endpoints
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'  # Required for Harness operations
+})
+
+# Option 2: Use harness_token for all operations (if apikey is not provided)
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
+})
+```
+
+### Working with Split Resources in Harness Mode
+
+You can still access standard Split resources with some restrictions:
+
+```python
+# List workspaces (read-only in harness mode)
+for ws in client.workspaces.list():
+    print(f"Workspace: {ws.name}, Id: {ws.id}")
+
+# Find a specific workspace
+ws = client.workspaces.find("Default")
+
+# List environments in a workspace
+for env in client.environments.list(ws.id):
+    print(f"Environment: {env.name}, Id: {env.id}")
+```
+
+### Working with Harness-specific Resources
+
+Harness mode provides access to several Harness-specific resources through dedicated microclients:
+
+- token
+- harness_apikey
+- service_account
+- harness_user
+- harness_group
+- role
+- resource_group
+- role_assignment
+- harness_project
+
+Basic example:
+
+```python
+# Account identifier is required for all Harness operations
+account_id = 'YOUR_ACCOUNT_IDENTIFIER'
+
+# List all tokens
+tokens = client.token.list(account_id)
+for token in tokens:
+    print(f"Token: {token.name}, ID: {token.id}")
+
+# List service accounts
+service_accounts = client.service_account.list(account_id)
+for sa in service_accounts:
+    print(f"Service Account: {sa.name}, ID: {sa.id}")
+```
+
+For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
+
+Example:
+```python
+# Create a new service account
+sa_data = {
+    'name': sa_name,
+    'identifier': sa_identifier,
+    'email': "test@harness.io",
+    'accountIdentifier': account_id,
+    'description': 'Service account for test',
+    'tags': {'test': 'test tag'}
+}
+        
+new_sa = client.service_account.create(sa_data, account_id)
+```
+
+```python
+# Add a user to a group
+client.harness_user.add_user_to_groups(user.id, [group.id], account_id)
+```
+
+
+For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
+
+### Setting Default Account Identifier
+
+To avoid specifying the account identifier with every request:
+
+```python
+# Set default account identifier when creating the client
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER'
+})
+
+# Now you can make calls without specifying account_identifier in each request
+tokens = client.token.list()  # account_identifier is automatically included
+projects = client.harness_project.list()  # account_identifier is automatically included
+```
+
+## Quick Setup
 
 Install the splitapiclient:
 ```
@@ -15,77 +159,78 @@ pip install splitapiclient
 
 Import the client object and initialize connection using an Admin API Key:
 
-```
+```python
 from splitapiclient.main import get_client
 client = get_client({'apikey': 'ADMIN API KEY'})
 ```
 
-
 Enable optional logging:
 
-```
+```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
 
-**Workspaces**
+## Standard Split API Usage
+
+### Workspaces
 
 Fetch all workspaces:
 
-```
+```python
 for ws in client.workspaces.list():
-    print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
+    print("\nWorkspace:" + ws.name + ", Id: " + ws.id)
 ```
 
-Find a specific workspaces:
+Find a specific workspace:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
-print ("\nWorkspace:"+ws.name+", Id: "+ws.id)
+print("\nWorkspace:" + ws.name + ", Id: " + ws.id)
 ```
 
-**Environments**
+### Environments
 
 Fetch all Environments:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
 for env in client.environments.list(ws.id):
-    print ("\nEnvironment: "+env.name+", Id: "+env.id)
+    print("\nEnvironment: " + env.name + ", Id: " + env.id)
 ```
 
 Add new environment:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
-env = ws.add_environment({'name':'new_environment', 'production':False})
+env = ws.add_environment({'name': 'new_environment', 'production': False})
 ```
 
-**Splits**
+### Splits
 Fetch all Splits:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
 for split in client.splits.list(ws.id):
-    print ("\nSplit: "+split.name+", "+split._workspace_id)
+    print("\nSplit: " + split.name + ", " + split._workspace_id)
 ```
 
 Add new Split:
 
-```
-split = ws.add_split({'name':'split_name', 'description':'new UI feature'}, "user")
+```python
+split = ws.add_split({'name': 'split_name', 'description': 'new UI feature'}, "user")
 print(split.name)
 ```
 
 Add tags:
 
-```
+```python
 split.associate_tags(['my_new_tag', 'another_new_tag'])
 ```
 
 Add Split to environment:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
 split = client.splits.find("new_feature", ws.id) 
 env = client.environments.find("Production", ws.id)
@@ -103,7 +248,7 @@ splitdef = split.add_to_environment(env.id, data)
 
 Kill Split:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
 env = client.environments.find("Production", ws.id)
 splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
@@ -112,22 +257,22 @@ splitDef.kill()
 
 Restore Split:
 
-```
+```python
 splitDef.restore()
 ```
 
 Fetch all Splits in an Environment:
 
-```
+```python
 ws = client.workspaces.find("Defaults")
 env = client.environments.find("Production", ws.id)
 for spDef in client.split_definitions.list(env.id, ws.id):
-    print(spDef.name+str(spDef._default_rule))
+    print(spDef.name + str(spDef._default_rule))
 ```
 
 Submit a Change request to update a Split definition:
 
-```
+```python
 splitDef = client.split_definitions.find("new_feature", env.id, ws.id)
 definition= {"treatments":[ {"name":"on"},{"name":"off"}],
     "defaultTreatment":"off", "baselineTreatment": "off",
@@ -139,100 +284,102 @@ splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'c
 
 List all change requests:
 
-```
+```python
 for cr in client.change_requests.list():
     if cr._split is not None:
-        print (cr._id+", "+cr._split['name']+", "+cr._title+", "+str(cr._split['environment']['id'])) 
+        print(cr._id + ", " + cr._split['name'] + ", " + cr._title + ", " + str(cr._split['environment']['id'])) 
     if cr._segment is not None:
-        print (cr._id+", "+cr._segment['name']+", "+cr._title)
+        print(cr._id + ", " + cr._segment['name'] + ", " + cr._title)
 ```
 
 Approve specific change request:
 
-```
+```python
 for cr in client.change_requests.list():
-    if cr._split['name']=='new_feature':
+    if cr._split['name'] == 'new_feature':
         cr.update_status("APPROVED", "done")
 ```
 
-**Users and Groups**
+### Users and Groups
 
 Fetch all Active users:
 
-```
+```python
 for user in client.users.list('ACTIVE'):
-    print(user.email+", "+user._id) 
+    print(user.email + ", " + user._id) 
 ```
 
 Invite new user:
 
-```
+```python
 group = client.groups.find('Administrators')
-userData = {'email':'user@email.com', 'groups':[{'id':'', 'type':'group'}]}
+userData = {'email': 'user@email.com', 'groups': [{'id': '', 'type': 'group'}]}
 userData['groups'][0]['id'] = group._id
 client.users.invite_user(userData)
 ```
 
 Delete a pending invite:
 
-```
+```python
 for user in client.users.list('PENDING'):
-    print(user.email+", "+user._id+", "+user._status)
+    print(user.email + ", " + user._id + ", " + user._status)
     if user.email == 'user@email.com': 
         client.users.delete(user._id)
 ```
 
 Update user info:
 
-```
-data = {'name':'new_name', 'email':'user@email.com', '2fa':False, 'status':'ACTIVE'}
+```python
+data = {'name': 'new_name', 'email': 'user@email.com', '2fa': False, 'status': 'ACTIVE'}
 user = client.users.find('user@email.com')
 user.update_user(user._id, data)
 ```
 
 Fetch all Groups:
 
-```
+```python
 for group in client.groups.list():
-    print (group._id+", "+group._name)
+    print(group._id + ", " + group._name)
 ```
 
 Create Group:
 
-```
-client.groups.create_group({'name':'new_group', 'description':''})
+```python
+client.groups.create_group({'name': 'new_group', 'description': ''})
 ```
 
 Delete Group:
 
-```
+```python
 group = client.groups.find('new_group')
 client.groups.delete_group(group._id)
 ```
 
 Replace existing user group:
 
-```
+```python
 user = client.users.find('user@email.com')
 group = client.groups.find('Administrators')
-data = [{'op': 'replace', 'path': '/groups/0', 'value': {'id': '<groupId>', 'type':'group'}}]
+data = [{'op': 'replace', 'path': '/groups/0', 'value': {'id': '<groupId>', 'type': 'group'}}]
 data[0]['value']['id'] = group._id
 user.update_user_group(data)
 ```
 
 Add user to new group
 
-```
+```python
 user = client.users.find('user@email.com')
 group = client.groups.find('Administrators')
-data = [{'op': 'add', 'path': '/groups/-', 'value': {'id': '<groupId>', 'type':'group'}}]
+data = [{'op': 'add', 'path': '/groups/-', 'value': {'id': '<groupId>', 'type': 'group'}}]
 data[0]['value']['id'] = group._id
 user.update_user_group(data)
 ```
 
+## About Split
+
 ### Commitment to Quality:
 
-Split’s APIs are in active development and are constantly tested for quality. Unit tests are developed for each wrapper based on the unique needs of that language, and integration tests, load and performance tests, and behavior consistency tests are running 24/7 via automated bots. In addition, monitoring instrumentation ensures that these wrappers behave under the expected parameters of memory, CPU, and I/O.
+Split's APIs are in active development and are constantly tested for quality. Unit tests are developed for each wrapper based on the unique needs of that language, and integration tests, load and performance tests, and behavior consistency tests are running 24/7 via automated bots. In addition, monitoring instrumentation ensures that these wrappers behave under the expected parameters of memory, CPU, and I/O.
 
 ### About Split:
 
@@ -248,5 +395,4 @@ Visit [split.io/product](https://www.split.io/product) for an overview of Split,
 
 **System Status:**
 
-We use a status page to monitor the availability of Split’s various services. You can check the current status at [status.split.io](http://status.split.io).
-
+We use a status page to monitor the availability of Split's various services. You can check the current status at [status.split.io](http://status.split.io).
