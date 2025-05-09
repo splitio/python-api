@@ -9,6 +9,8 @@ from splitapiclient.microclients import SplitMicroClient
 from splitapiclient.microclients import SplitDefinitionMicroClient
 from splitapiclient.microclients import SegmentMicroClient
 from splitapiclient.microclients import SegmentDefinitionMicroClient
+from splitapiclient.microclients import RuleBasedSegmentMicroClient
+from splitapiclient.microclients import RuleBasedSegmentDefinitionMicroClient
 from splitapiclient.microclients import WorkspaceMicroClient
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.microclients import AttributeMicroClient
@@ -67,6 +69,8 @@ class SyncApiClient(BaseApiClient):
         self._split_definition_client = SplitDefinitionMicroClient(http_client)
         self._segment_client = SegmentMicroClient(http_client)
         self._segment_definition_client = SegmentDefinitionMicroClient(http_client)
+        self._rule_based_segment_client = RuleBasedSegmentMicroClient(http_client)
+        self._rule_based_segment_definition_client = RuleBasedSegmentDefinitionMicroClient(http_client)
         self._large_segment_client = LargeSegmentMicroClient(http_client)
         self._large_segment_definition_client = LargeSegmentDefinitionMicroClient(http_client)
         self._workspace_client = WorkspaceMicroClient(http_client)
@@ -103,6 +107,14 @@ class SyncApiClient(BaseApiClient):
     @property
     def segment_definitions(self):
         return self._segment_definition_client
+        
+    @property
+    def rule_based_segments(self):
+        return self._rule_based_segment_client
+
+    @property
+    def rule_based_segment_definitions(self):
+        return self._rule_based_segment_definition_client
     
     @property
     def large_segments(self):

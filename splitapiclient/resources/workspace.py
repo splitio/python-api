@@ -103,6 +103,31 @@ class Workspace(BaseResource):
         workspaceId = self._id
         return imc.delete(large_segment_name, workspaceId)
 
+    def add_rule_based_segment(self, data, traffic_type_name, apiclient=None):
+        '''
+        Add a new rule-based segment associated with this workspace.
+
+        :param apiclient: If this instance wasn't returned by the client,
+            the ruleBasedSegmentClient instance should be passed in order to perform the
+            http call
+        '''
+        imc = require_client('RuleBasedSegment', self._client, apiclient)
+        segment = as_dict(data)
+        workspaceId = self._id
+        return imc.add(segment, traffic_type_name, workspaceId)
+        
+    def delete_rule_based_segment(self, segment_name, apiclient=None):
+        '''
+        delete rule-based segment associated with this workspace.
+
+        :param apiclient: If this instance wasn't returned by the client,
+            the ruleBasedSegmentClient instance should be passed in order to perform the
+            http call
+        '''
+        imc = require_client('RuleBasedSegment', self._client, apiclient)
+        workspaceId = self._id
+        return imc.delete(segment_name, workspaceId)
+
 
     def add_split(self, data, traffic_type_name, apiclient=None):
         '''

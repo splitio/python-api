@@ -41,3 +41,5 @@
 - Updated to support flag sets, large segments and the impressionsDisabled boolean value
 3.5.0 (May 6, 2025)
 - Updated to support harness mode
+3.5.1 (May 8, 2025)
+- Updated to support rule based segments
