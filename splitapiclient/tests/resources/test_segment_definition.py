@@ -182,7 +182,8 @@ class TestSegmentDefinition:
             'approvers': None,
             'operationType': None,
             'comments': None,
-            'rolloutStatus': None
+            'rolloutStatus': None,
+            'ruleBasedSegment': None
         }
 
         assert attr.to_dict() == data1

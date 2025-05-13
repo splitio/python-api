@@ -80,25 +80,18 @@ class RuleBasedSegmentMicroClient:
         :returns: list of RuleBasedSegment objects
         :rtype: list(RuleBasedSegment)
         '''
-        offset_val = 0
-        final_list = []
-        while True:
-            response = self._http_client.make_request(
-                self._endpoint['all_items'],
-                workspaceId = workspace_id,
-                offset = offset_val
-            )
-            for item in response:
-                final_list.append(as_dict(item))
-            offset = int(response['offset'])
-            totalCount = int(response['totalCount'])
-            limit = int(response['limit'])
-            if totalCount>(offset+limit):
-                offset_val = offset_val + limit
-                continue
-            else:
-                break
-        return [RuleBasedSegment(item, self._http_client) for item in final_list]
+        response = self._http_client.make_request(
+            self._endpoint['all_items'],
+            workspaceId = workspace_id
+        )
+        
+        # Check if we have the response
+        if isinstance(response, list):
+            objects = response
+            if not objects:  # If the list is empty, we're done
+                return []
+            return [RuleBasedSegment(item, self._http_client) for item in objects]
+        return []
 
     def find(self, segment_name, workspace_id):
         '''

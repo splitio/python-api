@@ -41,8 +41,10 @@ def require_client(model, http_client, apiclient):
     from splitapiclient.microclients.flag_set_microclient import FlagSetMicroClient
     from splitapiclient.microclients.large_segment_microclient import LargeSegmentMicroClient
     from splitapiclient.microclients.large_segment_definition_microclient import LargeSegmentDefinitionMicroClient
+    from splitapiclient.microclients.rule_based_segment_microclient import RuleBasedSegmentMicroClient
+    from splitapiclient.microclients.rule_based_segment_definition_microclient import RuleBasedSegmentDefinitionMicroClient
 
-    if model not in ['LargeSegment','LargeSegmentDefinition', 'FlagSet','Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey', 'Restriction']:
+    if model not in ['RuleBasedSegment', 'RuleBasedSegmentDefinition', 'LargeSegment','LargeSegmentDefinition', 'FlagSet','Attribute', 'Workspace', 'Environment', 'Split', 'SplitDefinition', 'Segment', 'SegmentDefinition', 'Identity', 'TrafficType', 'ChangeRequest', 'User', 'Group', 'APIKey', 'Restriction']:
         raise InvalidModelException('Unknown model %s' % model)
 
     if apiclient and isinstance(apiclient, BaseApiClient):
@@ -63,6 +65,8 @@ def require_client(model, http_client, apiclient):
         if model == 'FlagSet': return apiclient.flag_sets
         if model == 'LargeSegment': return apiclient.large_segments
         if model == 'LargeSegmentDefinition': return apiclient.large_segment_definitions
+        if model == 'RuleBasedSegment': return apiclient.rule_based_segments
+        if model == 'RuleBasedSegmentDefinition': return apiclient.rule_based_segment_definitions
     elif http_client and isinstance(http_client, BaseHttpClient):
         if model == 'Attribute': return AttributeMicroClient(http_client)
         if model == 'Environment': return EnvironmentMicroClient(http_client)
@@ -81,6 +85,8 @@ def require_client(model, http_client, apiclient):
         if model == 'FlagSet': return FlagSetMicroClient(http_client)
         if model == 'LargeSegment': return LargeSegmentMicroClient(http_client)
         if model == 'LargeSegmentDefinition': return LargeSegmentDefinitionMicroClient(http_client)
+        if model == 'RuleBasedSegment': return RuleBasedSegmentMicroClient(http_client)
+        if model == 'RuleBasedSegmentDefinition': return RuleBasedSegmentDefinitionMicroClient(http_client)
     else:
         raise ClientRequiredError(
             'Object created ad-hoc, you need to pass a SplitApiClient instance '

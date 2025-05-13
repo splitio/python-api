@@ -55,6 +55,9 @@ class RuleBasedSegmentDefinition(BaseResource):
         self._environment = data.get('environment')
         self._trafficType = TrafficType(data.get('trafficType')) if 'trafficType' in data else {}
         self._creationTime = data.get('creationTime') if 'creationTime' in data else 0
+        self._excludedKeys = data.get('excludedKeys', [])
+        self._excludedSegments = data.get('excludedSegments', [])
+        self._rules = data.get('rules', [])
             
     @property
     def name(self):
@@ -75,29 +78,45 @@ class RuleBasedSegmentDefinition(BaseResource):
     @property
     def creation_time(self):
         return None if self._creationTime==0 else self._creationTime
+        
+    @property
+    def excluded_keys(self):
+        return self._excludedKeys
+        
+    @property
+    def excluded_segments(self):
+        return self._excludedSegments
+        
+    @property
+    def rules(self):
+        return self._rules
 
-    def update(self, data):
+    def update(self, data, apiclient=None):
         '''
         Update RuleBasedSegmentDefinition object.
 
         :param data: dictionary of data to update
+        :param apiclient: If this instance wasn't returned by the client,
+            the ApiClient instance should be passed in order to perform the
+            http call
 
         :returns: RuleBasedSegmentDefinition object
         :rtype: RuleBasedSegmentDefinition
         '''
-        imc = require_client('RuleBasedSegmentDefinition', self._client)
+        imc = require_client('RuleBasedSegmentDefinition', self._client, apiclient)
         return imc.update(self._name, self._environment['id'], self._client._workspace_id, data)
 
-    def submit_change_request(self, rules, operation_type, title, comment, approvers, rollout_status_id, workspace_id, apiclient=None):
+    def submit_change_request(self, rules, excluded_keys, excluded_segments, operation_type, title, comment, approvers, workspace_id, apiclient=None):
         '''
         submit a change request for rule-based segment definition
 
         :param rules: dictionary of rules to update
+        :param excluded_keys: list of excluded keys
+        :param excluded_segments: list of excluded segments
         :param operation_type: operation type
         :param title: title of the change request
         :param comment: comment for the change request
         :param approvers: list of approvers
-        :param rollout_status_id: rollout status id
         :param workspace_id: id of the workspace
         :param apiclient: If this instance wasn't returned by the client,
             the IdentifyClient instance should be passed in order to perform the
@@ -110,13 +129,14 @@ class RuleBasedSegmentDefinition(BaseResource):
             'ruleBasedSegment': {
                 'name':self._name,
                 'rules': rules,
+                'excludedKeys': excluded_keys,
+                'excludedSegments': excluded_segments
             },
             'operationType': operation_type,
             'title': title,
             'comment': comment,
             'approvers': approvers,
         }
-        if rollout_status_id is not None:
-            data['rolloutStatus'] = {'id': rollout_status_id}
+
         imc = require_client('ChangeRequest', self._client, apiclient)
         return imc.submit_change_request(self._environment['id'], workspace_id, data)

@@ -282,6 +282,111 @@ definition= {"treatments":[ {"name":"on"},{"name":"off"}],
 splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'comment', ['user@email.com'], '')
 ```
 
+### Rule-Based Segments
+
+Fetch all Rule-Based Segments:
+
+```python
+ws = client.workspaces.find("Defaults")
+for segment in client.rule_based_segments.list(ws.id):
+    print("\nRule-Based Segment: " + segment.name + ", " + segment.description)
+```
+
+Add new Rule-Based Segment:
+
+```python
+segment_data = {
+    'name': 'advanced_users',
+    'description': 'Users who match advanced criteria',
+    'tags': [{'name': 'important'}]
+}
+rule_segment = ws.add_rule_based_segment(segment_data, "user")
+print(rule_segment.name)
+```
+
+Add Rule-Based Segment to environment:
+
+```python
+ws = client.workspaces.find("Defaults")
+segment = client.rule_based_segments.find("advanced_users", ws.id)
+env = client.environments.find("Production", ws.id)
+segdef = segment.add_to_environment(env.id)
+```
+
+Update Rule-Based Segment definition with rules:
+
+```python
+ws = client.workspaces.find("Defaults")
+env = client.environments.find("Production", ws.id)
+segdef = client.rule_based_segment_definitions.find("advanced_users", env.id, ws.id)
+
+# Define rules that match users with age > 30 and have completed tutorials
+rules_data = {
+    'rules': [
+        {
+            'condition': {
+                'combiner': 'AND',
+                'matchers': [
+                    {
+                        'type': 'GREATER_THAN_OR_EQUAL_TO',
+                        'attribute': 'age',
+                        'number': 30
+                    },
+                    {
+                        'type': 'EQUAL_TO',
+                        'attribute': 'completed_tutorials',
+                        'bool': True
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+# Update the segment definition with the rules
+updated_segdef = segdef.update(rules_data)
+```
+
+Submit a Change request to update a Rule-Based Segment definition:
+
+```python
+ws = client.workspaces.find("Defaults")
+env = client.environments.find("Production", ws.id)
+segdef = client.rule_based_segment_definitions.find("advanced_users", env.id, ws.id)
+
+# New rules for the change request
+rules = [
+    {
+        'condition': {
+            'combiner': 'AND',
+            'matchers': [
+                {
+                    'type': 'GREATER_THAN_OR_EQUAL_NUMBER',
+                    'attribute': 'age',
+                    'number': 25
+                },
+                {
+                    'type': 'BOOLEAN',
+                    'attribute': 'completed_tutorials',
+                    'bool': True
+                }
+            ]
+        }
+    }
+]
+
+# Submit change request
+segdef.submit_change_request(
+    rules=rules,
+    operation_type='UPDATE',
+    title='Lower age threshold to 25',
+    comment='Including more users in advanced segment',
+    approvers=['user@email.com'],
+    rollout_status_id=None,
+    workspace_id=ws.id
+)
+```
+
 List all change requests:
 
 ```python
