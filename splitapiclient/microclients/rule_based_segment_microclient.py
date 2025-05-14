@@ -56,7 +56,7 @@ class RuleBasedSegmentMicroClient:
         },
         'all_items': {
             'method': 'GET',
-            'url_template': 'rule-based-segments/ws/{workspaceId}?limit=50&offset={offset}',
+            'url_template': 'rule-based-segments/ws/{workspaceId}?limit={limit}&offset={offset}',
             'headers': [{
                 'name': 'Authorization',
                 'template': 'Bearer {value}',
@@ -73,25 +73,44 @@ class RuleBasedSegmentMicroClient:
         '''
         self._http_client = http_client
 
-    def list(self, workspace_id):
+    def list(self, workspace_id, offset=0, limit=50):
         '''
-        Returns a list of RuleBasedSegment objects.
+        Returns a list of RuleBasedSegment objects with pagination support.
 
+        :param workspace_id: id of the workspace
+        :param offset: starting position for pagination (default: 0)
+        :param limit: maximum number of items to return (default: 50)
         :returns: list of RuleBasedSegment objects
         :rtype: list(RuleBasedSegment)
         '''
-        response = self._http_client.make_request(
-            self._endpoint['all_items'],
-            workspaceId = workspace_id
-        )
+        segment_list = []
+        current_offset = offset
         
-        # Check if we have the response
-        if isinstance(response, list):
-            objects = response
-            if not objects:  # If the list is empty, we're done
-                return []
-            return [RuleBasedSegment(item, self._http_client) for item in objects]
-        return []
+        while True:
+            response = self._http_client.make_request(
+                self._endpoint['all_items'],
+                workspaceId = workspace_id,
+                offset = current_offset,
+                limit = limit
+            )
+            
+            # Process the current page of results
+            current_page_items = []
+            if isinstance(response, list):
+                for item in response:
+                    current_page_items.append(RuleBasedSegment(item, self._http_client))
+            
+            # Add current page items to the full list
+            segment_list.extend(current_page_items)
+            
+            # If we reached the end (fewer items than limit), then break the loop
+            if len(current_page_items) < limit:
+                break
+                
+            # Otherwise move to the next page
+            current_offset += limit
+            
+        return segment_list
 
     def find(self, segment_name, workspace_id):
         '''

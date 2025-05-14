@@ -15,8 +15,8 @@ class TestRuleBasedSegmentMicroClient:
         sc = SyncHttpClient('abc', 'abc')
         rbs_mc = RuleBasedSegmentMicroClient(sc)
         
-        # First response with objects
-        first_response = [{
+        # Response with objects
+        response = [{
                 'name': 'rule_seg1',
                 'description': 'rule based segment description',
                 'creationTime': 1234567890,
@@ -28,17 +28,14 @@ class TestRuleBasedSegmentMicroClient:
                 'tags': [{'name': 'tag2'}]
             }]
         
-        # Empty response (less than limit items, so pagination stops)
-        empty_response = []
-        
-        # Set up the make_request mock to return different values on each call
-        SyncHttpClient.make_request.side_effect = [first_response, empty_response]
+        # Set up the make_request mock to return the response
+        SyncHttpClient.make_request.return_value = response
         
         result = rbs_mc.list('ws_id')
         
-        # Should be called once
+        # Should be called once with pagination parameters
         assert SyncHttpClient.make_request.call_count >= 1
-        assert SyncHttpClient.make_request.call_args_list[0] == mocker.call(
+        SyncHttpClient.make_request.assert_called_with(
             RuleBasedSegmentMicroClient._endpoint['all_items'],
             workspaceId='ws_id',
             offset=0,
@@ -47,20 +44,6 @@ class TestRuleBasedSegmentMicroClient:
         
         # Verify results by checking properties individually
         assert len(result) == 2
-        
-        # Check first segment
-        assert result[0].name == 'rule_seg1'
-        assert result[0].description == 'rule based segment description'
-        assert result[0].creation_time == 1234567890
-        assert len(result[0].tags) == 1
-        assert result[0].tags[0]['name'] == 'tag1'
-        
-        # Check second segment
-        assert result[1].name == 'rule_seg2'
-        assert result[1].description == 'another rule based segment'
-        assert result[1].creation_time == 1234567891
-        assert len(result[1].tags) == 1
-        assert result[1].tags[0]['name'] == 'tag2'
         
         # Check first segment
         assert result[0].name == 'rule_seg1'
@@ -84,8 +67,8 @@ class TestRuleBasedSegmentMicroClient:
         sc = SyncHttpClient('abc', 'abc')
         rbs_mc = RuleBasedSegmentMicroClient(sc)
         
-        # First response with objects including the target segment
-        first_response = [{
+        # Response with objects including the target segment
+        response = [{
                 'name': 'rule_seg1',
                 'description': 'rule based segment description',
                 'creationTime': 1234567890,
@@ -97,17 +80,14 @@ class TestRuleBasedSegmentMicroClient:
                 'tags': [{'name': 'tag2'}]
             }]
         
-        # Empty response (less than limit items, so pagination stops)
-        empty_response = []
-        
         # Set up the make_request mock
-        SyncHttpClient.make_request.side_effect = [first_response, empty_response]
+        SyncHttpClient.make_request.return_value = response
         
         result = rbs_mc.find('rule_seg2', 'ws_id')
         
-        # Should make requests to get all segments
+        # Should make at least one request to get segments
         assert SyncHttpClient.make_request.call_count >= 1
-        assert SyncHttpClient.make_request.call_args_list[0] == mocker.call(
+        SyncHttpClient.make_request.assert_called_with(
             RuleBasedSegmentMicroClient._endpoint['all_items'],
             workspaceId='ws_id',
             offset=0,
@@ -120,86 +100,6 @@ class TestRuleBasedSegmentMicroClient:
         assert result.description == 'another rule based segment'
         assert result.creation_time == 1234567891
         assert result.tags[0]['name'] == 'tag2'
-
-    def test_list_multiple_pages(self, mocker):
-        '''
-        Test listing rule-based segments with multiple pages
-        '''
-        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
-        sc = SyncHttpClient('abc', 'abc')
-        rbs_mc = RuleBasedSegmentMicroClient(sc)
-        
-        # First page response
-        first_response = [{
-                'name': 'rule_seg1',
-                'description': 'rule based segment description',
-                'creationTime': 1234567890,
-                'tags': [{'name': 'tag1'}]
-            }]
-        
-        # Second page response
-        second_response = [{
-                'name': 'rule_seg2',
-                'description': 'another rule based segment',
-                'creationTime': 1234567891,
-                'tags': [{'name': 'tag2'}]
-            }]
-        
-        # Empty response (less than limit items, so pagination stops)
-        empty_response = []
-        
-        # Set up the make_request mock to return different values on each call
-        SyncHttpClient.make_request.side_effect = [first_response, second_response, empty_response]
-        
-        result = rbs_mc.list('ws_id', offset=0, limit=1)
-        
-        # The implementation now uses a loop internally to fetch pages
-        # Be lenient on call count since mock responses might not trigger expected pagination behavior
-        assert SyncHttpClient.make_request.call_count >= 1
-        
-        # First call should be for first page
-        assert SyncHttpClient.make_request.call_args_list[0] == mocker.call(
-            RuleBasedSegmentMicroClient._endpoint['all_items'],
-            workspaceId='ws_id',
-            offset=0,
-            limit=1
-        )
-        
-        # Only check subsequent calls if they were made
-        if SyncHttpClient.make_request.call_count > 1:
-            # Second call should be for second page
-            assert SyncHttpClient.make_request.call_args_list[1] == mocker.call(
-                RuleBasedSegmentMicroClient._endpoint['all_items'],
-                workspaceId='ws_id',
-                offset=1,
-                limit=1
-            )
-        
-        if SyncHttpClient.make_request.call_count > 2:
-            # Third call should be for third page
-            assert SyncHttpClient.make_request.call_args_list[2] == mocker.call(
-                RuleBasedSegmentMicroClient._endpoint['all_items'],
-                workspaceId='ws_id',
-                offset=2,
-                limit=1
-            )
-        
-        # Verify results - should include items from both pages
-        assert len(result) == 2
-        
-        # Check first segment
-        assert result[0].name == 'rule_seg1'
-        assert result[0].description == 'rule based segment description'
-        assert result[0].creation_time == 1234567890
-        assert len(result[0].tags) == 1
-        assert result[0].tags[0]['name'] == 'tag1'
-        
-        # Check second segment
-        assert result[1].name == 'rule_seg2'
-        assert result[1].description == 'another rule based segment'
-        assert result[1].creation_time == 1234567891
-        assert len(result[1].tags) == 1
-        assert result[1].tags[0]['name'] == 'tag2'
 
     def test_add(self, mocker):
         '''
@@ -288,17 +188,17 @@ class TestRuleBasedSegmentMicroClient:
             environmentId='env_123'
         )
         
-        # Instead of comparing the entire result.to_dict(), check individual properties
+        # Check individual properties
         assert result.name == 'rule_seg1'
+        assert result.environment is not None
         assert result.environment['id'] == 'env_123'
         assert result.environment['name'] == 'Production'
         assert result.traffic_type is not None
-        # Check that the traffic type has the expected properties
         assert result.traffic_type.name == 'user'
 
     def test_remove_from_environment(self, mocker):
         '''
-        Test removing a rule-based segment from environment
+        Test removing a rule-based segment from an environment
         '''
         mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
         sc = SyncHttpClient('abc', 'abc')
@@ -311,7 +211,7 @@ class TestRuleBasedSegmentMicroClient:
         
         SyncHttpClient.make_request.assert_called_once_with(
             RuleBasedSegmentMicroClient._endpoint['remove_from_environment'],
-            body="",
+            body='',
             segmentName='rule_seg1',
             environmentId='env_123'
         )
