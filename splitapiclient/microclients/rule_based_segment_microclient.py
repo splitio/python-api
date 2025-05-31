@@ -104,7 +104,8 @@ class RuleBasedSegmentMicroClient:
             segment_list.extend(current_page_items)
             
             # If we reached the end (fewer items than limit), then break the loop
-            if len(current_page_items) < limit:
+            # or if we have more than limit items, then the pagination logic isn't implemented yet at the api
+            if len(current_page_items) < limit or len(current_page_items) > limit:
                 break
                 
             # Otherwise move to the next page
