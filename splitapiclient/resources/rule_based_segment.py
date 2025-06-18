@@ -72,7 +72,7 @@ class RuleBasedSegment(BaseResource):
         :rtype: RuleBasedSegmentDefinition
         '''
         imc = require_client('RuleBasedSegment', self._client, apiclient)
-        return imc.add_to_environment(self._name, environment_id)
+        return imc.add_to_environment(self._name, environment_id=environment_id, workspace_id=self._workspace_id)
 
     def remove_from_environment(self, environment_id, apiclient=None):
         '''

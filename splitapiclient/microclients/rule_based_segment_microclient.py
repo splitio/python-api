@@ -161,11 +161,13 @@ class RuleBasedSegmentMicroClient:
         )
         return response
 
-    def add_to_environment(self, segment_name, environment_id):
+    def add_to_environment(self, segment_name, environment_id, workspace_id=None):
         '''
         add a rule-based segment to environment
 
-        :param segment: rule-based segment name, environment id
+        :param segment_name: name of the rule-based segment
+        :param environment_id: id of the environment
+        :param workspace_id: id of the workspace (optional)
         
         :returns: newly created rule-based segment definition object
         :rtype: RuleBasedSegmentDefinition
@@ -174,9 +176,10 @@ class RuleBasedSegmentMicroClient:
             self._endpoint['add_to_environment'],
             body="",
             segmentName = segment_name,
-            environmentId = environment_id
+            environmentId = environment_id,
+
         )
-        return RuleBasedSegmentDefinition(response, self._http_client)
+        return RuleBasedSegmentDefinition(response, self._http_client, workspace_id)
 
     def remove_from_environment(self, segment_name, environment_id):
         '''

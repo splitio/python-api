@@ -44,7 +44,7 @@ class RuleBasedSegmentDefinition(BaseResource):
         }]
     }
 
-    def __init__(self, data=None, client=None):
+    def __init__(self, data=None, client=None, workspace_id=None):
         '''
         Constructor for RuleBasedSegmentDefinition
         '''
@@ -58,6 +58,8 @@ class RuleBasedSegmentDefinition(BaseResource):
         self._excludedKeys = data.get('excludedKeys', [])
         self._excludedSegments = data.get('excludedSegments', [])
         self._rules = data.get('rules', [])
+        self._workspace_id = workspace_id
+ 
             
     @property
     def name(self):
@@ -91,11 +93,27 @@ class RuleBasedSegmentDefinition(BaseResource):
     def rules(self):
         return self._rules
 
-    def update(self, data, apiclient=None):
+    def delete(self, apiclient=None):
+        '''
+        Delete RuleBasedSegmentDefinition object.
+
+        :param apiclient: If this instance wasn't returned by the client,
+            the ApiClient instance should be passed in order to perform the
+            http call
+
+        :returns: True if successful
+        :rtype: boolean
+        '''
+        imc = require_client('RuleBasedSegmentDefinition', self._client, apiclient)
+        return imc.delete(self._name, self._environment['id'])
+
+
+    def update(self, data, workspace_id=None, apiclient=None):
         '''
         Update RuleBasedSegmentDefinition object.
 
         :param data: dictionary of data to update
+        :param workspace_id: id of the workspace
         :param apiclient: If this instance wasn't returned by the client,
             the ApiClient instance should be passed in order to perform the
             http call
@@ -103,8 +121,13 @@ class RuleBasedSegmentDefinition(BaseResource):
         :returns: RuleBasedSegmentDefinition object
         :rtype: RuleBasedSegmentDefinition
         '''
+        if not workspace_id:
+            workspace_id = self._workspace_id
+            
+        if workspace_id is None:
+            raise ValueError("workspace_id is required argument")
         imc = require_client('RuleBasedSegmentDefinition', self._client, apiclient)
-        return imc.update(self._name, self._environment['id'], self._client._workspace_id, data)
+        return imc.update(self._name, self._environment['id'], workspace_id, data)
 
     def submit_change_request(self, rules, excluded_keys, excluded_segments, operation_type, title, comment, approvers, workspace_id, apiclient=None):
         '''

@@ -30,6 +30,17 @@ class RuleBasedSegmentDefinitionMicroClient:
             }],
             'query_string': [],
             'response': True,
+        },
+        'delete': {
+            'method': 'DELETE',
+            'url_template': 'rule-based-segments/{environmentId}/{segmentName}',
+            'headers': [{
+                'name': 'Authorization',
+                'template': 'Bearer {value}',
+                'required': True,
+            }],
+            'query_string': [],
+            'response': True,
         }
     }
 
@@ -121,4 +132,19 @@ class RuleBasedSegmentDefinitionMicroClient:
         )
         return RuleBasedSegmentDefinition(as_dict(response), self._http_client)
 
+    def delete(self, segment_name, environment_id):
+        '''
+        Delete RuleBasedSegmentDefinition object.
 
+        :param segment_name: name of the rule-based segment
+        :param environment_id: id of the environment
+
+        :returns: True if successful
+        :rtype: boolean
+        '''
+        self._http_client.make_request(
+            self._endpoint['delete'],
+            environmentId = environment_id,
+            segmentName = segment_name
+        )
+        return True
