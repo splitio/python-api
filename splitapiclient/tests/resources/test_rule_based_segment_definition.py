@@ -107,7 +107,7 @@ class TestRuleBasedSegmentDefinition:
         http_client_mock.make_request.return_value = response_data
         http_client_mock._workspace_id = 'workspace1'
         
-        seg = RuleBasedSegmentDefinition(sample_data, http_client_mock)
+        seg = RuleBasedSegmentDefinition(sample_data, http_client_mock, workspace_id=http_client_mock._workspace_id)
         result = seg.update(update_data)
 
         http_client_mock.make_request.assert_called_once_with(
