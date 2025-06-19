@@ -79,7 +79,7 @@ class RuleBasedSegmentDefinitionMicroClient:
             if isinstance(response, list):
                 for item in response:
                     item['environment'] = {'id':environment_id, 'name':''}
-                    current_page_items.append(RuleBasedSegmentDefinition(item, self._http_client))
+                    current_page_items.append(RuleBasedSegmentDefinition(item, self._http_client, workspace_id=workspace_id))
             
             # Add current page items to the full list
             segment_definition_list.extend(current_page_items)

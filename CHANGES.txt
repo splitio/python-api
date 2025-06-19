@@ -43,3 +43,5 @@
 - Updated to support harness mode
 3.5.1 (June 20, 2025)
 - Updated to support rule based segments
+3.5.2 (June 20, 2025)
+- fixed bug in updating rule based segments
