@@ -401,7 +401,7 @@ rules_data = {
 }
 
 # Update the segment definition with the rules
-updated_segdef = segdef.update(rules_data)
+updated_segdef = segdef.update(rules_data) # the workspace id is passed in from the find operation - so it's not needed here
 ```
 
 Update Rule-Based Segment definition with excluded keys and excluded segments:
