@@ -16,3 +16,5 @@ from splitapiclient.resources.restriction import Restriction
 from splitapiclient.resources.flag_set import FlagSet
 from splitapiclient.resources.large_segment import LargeSegment
 from splitapiclient.resources.large_segment_definition import LargeSegmentDefinition
+from splitapiclient.resources.rule_based_segment import RuleBasedSegment
+from splitapiclient.resources.rule_based_segment_definition import RuleBasedSegmentDefinition

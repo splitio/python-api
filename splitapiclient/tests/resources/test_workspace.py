@@ -10,6 +10,7 @@ from splitapiclient.microclients import SegmentMicroClient
 from splitapiclient.microclients import SplitMicroClient
 from splitapiclient.microclients import WorkspaceMicroClient
 from splitapiclient.microclients import LargeSegmentMicroClient
+from splitapiclient.microclients import RuleBasedSegmentMicroClient
 class TestWorkspace:
     '''
     Tests for the Workspace class' methods
@@ -306,5 +307,68 @@ class TestWorkspace:
             LargeSegmentMicroClient._endpoint['delete'],
             workspaceId='1',
             segmentName=large_segment_name,
+        )
+        assert attr == True
+        
+    def test_add_rule_based_segment(self, mocker):
+        '''
+        Test adding a rule-based segment via the workspace
+        '''
+        data = {
+            'name': 'rule_seg1',
+            'description': 'rule based segment description',
+            'creationTime': None,
+            'tags': [{'name': 'tag1'}]
+        }
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = data
+        ws1 = Workspace(
+            {
+                'id': '1',
+                'name': 'workspace1',
+                'requiresTitleAndComments': None
+            },
+            http_client_mock
+        )
+        attr = ws1.add_rule_based_segment(data, 'user')
+
+        http_client_mock.make_request.assert_called_once_with(
+            RuleBasedSegmentMicroClient._endpoint['create'],
+            body=data,
+            workspaceId='1',
+            trafficTypeName='user'
+        )
+        expected_data = {
+            'name': 'rule_seg1',
+            'description': 'rule based segment description',
+            'trafficType': None,
+            'workspaceId': '1',
+            'creationTime': None,
+            'tags': [{'name': 'tag1'}]
+        }
+        assert attr.to_dict() == expected_data
+
+    def test_delete_rule_based_segment(self, mocker):
+        '''
+        Test deleting a rule-based segment via the workspace
+        '''
+        segment_name = 'rule_seg1'
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = True
+        ws1 = Workspace(
+            {
+                'id': '1',
+                'name': 'workspace1',
+                'requiresTitleAndComments': None
+            },
+            http_client_mock
+        )
+
+        attr = ws1.delete_rule_based_segment(segment_name)
+
+        http_client_mock.make_request.assert_called_once_with(
+            RuleBasedSegmentMicroClient._endpoint['delete'],
+            workspaceId='1',
+            segmentName=segment_name,
         )
         assert attr == True

@@ -35,6 +35,14 @@ class BaseApiClient:
     @abc.abstractproperty
     def segment_definitions(self):
         pass
+        
+    @abc.abstractproperty
+    def rule_based_segments(self):
+        pass
+
+    @abc.abstractproperty
+    def rule_based_segment_definitions(self):
+        pass
 
     @abc.abstractproperty
     def workspaces(self):

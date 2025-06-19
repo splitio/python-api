@@ -282,6 +282,214 @@ definition= {"treatments":[ {"name":"on"},{"name":"off"}],
 splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'comment', ['user@email.com'], '')
 ```
 
+### Rule-Based Segments
+
+Rule-based segments allow you to define audience segments using complex rule structures and exclusion logic. Added in version 3.5.1, they offer enhanced functionality for targeting users.
+
+Fetch all Rule-Based Segments:
+
+```python
+ws = client.workspaces.find("Defaults")
+for segment in client.rule_based_segments.list(ws.id):
+    print("\nRule-Based Segment: " + segment.name + ", " + segment.description)
+```
+
+Add new Rule-Based Segment:
+
+```python
+segment_data = {
+    'name': 'advanced_users',
+    'description': 'Users who match advanced criteria'
+}
+rule_segment = ws.add_rule_based_segment(segment_data, "user")
+print(rule_segment.name)
+```
+
+Add Rule-Based Segment to environment:
+
+```python
+ws = client.workspaces.find("Defaults")
+segment = client.rule_based_segments.find("advanced_users", ws.id)
+env = client.environments.find("Production", ws.id)
+segdef = segment.add_to_environment(env.id)
+```
+
+#### Rule-Based Segment Structure
+
+Rule-based segment definitions support multiple rule types and matching conditions:
+
+```python
+# Examples of different matcher types
+matchers = [
+    # String matching
+    {
+        'type': 'IN_LIST_STRING',
+        'attribute': 'device',
+        'strings': ['mobile', 'tablet']
+    },
+    # Numeric comparisons
+    {
+        'type': 'GREATER_THAN_OR_EQUAL_NUMBER',
+        'attribute': 'age',
+        'number': 21
+    },
+    {
+        'type': 'LESS_THAN_OR_EQUAL_NUMBER',
+        'attribute': 'account_age_days',
+        'number': 30
+    },
+    {
+        'type': 'BETWEEN_NUMBER',
+        'attribute': 'purchases',
+        'between': {'from': 5, 'to': 20}
+    },
+    # Boolean conditions
+    {
+        'type': 'BOOLEAN',
+        'attribute': 'subscribed',
+        'bool': True
+    },
+    # Date/time matching
+    {
+        'type': 'ON_DATE',
+        'attribute': 'sign_up_date',
+        'date': 1623456789000  # timestamp in milliseconds
+    },
+    # Dependency on another split
+    {
+        'type': 'IN_SPLIT',
+        'attribute': '',
+        'depends': {'splitName': 'another_split', 'treatment': 'on'}
+    }
+]
+
+# Multiple conditions using combiners
+condition = {
+    'combiner': 'AND',  # Can only be 'AND'
+    'matchers': matchers
+}
+```
+
+Update Rule-Based Segment definition with rules:
+
+```python
+ws = client.workspaces.find("Defaults")
+env = client.environments.find("Production", ws.id)
+segdef = client.rule_based_segment_definitions.find("advanced_users", env.id, ws.id)
+
+# Define rules that match users in a certain list
+rules_data = {
+    'rules': [
+        {
+            'condition': {
+                'combiner': 'AND',
+                'matchers': [
+                    {
+                        'type': 'GREATER_THAN_OR_EQUAL_NUMBER',
+                        'attribute': 'age',
+                        'number': 30
+                    },
+                    {
+                        'type': 'BOOLEAN',
+                        'attribute': 'completed_tutorials',
+                        'bool': True
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+# Update the segment definition with the rules
+updated_segdef = segdef.update(rules_data)
+```
+
+Update Rule-Based Segment definition with excluded keys and excluded segments:
+
+```python
+ws = client.workspaces.find("Defaults")
+env = client.environments.find("Production", ws.id)
+segdef = client.rule_based_segment_definitions.find("advanced_users", env.id, ws.id)
+
+# Define rules and exclusion data
+update_data = {
+    'rules': [
+        {
+            'condition': {
+                'combiner': 'AND',
+                'matchers': [
+                    {
+                        'type': 'GREATER_THAN_OR_EQUAL_NUMBER',
+                        'attribute': 'age',
+                        'number': 30
+                    }
+                ]
+            }
+        }
+    ],
+    'excludedKeys': ['user1', 'user2', 'user3'],
+    'excludedSegments': [
+        {
+            'name': 'beta_testers',
+            'type': 'standard_segment'
+        }
+    ]
+}
+
+# Update the segment definition with rules and exclusions
+updated_segdef = segdef.update(update_data)
+```
+
+Submit a Change request to update a Rule-Based Segment definition:
+
+```python
+ws = client.workspaces.find("Defaults")
+env = client.environments.find("Production", ws.id)
+segdef = client.rule_based_segment_definitions.find("advanced_users", env.id, ws.id)
+
+# New rules for the change request
+rules = [
+    {
+        'condition': {
+            'combiner': 'AND',
+            'matchers': [
+                {
+                    'type': 'GREATER_THAN_OR_EQUAL_NUMBER',
+                    'attribute': 'age',
+                    'number': 25
+                },
+                {
+                    'type': 'BOOLEAN',
+                    'attribute': 'completed_tutorials',
+                    'bool': True
+                }
+            ]
+        }
+    }
+]
+
+# Define excluded keys and segments for the change request
+excluded_keys = ['user1', 'user2']
+excluded_segments = [
+    {
+        'name': 'test_users',
+        'type': 'rule_based_segment'
+    }
+]
+
+# Submit change request with all parameters
+segdef.submit_change_request(
+    rules=rules,
+    excluded_keys=excluded_keys,
+    excluded_segments=excluded_segments,
+    operation_type='UPDATE',
+    title='Lower age threshold to 25',
+    comment='Including more users in advanced segment',
+    approvers=['user@email.com'],
+    workspace_id=ws.id
+)
+```
+
 List all change requests:
 
 ```python

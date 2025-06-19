@@ -73,7 +73,30 @@ class ChangeRequest(BaseResource):
             },
             'creationTime': 'number',
         },
-                
+        'ruleBasedSegment':{
+            'name': 'string',
+            'rules': [{
+                'condition': {
+                    'combiner': 'string',
+                    'matchers': [{
+                        'type': 'string',
+                        'attribute': 'string',
+                        'string': 'string',
+                        'bool' : 'boolean',
+                        'strings' : [ 'string' ],
+                        'number' : 'number',
+                        'date' : 'number',
+                        'between': { 'from': 'number', 'to' : 'umber' },
+                        'depends': { 'splitName': 'string', 'treatment': 'string' }
+                    }]
+                }
+            }],
+            'excludedKeys': ['string'],
+            'excludedSegments': [{
+                'name': 'string',
+                'type': 'string'
+            }]
+        },
         'id': 'string',
         'status': 'string',
         'title': 'string',
