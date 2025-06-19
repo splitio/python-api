@@ -299,8 +299,7 @@ Add new Rule-Based Segment:
 ```python
 segment_data = {
     'name': 'advanced_users',
-    'description': 'Users who match advanced criteria',
-    'tags': [{'name': 'important'}]
+    'description': 'Users who match advanced criteria'
 }
 rule_segment = ws.add_rule_based_segment(segment_data, "user")
 print(rule_segment.name)
