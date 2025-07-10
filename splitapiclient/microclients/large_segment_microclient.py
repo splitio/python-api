@@ -87,9 +87,10 @@ class LargeSegmentMicroClient:
             workspaceId = workspace_id,
         )
         for item in response:
-            final_list.append(as_dict(item))
-
-        item['workspaceId'] = workspace_id
+            item_dict = as_dict(item)
+            item_dict['workspaceId'] = workspace_id
+            final_list.append(item_dict)
+        
         return [LargeSegment(item, self._http_client) for item in final_list]
 
     def find(self, large_segment_name, workspace_id):
