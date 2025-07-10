@@ -45,3 +45,5 @@
 - Updated to support rule based segments
 3.5.2 (June 20, 2025)
 - fixed bug in updating rule based segments
+3.5.3 (Jul 10, 2025)
+- fixed bug in listing large segments
