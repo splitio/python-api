@@ -322,7 +322,12 @@ segment = client.rule_based_segments.find("advanced_users", ws.id)
 env = client.environments.find("Production", ws.id)
 success = segment.remove_from_environment(env.id)
 ```
+Remove Rule based segment from workspace
 
+```python
+ws = client.workspaces.find("Defaults")
+ws.delete_rule_based_segment("advanced_users")
+```
 
 #### Rule-Based Segment Structure
 
