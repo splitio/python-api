@@ -326,7 +326,7 @@ Remove Rule based segment from workspace
 
 ```python
 ws = client.workspaces.find("Defaults")
-ws.delete_rule_based_segment("advanced_users")
+success = ws.delete_rule_based_segment("advanced_users")
 ```
 
 #### Rule-Based Segment Structure
