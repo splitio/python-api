@@ -314,6 +314,16 @@ env = client.environments.find("Production", ws.id)
 segdef = segment.add_to_environment(env.id)
 ```
 
+Remove Rule-Based Segment from environment:
+
+```python
+ws = client.workspaces.find("Defaults")
+segment = client.rule_based_segments.find("advanced_users", ws.id)
+env = client.environments.find("Production", ws.id)
+success = segment.remove_from_environment(env.id)
+```
+
+
 #### Rule-Based Segment Structure
 
 Rule-based segment definitions support multiple rule types and matching conditions:
