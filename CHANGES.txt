@@ -47,3 +47,5 @@
 - fixed bug in updating rule based segments
 3.5.3 (Jul 10, 2025)
 - fixed bug in listing large segments
+3.5.4 (Aug 12, 2025)
+- added method to retrieve segment definition key counts for standard segments

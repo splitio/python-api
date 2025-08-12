@@ -53,6 +53,16 @@ class SegmentDefinition(BaseResource):
     def creation_time(self):
         return None if  self._creationTime==0 else self._creationTime
 
+    def get_key_count(self, apiclient=None):
+        '''
+        Get the key count for this segment definition in this environment
+
+        :returns: the key count for the segment definition
+        :rtype: integer
+        '''
+        imc = require_client('SegmentDefinition', self._client, apiclient)
+        return imc.get_key_count(self._name, self._environment['id'])
+
 
     def get_keys(self, apiclient=None):
         '''

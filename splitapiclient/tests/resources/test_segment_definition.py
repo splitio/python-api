@@ -175,6 +175,49 @@ class TestSegmentDefinition:
         )
         assert attr == True
 
+    def test_get_key_count(self, mocker):
+        '''
+        Test get_key_count method of SegmentDefinition class
+        '''
+        # Mock response data with count
+        data = {
+            'keys': [{'key':'key1'}, {'key':'key2'}, {'key':'key3'}],
+            'offset': 0,
+            'count': 3,
+            'limit': 100
+        }
+        
+        # Create mock HTTP client
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        http_client_mock.make_request.return_value = data
+        
+        # Create segment definition with mock client
+        seg = SegmentDefinition(
+            {
+                'name': 'test_segment',
+                'environment': {
+                    'id': 'env_123',
+                    'name': 'test_env'
+                },
+                'trafficType': {},
+            },
+            http_client_mock
+        )
+        
+        # Call the method being tested
+        key_count = seg.get_key_count()
+        
+        # Verify the HTTP client was called with correct parameters
+        http_client_mock.make_request.assert_called_once_with(
+            SegmentDefinitionMicroClient._endpoint['get_keys'],
+            environmentId = 'env_123',
+            segmentName = 'test_segment',
+            offset = 0
+        )
+        
+        # Verify the returned count matches expected value
+        assert key_count == 3
+    
     def test_submit_change_request(self, mocker):
         '''
         '''

@@ -84,3 +84,39 @@ class TestSegmentDefinitionMicroClient:
         assert object_to_stringified_dict(result[0]) == data[0]
 
         assert object_to_stringified_dict(result[1]) == data[1]
+        
+    def test_get_key_count(self, mocker):
+        '''
+        Test get_key_count method of SegmentDefinitionMicroClient
+        '''
+        # Mock the SyncHttpClient make_request method
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        
+        # Create client instances
+        sc = SyncHttpClient('abc', 'abc')
+        segment_client = SegmentDefinitionMicroClient(sc)
+        
+        # Define mock response data
+        mock_response = {
+            'keys': [{'key': 'key1'}, {'key': 'key2'}, {'key': 'key3'}, {'key': 'key4'}, {'key': 'key5'}],
+            'offset': 0,
+            'count': 5,   # This is the value we expect to be returned
+            'limit': 100
+        }
+        
+        # Set the return value for the mocked method
+        SyncHttpClient.make_request.return_value = mock_response
+        
+        # Call the method being tested
+        result = segment_client.get_key_count('test_segment', 'test_env_id')
+        
+        # Verify the HTTP client was called with correct parameters
+        SyncHttpClient.make_request.assert_called_once_with(
+            SegmentDefinitionMicroClient._endpoint['get_keys'],
+            environmentId='test_env_id',
+            segmentName='test_segment',
+            offset=0
+        )
+        
+        # Verify the result matches the expected count
+        assert result == 5
