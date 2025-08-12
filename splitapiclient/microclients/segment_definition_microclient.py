@@ -133,6 +133,26 @@ class SegmentDefinitionMicroClient:
                 break
         return [item["key"] for item in final_list]
 
+
+
+    def get_key_count(self, segment_name, environment_id):
+        '''
+        Returns a count of keys
+
+        :returns: count of keys in Segment in environemnt objects
+        :rtype: integer
+        '''
+
+        response = self._http_client.make_request(
+                self._endpoint['get_keys'],
+                environmentId = environment_id,
+                segmentName = segment_name,
+                offset = 0
+            )
+           
+        return int(response['count'])
+
+
     def import_keys_from_json(self, segment_name, environment_id, replace_keys, data):
         '''
         import keys from csv file into segment
