@@ -210,7 +210,10 @@ class SegmentDefinition(BaseResource):
         if self._get_segment_from_sdk_endpoint(self._name):
             keys = self._segment_storage.keys
             self._segment_storage = None
-            return keys
+            return {
+                "keys": keys,
+                "count": len(keys)
+            }
 
         LOGGER.error("Failed to fetch segment %s keys", self._name)
         return None

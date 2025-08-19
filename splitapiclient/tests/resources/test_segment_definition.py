@@ -300,7 +300,7 @@ class TestSegmentDefinition:
             return {"name": "test_segment", "since": 223, "till": 223, "added": [], "removed": []}
             
         seg._fetch_segment_api = fetch_segment_api
-        assert seg.get_keys_from_sdk_endpoint("api") == {"key2", "key4", "key5"}
+        assert seg.get_keys_from_sdk_endpoint("api") == {"keys": {"key2", "key4", "key5"}, "count": 3}
         
         assert seg._build_basic_headers({"extra": "val"}) == {
             'Content-Type': 'application/json',
