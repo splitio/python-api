@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, \
 
 from splitapiclient.microclients import SegmentDefinitionMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
-from splitapiclient.resources import TrafficType
+from splitapiclient.resources import TrafficType, Environment
 
 def object_to_stringified_dict(obj):
     """
@@ -120,3 +120,47 @@ class TestSegmentDefinitionMicroClient:
         
         # Verify the result matches the expected count
         assert result == 5
+
+    def test_get_segment_from_sdk_endpoint(self, mocker):
+        # Create mock HTTP client
+        sc = SyncHttpClient('abc', 'abc')
+        env = Environment(
+            {
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
+            },
+            mocker.Mock()
+        )
+        env.sdkApiToken = "sdkapi"
+        
+        # Create segment definition with mock client
+        seg = SegmentDefinitionMicroClient(sc)
+
+        self.count = 0
+        def fetch_segment_api(*_):
+            self.count += 1
+            if self.count == 1:
+                return {"name": "test_segment", "since": -1, "till": 123, "added": ["key1", "key2"], "removed": []}
+
+            if self.count == 2:
+                return {"name": "test_segment", "since": 123, "till": 223, "added": ["key4", "key5"], "removed": ["key1"]}
+            
+            return {"name": "test_segment", "since": 223, "till": 223, "added": [], "removed": []}
+            
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_all_keys("test_segment", env) == {"keys": {"key2", "key4", "key5"}, "count": 3}
+        
+        assert seg._build_basic_headers({"extra": "val"}) == {
+            'Content-Type': 'application/json',
+            'Authorization': "Bearer sdkapi",
+            'extra': 'val'
+        }
