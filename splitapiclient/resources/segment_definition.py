@@ -185,7 +185,7 @@ class SegmentDefinition(BaseResource):
         imc = require_client('ChangeRequest', self._client, apiclient)
         return imc.submit_change_request(self._environment['id'], workspace_id, data)
 
-    def get_keys_from_sdk_endpoint(self, sdk_api_key):
+    def get_all_keys(self, sdk_api_key):
         '''
         Get list of keys in segment in environment
 
@@ -201,7 +201,7 @@ class SegmentDefinition(BaseResource):
         self._segment_storage = None
         self._segment_change_number = None
         self._metadata =  {
-            'SplitSDKVersion': 'python-10.4.0',
+            'SplitSDKVersion': 'python-3.6.0-wrapper',
         }
         self._backoff = Backoff(
                                 _ON_DEMAND_FETCH_BACKOFF_BASE,
