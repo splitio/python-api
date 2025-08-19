@@ -270,3 +270,41 @@ class TestSegmentDefinition:
         }
 
         assert attr.to_dict() == data1
+
+    def test_get_segment_from_sdk_endpoint(self, mocker):
+        # Create mock HTTP client
+        http_client_mock = mocker.Mock(spec=BaseHttpClient)
+        
+        # Create segment definition with mock client
+        seg = SegmentDefinition(
+            {
+                'name': 'test_segment',
+                'environment': {
+                    'id': 'env_123',
+                    'name': 'test_env'
+                },
+                'trafficType': {},
+            },
+            http_client_mock
+        )
+
+        self.count = 0
+        def fetch_segment_api(*_):
+            self.count += 1
+            if self.count == 1:
+                return {"name": "test_segment", "since": -1, "till": 123, "added": ["key1", "key2"], "removed": []}
+
+            if self.count == 2:
+                return {"name": "test_segment", "since": 123, "till": 223, "added": ["key4", "key5"], "removed": ["key1"]}
+            
+            return {"name": "test_segment", "since": 223, "till": 223, "added": [], "removed": []}
+            
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_keys_from_sdk_endpoint("api") == {"key2", "key4", "key5"}
+        
+        assert seg._build_basic_headers({"extra": "val"}) == {
+            'Content-Type': 'application/json',
+            'Authorization': "Bearer api",
+            'extra': 'val'
+        }
+        
