@@ -142,7 +142,7 @@ class TestSegmentDefinitionMicroClient:
             },
             mocker.Mock()
         )
-        env.sdkApiToken = "sdkapi"
+        env.sdkApiToken = "sdkapixxxxsdkapixxxxsdkapixxxx123456"
         
         # Create segment definition with mock client
         seg = SegmentDefinitionMicroClient(sc)
@@ -163,7 +163,7 @@ class TestSegmentDefinitionMicroClient:
         
         assert seg._build_basic_headers({"extra": "val"}) == {
             'Content-Type': 'application/json',
-            'Authorization': "Bearer sdkapi",
+            'Authorization': "Bearer sdkapixxxxsdkapixxxxsdkapixxxx123456",
             'extra': 'val'
         }
 
@@ -186,7 +186,7 @@ class TestSegmentDefinitionMicroClient:
             },
             mocker.Mock()
         )
-        env.sdkApiToken = "sdkapi"
+        env.sdkApiToken = "sdkapixxxxsdkapixxxxsdkapixxxx123456"
         
         # Create segment definition with mock client
         seg = SegmentDefinitionMicroClient(sc)
@@ -203,6 +203,13 @@ class TestSegmentDefinitionMicroClient:
         seg._fetch_segment_api = fetch_segment_api
         assert seg.get_all_keys("test_segment", env) == None
 
+        env.sdkApiToken = "1234"
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_all_keys("test_segment", env) == None
+
+        env.sdkApiToken = 1234
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_all_keys("test_segment", env) == None
 
     def test_errors_from_sdk_endpoint(self, mocker):
         # Create mock HTTP client

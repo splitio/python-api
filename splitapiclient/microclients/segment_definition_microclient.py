@@ -214,8 +214,7 @@ class SegmentDefinitionMicroClient:
         :returns: string of keys instance
         :rtype: string
         '''
-        if environment.sdkApiToken == None:
-            LOGGER.error("Environment object does not have the SDK Api Key set, please set it before calling this method.")
+        if not self._validate_sdkapi_key(environment.sdkApiToken):
             return None
 
         self._name = segment_name
@@ -240,6 +239,21 @@ class SegmentDefinitionMicroClient:
         LOGGER.error("Failed to fetch segment %s keys", self._name)
         return None
 
+    def _validate_sdkapi_key(self, sdkApiToken):
+        if sdkApiToken == None:
+            LOGGER.error("Environment object does not have the SDK Api Key set, please set it before calling this method.")
+            return False
+
+        if not isinstance(sdkApiToken, str):
+            LOGGER.error("SDK Api Key must be a string, please use a string to set it before calling this method.")
+            return False
+
+        if len(sdkApiToken) != 36:
+            LOGGER.error("SDK Api Key string is invalid, please set it before calling this method.")
+            return False
+        
+        return True
+        
     def _fetch_until(self, segment_name, fetch_options, till=None):
         """
         Hit endpoint, update storage and return when since==till.
