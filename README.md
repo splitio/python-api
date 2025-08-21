@@ -285,7 +285,14 @@ splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'c
 This build allows fetching segments keys from SDK Endpoints to speedup the download for big sized segments. 
 
 The function `client.segment_definitions.get_all_keys` takes 2 parameters, the segment name and an Environment object retrieved from `client.environments`
-If the function is successful, it will return a set of all segment keys. If any network issue or http returned codes are not within 200-300 range, None is returned. All errors are logged in debug mode. 
+If the function is successful, it will return a json below with set of all segment keys and the total keys count, see example below:
+```json
+{
+    "keys": {"key1", "key2", "key3"},
+    "count": 3
+}
+```
+If any network issue or http returned codes are not within 200-300 range, None is returned. All errors are logged in debug mode. 
 
 Below an example of fetching all segments keys in en environment.
 
