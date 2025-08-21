@@ -263,10 +263,13 @@ class SegmentDefinitionMicroClient:
             try:
                 segment_changes = self._fetch_segment_api(segment_name, change_number,
                                                           fetch_options)
+                if segment_changes == None:
+                    return None
+                
             except Exception as exc:
                 LOGGER.debug('Exception raised while fetching segment %s', segment_name)
                 LOGGER.error('Exception information: %s', str(exc))
-                raise exc
+                return None
 
             if change_number == -1:  # first time fetching the segment
                 new_segment = segments.from_raw(segment_changes)
@@ -301,6 +304,9 @@ class SegmentDefinitionMicroClient:
         while True:
             remaining_attempts -= 1
             change_number = self._fetch_until(segment_name, fetch_options, till)
+            if change_number == None:
+                return False, 0, None
+            
             if till is None or till <= change_number:
                 return True, remaining_attempts, change_number
 
@@ -325,12 +331,18 @@ class SegmentDefinitionMicroClient:
         """
         fetch_options = FetchOptions(True)  # Set Cache-Control to no-cache
         successful_sync, remaining_attempts, change_number = self._attempt_segment_sync(segment_name, fetch_options, till)
+        if change_number == None:
+            return False
+        
         attempts = _ON_DEMAND_FETCH_BACKOFF_MAX_RETRIES - remaining_attempts
         if successful_sync:  # succedeed sync
             LOGGER.debug('Refresh completed in %d attempts.', attempts)
             return True
         with_cdn_bypass = FetchOptions(True, change_number)  # Set flag for bypassing CDN
         without_cdn_successful_sync, remaining_attempts, change_number = self._attempt_segment_sync(segment_name, with_cdn_bypass, till)
+        if change_number == None:
+            return False
+
         without_cdn_attempts = _ON_DEMAND_FETCH_BACKOFF_MAX_RETRIES - remaining_attempts
         if without_cdn_successful_sync:
             LOGGER.debug('Refresh completed bypassing the CDN in %d attempts.',
@@ -352,13 +364,13 @@ class SegmentDefinitionMicroClient:
             if 200 <= response.status_code < 300:
                 return json.loads(response.text)
 
-            raise Exception(response.text, response.status_code)
-        except requests.HTTPError as exc:
+            return None
+        except Exception as exc:
             LOGGER.debug(
                 'Error fetching %s because an exception was raised by the HTTPClient',
                 segment_name)
             LOGGER.error(str(exc))
-            raise Exception('Segments not fetched properly.') from exc
+            return None
         
     def _build_basic_headers(self, extra_headers):
         """

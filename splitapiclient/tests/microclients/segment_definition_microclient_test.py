@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
+from unittest import mock
+import pytest
 
 from splitapiclient.microclients import SegmentDefinitionMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
@@ -164,3 +166,76 @@ class TestSegmentDefinitionMicroClient:
             'Authorization': "Bearer sdkapi",
             'extra': 'val'
         }
+
+    def test_errors_fetching_segment_keys(self, mocker):
+        # Create mock HTTP client
+        sc = SyncHttpClient('abc', 'abc')
+        env = Environment(
+            {
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
+            },
+            mocker.Mock()
+        )
+        env.sdkApiToken = "sdkapi"
+        
+        # Create segment definition with mock client
+        seg = SegmentDefinitionMicroClient(sc)
+
+        assert seg.get_all_keys("test_segment", env) == None
+
+        def fetch_segment_api(*_):
+            return None
+
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_all_keys("test_segment", env) == None
+
+#    @mock.patch('requests.models.Response.status_code', mock.Mock(side_effect = 404))
+    def test_errors_from_sdk_endpoint(self, mocker):
+        # Create mock HTTP client
+        sc = SyncHttpClient('abc', 'abc')
+        env = Environment(
+            {
+                'id': '123',
+                'name': 'env1',
+                'production':None,
+                'creationTime' : None,
+                'dataExportPermissions' : None,
+                'environmentType' : None,
+                'workspaceIds' : None,
+                'changePermissions' : None,
+                'type': None,
+                'orgId' : None,
+                'status' : None
+            },
+            mocker.Mock()
+        )
+        env.sdkApiToken = "sdkapi"
+        seg = SegmentDefinitionMicroClient(sc)
+
+        response_mock = mocker.Mock()
+        response_mock.status_code = 404
+        response_mock.headers = {}
+        response_mock.text = 'ok'
+        get_mock = mocker.Mock()
+        get_mock.return_value = response_mock
+        mocker.patch('requests.get', new=get_mock)
+        assert seg.get_all_keys("test_segment", env) == None
+        
+        response_mock = mocker.Mock()
+        response_mock.status_code = 400
+        response_mock.headers = {}
+        response_mock.text = 'ok'
+        get_mock = mocker.Mock()
+        get_mock.return_value = response_mock
+        mocker.patch('requests.get', new=get_mock)
+        assert seg.get_all_keys("test_segment", env) == None
