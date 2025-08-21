@@ -214,6 +214,10 @@ class SegmentDefinitionMicroClient:
         :returns: string of keys instance
         :rtype: string
         '''
+        if environment.sdkApiToken == None:
+            LOGGER.error("Environment object does not have the SDK Api Key set, please set it before calling this method.")
+            return None
+
         self._name = segment_name
         self._sdk_api_key = environment.sdkApiToken
         self._segment_storage = None

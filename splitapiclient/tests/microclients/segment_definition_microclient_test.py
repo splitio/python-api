@@ -199,7 +199,11 @@ class TestSegmentDefinitionMicroClient:
         seg._fetch_segment_api = fetch_segment_api
         assert seg.get_all_keys("test_segment", env) == None
 
-#    @mock.patch('requests.models.Response.status_code', mock.Mock(side_effect = 404))
+        env.sdkApiToken = None
+        seg._fetch_segment_api = fetch_segment_api
+        assert seg.get_all_keys("test_segment", env) == None
+
+
     def test_errors_from_sdk_endpoint(self, mocker):
         # Create mock HTTP client
         sc = SyncHttpClient('abc', 'abc')
