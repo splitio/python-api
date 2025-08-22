@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, \
 from splitapiclient.resources.base_resource import BaseResource
 from splitapiclient.util.helpers import require_client, as_dict
 from splitapiclient.resources import TrafficType
-from splitapiclient.resources import Environment
+
 import csv
 
 class SegmentDefinition(BaseResource):
@@ -172,3 +172,4 @@ class SegmentDefinition(BaseResource):
             data['rolloutStatus'] = {'id': rollout_status_id}
         imc = require_client('ChangeRequest', self._client, apiclient)
         return imc.submit_change_request(self._environment['id'], workspace_id, data)
+

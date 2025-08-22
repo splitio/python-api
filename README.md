@@ -281,6 +281,39 @@ definition= {"treatments":[ {"name":"on"},{"name":"off"}],
 }
 splitDef.submit_change_request(definition, 'UPDATE', 'updating default rule', 'comment', ['user@email.com'], '')
 ```
+### Segments Keys
+This build allows fetching segments keys from SDK Endpoints to speedup the download for big sized segments. 
+
+The function `client.segment_definitions.get_all_keys` takes 2 parameters, the segment name and an Environment object retrieved from `client.environments`
+If the function is successful, it will return a json below with set of all segment keys and the total keys count, see example below:
+```json
+{
+    "keys": {"key1", "key2", "key3"},
+    "count": 3
+}
+```
+If any network issue or http returned codes are not within 200-300 range, None is returned. All errors are logged in debug mode. 
+
+Below an example of fetching all segments keys in en environment.
+
+```python
+ws = client.workspaces.find("Default")
+env = client.environments.find("Production", ws.id)
+env.sdkApiToken = "SDK API Key (Server side)"
+
+for segDef in client.segment_definitions.list(env.id, ws.id):
+    print(segDef.name)
+    print("============")
+    keys = client.segment_definitions.get_all_keys(segDef.name, env)
+    if keys == None:
+        print("Failed to get keys, check debug logs")
+    else:
+        print ("Segment Keys: ")
+        print(keys)
+    print("\n")
+
+print("done.")
+```
 
 ### Rule-Based Segments
 

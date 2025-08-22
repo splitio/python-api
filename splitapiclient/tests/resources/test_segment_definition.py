@@ -269,4 +269,4 @@ class TestSegmentDefinition:
             'ruleBasedSegment': None
         }
 
-        assert attr.to_dict() == data1
+        assert attr.to_dict() == data1        

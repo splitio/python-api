@@ -52,7 +52,7 @@ class Environment(BaseResource):
         "status" : "string"
     }
 
-    def __init__(self, data=None, workspace_id=None, client=None):
+    def __init__(self, data=None, workspace_id=None, client=None, sdk_apikey=None):
         '''
         '''
         if not data:
@@ -70,7 +70,16 @@ class Environment(BaseResource):
         self._changePermissions = data.get("changePermissions") if "changePermissions" in data else {}
         self._apiTokens = data.get("apiTokens") if "apiTokens" in data else {}
         self._client = client
+        self._sdk_apikey = sdk_apikey
 
+    @property
+    def sdkApiToken(self):
+        return self._sdk_apikey
+
+    @sdkApiToken.setter
+    def sdkApiToken(self, value):
+        self._sdk_apikey = value
+        
     @property
     def apiTokens(self):
         return self._apiTokens

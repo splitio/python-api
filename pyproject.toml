@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "splitapiclient"
-version = "3.5.4"
+version = "3.6.0.rc.1"
 description = "This Python Library provide full support for Split REST Admin API, allow creating, deleting and editing Environments, Splits, Split Definitions, Segments, Segment Keys, Users, Groups, API Keys, Change Requests, Attributes and Identities"
 classifiers = [
     "Programming Language :: Python :: 3",
