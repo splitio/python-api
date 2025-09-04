@@ -108,45 +108,6 @@ class TestSegmentDefinition:
         )
         assert attr == True
 
-    def test_import_keys_from_json_large_batch(self, mocker):
-        """Test importing more than 10,000 keys to verify batch processing"""
-        # Create a large list of keys (e.g., 25,000)
-        large_key_list = [f"id{i}" for i in range(25000)]
-        data = {"keys": large_key_list, "comment": "large batch test"}
-        
-        # Mock the microclient
-        mock_imc = mocker.Mock()
-        mock_imc.import_keys_from_json.return_value = True
-        
-        # Mock the require_client function to return our mock
-        mocker.patch('splitapiclient.resources.segment_definition.require_client', 
-                    return_value=mock_imc)
-        
-        seg = SegmentDefinition(
-            {
-                'name': 'name',
-                'environment': {
-                    'id': '1',
-                    'name': 'env'
-                },
-                'trafficType': {},
-            }
-        )
-        
-        # Call the method
-        result = seg.import_keys_from_json(False, data)
-        
-        # Verify the method returns True when all batches succeed
-        assert result is True
-        
-        # Verify the microclient was called 3 times (for 25,000 keys)
-        assert mock_imc.import_keys_from_json.call_count == 3
-        
-        # Verify each batch had the correct number of keys
-        calls = mock_imc.import_keys_from_json.call_args_list
-        assert len(calls[0][0][3]['keys']) == 10000  # First batch
-        assert len(calls[1][0][3]['keys']) == 10000  # Second batch
-        assert len(calls[2][0][3]['keys']) == 5000   # Last batch
     
     def test_remove_keys(self, mocker):
         '''

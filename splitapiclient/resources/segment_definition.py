@@ -113,23 +113,8 @@ class SegmentDefinition(BaseResource):
         :rtype: boolean
         '''
         imc = require_client('SegmentDefinition', self._client, apiclient)
-        keys = json_data['keys']
-        if(len(keys) > 10000):
-            # Split keys into batches of 10,000
-            key_batches = [keys[i:i + 10000] for i in range(0, len(keys), 10000)]
-            success = True
-            # Process each batch
-            for key_batch in key_batches:
-                # Make a copy of the json_data to avoid modifying the original
-                batch_data = json_data.copy()
-                batch_data['keys'] = key_batch
-                # If any batch fails, mark the entire operation as failed
-                batch_result = imc.import_keys_from_json(self._name, self._environment['id'], replace_keys, batch_data)
-                if not batch_result:
-                    success = False
-            return success
-        else:
-            return imc.import_keys_from_json(self._name, self._environment['id'], replace_keys, json_data)
+        return imc.import_keys_from_json(self._name, self._environment['id'], replace_keys, json_data)
+
 
     def remove_keys(self, json_data, apiclient=None):
         '''
