@@ -119,14 +119,18 @@ class SegmentDefinition(BaseResource):
             key_batches = [keys[i:i + 10000] for i in range(0, len(keys), 10000)]
             success = True
             # Process each batch
+            first_batch = True
             for key_batch in key_batches:
                 # Make a copy of the json_data to avoid modifying the original
                 batch_data = json_data.copy()
                 batch_data['keys'] = key_batch
                 # If any batch fails, mark the entire operation as failed
-                batch_result = imc.import_keys_from_json(self._name, self._environment['id'], replace_keys, batch_data)
+                # First batch uses original replace_keys value, subsequent batches use False
+                batch_replace_keys = replace_keys if first_batch else False
+                batch_result = imc.import_keys_from_json(self._name, self._environment['id'], batch_replace_keys, batch_data)
                 if not batch_result:
                     success = False
+                first_batch = False
             return success
         else:
             return imc.import_keys_from_json(self._name, self._environment['id'], replace_keys, json_data)

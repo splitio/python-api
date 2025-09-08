@@ -49,3 +49,5 @@
 - fixed bug in listing large segments
 3.5.4 (Aug 12, 2025)
 - added method to retrieve segment definition key counts for standard segments
+3.5.5 (Sep 8, 2025)
+- fixed method to import segment keys of larger (10k+) segment keys appropriately
