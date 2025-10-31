@@ -125,11 +125,13 @@ class HarnessHttpClient(base_client.BaseHttpClient):
             400: HTTPIncorrectParametersError,
         }
 
+        # Format error message with status code
+        error_message = f"HTTP {response.status_code}: {response.text}"
         exc = status_codes_exceptions.get(response.status_code)
         if exc:
-            raise exc(response.text)
+            raise exc(error_message, response)
         else:
-            raise HTTPResponseError(response.text)
+            raise HTTPResponseError(error_message, response)
 
     def _handle_connection_error(self, e):
         '''

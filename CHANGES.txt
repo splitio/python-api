@@ -1,53 +1,485 @@
-1.0 (July 10th, 2017)
- - Initial release
-2.0 (June 23rd, 2019)
-- Added Workspace and update base URL to use v2
-3.0 (Nov 2nd, 2021)
-- Added support for Users, Groups, Splits, Split Definitions, Segments, Segments Definitions, Rollout dashboard, Change requests and API Keys
-3.0.2 (Nov 11th, 2021)
-- Added Added lastUpdatedTime and lastTrafficReceivedAt fields to split_definition.py class
-- Fixed issues with Attributes and Identities classes
-3.1.1 (May 2nd, 2022)
-- Added support for new Workspace API (add/modify/delete and permissions) and Environment permissions.
-- Added support to pass tags to splits.list() and splits.find()
-- Added support to pass environment_id and status to change_requests.list()
-3.1.2 (May 19th, 2022)
-- Added support for owners array in Split get and create endpoints.
-- Added support for get split details api endpoint.
-3.1.3 (Jun 21st, 2022)
-- Made tags optional parameter for client_splits.list() and client_splits.find()
-3.1.4 (Jul 11th, 2022)
-- Added tags property support for segment object.
-3.1.5 (Sept 8th, 2022)
-- Added `import_attributes_from_json` for trafficType object
-3.1.6 (Nov 2nd, 2022)
-- Added `baselineTreatment` for splitDefinition object
-3.1.7 (Mar 2nd, 2023)
-- Added `comment` and `title` as optional parameters for the `remove_from_environment` method of a Split
-- Updated default logging to be more useful
-3.1.8 (Jun 29nd, 2023)
-- Added suggestedValues for attributes
-3.1.9 (Sept 7th, 2023)
-- Fixed `to_dict()` method for Segments, Segment Definitions and Split Definitions
-3.1.10 (Oct 30, 2023)
-- Added scope options for admin api
-3.1.11 (Dec 13, 2023)
-- Added ability to get individual flag definitions with the `get_definition` method of splitDefinition
-3.1.12 (Jan 13, 2024)
-- Added ability to retrieve API keys when creating an environment
-3.1.13 (Jan 31, 2024)
-- Updated keyId of an API KEY to be the actual ID and not the key itself
-3.2.0 (Feb 2, 2025)
-- Updated to support flag sets, large segments and the impressionsDisabled boolean value
-3.5.0 (May 6, 2025)
-- Updated to support harness mode
-3.5.1 (June 20, 2025)
-- Updated to support rule based segments
+CHANGELOG
+=========
+
+This file tracks the version history and changes made to the Split/Harness FME Python API Client library.
+
+3.5.6 (October 31, 2025)
+-------------------------
+Bug Fixes:
+- Fixed TrafficType objects created by list() not having correct workspace_id
+  - TrafficTypeMicroClient.list() now properly passes workspace_id parameter
+  - Resolves issue where fetch_attributes() would fail on TrafficType objects from list()
+
+Improvements:
+- Enhanced HTTP error messages to include status codes
+  - Error messages now show "HTTP 404: ..." instead of just the response text
+  - Makes debugging API errors significantly easier
+  - Note: Error message format has changed; update any code doing exact string matching
+
+3.5.5 (September 8, 2025)
+-------------------------
+- Fixed segment key import behavior for large segments (10k+ keys)
+    - Corrected replace_keys flag to only apply on first batch during segmented key import
+
+
+3.5.4 (August 12, 2025)
+-----------------------
+- Added get_key_count() method to segment definitions
+    - Enables retrieval of key counts for standard segments without fetching all keys
+
+
+3.5.3 (July 10, 2025)
+---------------------
+- Fixed bug in large segment list method
+    - Corrected pagination handling for large segments
+
 3.5.2 (June 20, 2025)
-- fixed bug in updating rule based segments
-3.5.3 (Jul 10, 2025)
-- fixed bug in listing large segments
-3.5.4 (Aug 12, 2025)
-- added method to retrieve segment definition key counts for standard segments
-3.5.5 (Sep 8, 2025)
-- fixed method to import segment keys of larger (10k+) segment keys appropriately
+---------------------
+- Fixed critical bug in updating rule-based segments
+
+
+3.5.1 (June 20, 2025)
+---------------------
+Features:
+- Added full support for rule-based segments
+    - Implemented add_to_environment for rule-based segments
+    - Added remove_from_environment for rule-based segments
+    - Added support for segment rules with complex matchers
+    - Implemented excluded keys and excluded segments functionality
+    - Added pagination handling for rule-based segment keys
+- Fixed issue with 10k+ keys limit in segment operations
+- Updated README with comprehensive rule-based segment examples
+
+New Resources:
+- RuleBasedSegment - Create and manage segments with rule-based targeting
+- RuleBasedSegmentDefinition - Manage segment definitions in environments
+
+New Methods:
+- workspace.add_rule_based_segment() - Create rule-based segments
+- workspace.delete_rule_based_segment() - Remove rule-based segments
+- rule_based_segment.add_to_environment() - Deploy segments to environments
+- rule_based_segment.remove_from_environment() - Remove from environments
+- rule_based_segment_definition.update() - Update segment rules and exclusions
+- rule_based_segment_definition.submit_change_request() - Submit changes for approval
+
+3.5.0 (May 6, 2025)
+-------------------
+Major Features:
+- **Harness Mode Support** - Full integration with Harness platform APIs
+- Dual authentication system supporting both Split API keys and Harness tokens
+- Support for Harness-specific endpoints using x-api-key header format
+- Backward compatible with existing Split API functionality
+
+New Harness Resources:
+- HarnessApiKey - Manage Harness API keys and tokens
+- HarnessUser - User management in Harness
+- HarnessGroup - Group management in Harness
+- HarnessProject - Project management in Harness
+- ServiceAccount - Service account management
+- Token - Personal access token management
+- Role - Role-based access control
+- ResourceGroup - Resource grouping and permissions
+- RoleAssignment - Assign roles to users and groups
+- HarnessInvite - User invitation management
+
+New Microclients:
+- token - Token operations
+- harness_apikey - Harness API key operations
+- service_account - Service account operations
+- harness_user - Harness user operations
+- harness_group - Harness group operations
+- harness_project - Harness project operations
+- role - Role operations
+- resource_group - Resource group operations
+- role_assignment - Role assignment operations
+
+Configuration:
+- Added harness_mode configuration flag
+- Added harness_token for Harness authentication
+- Added account_identifier for Harness operations
+- Support for multiple base URLs (Split and Harness)
+
+Usage:
+  client = get_client({
+      'harness_mode': True,
+      'harness_token': 'YOUR_HARNESS_TOKEN',
+      'account_identifier': 'YOUR_ACCOUNT_ID'
+  })
+
+Breaking Changes for Harness Mode:
+- Deprecated endpoints in Harness mode:
+  - /workspaces: POST, PATCH, DELETE, PUT operations
+  - /apiKeys: POST for apiKeyType == 'admin'
+  - /users: All operations
+  - /groups: All operations
+  - /restrictions: All operations
+
+3.2.0 (February 2, 2025)
+------------------------
+Features:
+- Added support for flag sets
+- Implemented large segment support
+- Added impressionsDisabled boolean flag for split definitions
+- Fixed raw string deprecation warnings
+
+New Resources:
+- FlagSet - Group multiple feature flags together
+- LargeSegment - Handle segments with large numbers of keys
+- LargeSegmentDefinition - Manage large segment definitions
+
+New Methods:
+- client.flag_sets.list() - List all flag sets
+- client.flag_sets.create() - Create new flag sets
+- client.large_segments.list() - List large segments
+- client.large_segment_definitions.list() - List large segment definitions
+
+3.1.13 (January 31, 2024)
+-------------------------
+- Fixed API key ID handling
+    - Updated keyId to return actual ID instead of the key value itself
+    - Improved API key resource representation
+
+3.1.12 (January 13, 2024)
+-------------------------
+- Added ability to retrieve API tokens when creating an environment
+    - Environment creation now returns associated API keys
+
+3.1.11 (December 13, 2023)
+--------------------------
+- Added get_definition() method to SplitDefinition
+    - Enables retrieving individual flag definition details
+- Migrated project configuration from setup.py to pyproject.toml
+
+
+3.1.10 (October 30, 2023)
+-------------------------
+- Added scope options for Admin API keys
+
+
+3.1.9 (September 7, 2023)
+-------------------------
+Bug Fixes:
+- Fixed to_dict() method for Segment resources
+- Fixed to_dict() method for SegmentDefinition resources
+- Fixed to_dict() method for SplitDefinition resources
+- Improved HTTP error message handling and logging
+
+3.1.8 (June 29, 2023)
+---------------------
+- Added suggestedValues property for attributes
+    - Attributes can now include suggested value lists
+    - Useful for dropdown menus and validation in UI
+
+3.1.7 (March 2, 2023)
+---------------------
+Features:
+- Added comment parameter to remove_from_environment() method
+- Added title parameter to remove_from_environment() method
+- Enhanced split removal with change tracking metadata
+- Updated default logging configuration for better debugging
+- Improved error messages in HTTP client
+
+3.1.6 (November 2, 2022)
+------------------------
+- Added baselineTreatment property for SplitDefinition
+- Enables setting baseline treatment for A/B tests
+- Enhanced split configuration options
+
+3.1.5 (September 8, 2022)
+-------------------------
+- Added import_attributes_from_json() method for TrafficType
+- Enables bulk attribute import from JSON data
+- Streamlines attribute schema migration and setup
+
+3.1.4 (July 11, 2022)
+---------------------
+- Added tags property support for Segment object
+- Segments can now be tagged for organization
+- Enhanced segment metadata and categorization
+
+3.1.3 (June 21, 2022)
+---------------------
+- Made tags parameter optional for splits.list() method
+- Made tags parameter optional for splits.find() method
+- Improved method signatures for better usability
+
+3.1.2 (May 19, 2022)
+--------------------
+Features:
+- Added owners array support in Split get endpoint
+- Added owners array support in Split create endpoint
+- Added get() method for retrieving detailed split information
+- Enhanced split resource with ownership tracking
+
+3.1.1 (May 2, 2022)
+-------------------
+Major Features:
+- Implemented new Workspace Management API
+  - Create workspaces
+  - Update workspace properties
+  - Delete workspaces
+  - Manage workspace permissions
+- Implemented new Environment Management API
+  - Enhanced environment permissions
+  - Data export permissions
+  - Change permissions configuration
+- Added Restriction API for access control
+
+New Methods:
+- workspace.update() - Update workspace properties
+- workspace.delete() - Delete workspaces
+- environment.update() - Update environment fields
+- environment.delete() - Delete environments
+- client.restrictions.* - Manage restrictions
+
+Enhancements:
+- Added support for tags parameter in splits.list()
+- Added support for tags parameter in splits.find()
+- Added support for environment_id parameter in change_requests.list()
+- Added support for status parameter in change_requests.list()
+
+3.1.0 (May 2, 2022)
+-------------------
+- Initial release of 3.1.x series
+- See 3.1.1 for detailed changes
+
+3.0.3 (November 14, 2021)
+-------------------------
+Bug Fixes:
+- Added change request support for Segment class
+- Added missing properties to resource class schemas
+- Fixed schema validation issues
+- Updated and expanded test coverage
+- Improved API consistency across resources
+
+3.0.2 (November 11, 2021)
+-------------------------
+Features:
+- Added lastUpdatedTime field to SplitDefinition
+- Added lastTrafficReceivedAt field to SplitDefinition
+- Enhanced split definition tracking capabilities
+- Updated README with full library documentation link
+
+Bug Fixes:
+- Fixed issues with Attribute class initialization
+- Fixed issues with Identity class methods
+- Corrected property accessors in resource classes
+
+3.0.1 (November 9, 2021)
+------------------------
+- Fixed project description formatting for PyPI
+- Updated README formatting for better readability
+- Corrected pip installation documentation
+- Improved package metadata
+
+3.0.0 (November 2, 2021)
+------------------------
+Major Release - Full Admin API Support
+
+This is a major release that adds comprehensive support for the Split Admin API,
+transforming the library from a simple attribute/identity management tool into
+a full-featured Split platform administration client.
+
+New Resources:
+- User - User management and permissions
+- Group - User group management
+- Split - Feature flag management
+- SplitDefinition - Feature flag configuration per environment
+- Segment - User segment management
+- SegmentDefinition - Segment configuration per environment
+- ChangeRequest - Change request workflow
+- APIKey - API key management
+- Rollout - Rollout status and tracking
+
+New Microclients:
+- UserMicroClient - User operations
+- GroupMicroClient - Group operations
+- SplitMicroClient - Split/feature flag operations
+- SplitDefinitionMicroClient - Split definition operations
+- SegmentMicroClient - Segment operations
+- SegmentDefinitionMicroClient - Segment definition operations
+- ChangeRequestMicroClient - Change request operations
+- APIKeyMicroClient - API key operations
+
+New Helper Resources:
+- Treatment - Treatment configuration for splits
+- Bucket - Traffic allocation buckets
+- Rule - Targeting rule definitions
+- Matcher - Condition matching logic
+- Condition - Rule conditions
+- DefaultRule - Default treatment rules
+
+Major Features:
+- Complete split/feature flag lifecycle management
+  - Create, read, update, delete splits
+  - Add splits to environments
+  - Remove splits from environments
+  - Update split definitions
+  - Kill/restore splits
+- Segment management
+  - Create and manage user segments
+  - Add/remove keys from segments
+  - Segment targeting rules
+- User and group management
+  - Invite users
+  - Manage user groups
+  - User permissions
+- Change request workflow
+  - Submit change requests
+  - Approve/reject changes
+  - Track change status
+- API key management
+  - Create API keys
+  - Manage key permissions
+  - Key rotation
+- Enhanced workspace operations
+  - List workspaces
+  - Find workspaces by name
+  - Workspace-scoped operations
+
+API Changes:
+- Updated base URL to use /internal/api/v2
+- Improved error handling and validation
+- Better pagination support
+- Enhanced resource relationships
+
+Breaking Changes:
+- Base URL changed from v1 to v2
+- Some method signatures updated for consistency
+- Resource initialization patterns standardized
+
+2.0 (June 23, 2019)
+-------------------
+Features:
+- Added Workspace resource and operations
+- Updated base URL to use Split API v2
+- Enhanced organization and workspace management
+- Improved API client architecture
+
+Breaking Changes:
+- Base URL changed from v1 to v2
+- Some existing methods may have new signatures
+
+1.0.0 (July 10, 2017)
+---------------------
+Initial Release
+
+Core Features:
+- HTTP client for Split Admin API
+- Attribute management for traffic types
+- Identity management (create, update, bulk operations)
+- TrafficType resource
+- Environment resource
+- Synchronous API client
+
+Architecture:
+- BaseResource abstract class for resource objects
+- MicroClient pattern for API operations
+- BaseHttpClient for HTTP operations
+- Comprehensive test suite with mocked server
+- Python 2 and Python 3 compatibility
+
+Resources:
+- TrafficType - Define and manage traffic types
+- Attribute - Define attributes for traffic types
+- Identity - Manage user identities
+- Environment - Manage environments
+
+Operations:
+- attribute.save() - Create/update attributes
+- attribute.delete() - Remove attributes
+- environment.add_identity() - Add single identity
+- environment.add_identities() - Bulk add identities
+- traffic_type.fetch_attributes() - Get attributes for traffic type
+- traffic_type.add_attribute() - Add attribute to traffic type
+- traffic_type.add_identity() - Add identity to traffic type
+
+Client Features:
+- Flexible HTTP client architecture
+- Support for custom base URLs
+- Bearer token authentication
+- Comprehensive error handling
+- Validation helpers
+- CamelCase/snake_case conversion
+- BulkResult class for batch operations
+
+Testing:
+- Unit tests for all components
+- End-to-end tests with mock server
+- Test helpers and fixtures
+- Pytest integration
+
+Utilities:
+- logger.py - Configurable logging
+- validation.py - Input validation
+- camelcase.py - Name conversion
+- helpers.py - Common utility functions
+- exceptions.py - Custom exception classes
+
+Development (Pre-1.0)
+---------------------
+The library went through extensive development before the 1.0 release:
+
+June 2017:
+- Complete refactoring of resource and client architecture
+- Added comprehensive test coverage
+- Python 3 compatibility
+- Improved validation and error handling
+- Better logging configuration
+
+May-June 2017:
+- Initial client implementation
+- Basic resource models
+- HTTP client foundation
+- Test infrastructure setup
+
+================================================================================
+UPGRADING BETWEEN MAJOR VERSIONS
+================================================================================
+
+Upgrading from 3.x to 3.5.x (Harness Mode)
+------------------------------------------
+The 3.5.x release adds Harness mode support while maintaining full backward
+compatibility. Existing code will continue to work without changes.
+
+To use new Harness features:
+  client = get_client({
+      'harness_mode': True,
+      'harness_token': 'YOUR_TOKEN',
+      'account_identifier': 'YOUR_ACCOUNT'
+  })
+
+Note: Some Split endpoints are deprecated in Harness mode (see 3.5.0 notes).
+
+Upgrading from 2.x to 3.x
+--------------------------
+Version 3.0 is a major release with extensive new features. Most changes are
+additive, but note:
+
+1. Base URL updated to /internal/api/v2 (handled automatically)
+2. New required parameters for some operations
+3. Enhanced error handling may surface previously silent failures
+
+Existing attribute and identity code should work without changes.
+
+Upgrading from 1.x to 2.x
+--------------------------
+Version 2.0 introduced workspace support and updated the base URL.
+
+Key changes:
+1. Base URL changed to API v2
+2. Workspace concept introduced
+3. Some operations now require workspace_id parameter
+
+================================================================================
+CONTRIBUTING
+================================================================================
+
+This project follows semantic versioning:
+- Major version: Breaking changes
+- Minor version: New features, backward compatible
+- Patch version: Bug fixes, backward compatible
+
+For contribution guidelines, see the project repository.
+
+================================================================================
