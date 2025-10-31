@@ -18,8 +18,8 @@ Improvements:
 
 3.5.5 (September 8, 2025)
 -------------------------
-- Fixed segment key import behavior for large segments (10k+ keys)
-    - Corrected replace_keys flag to only apply on first batch during segmented key import
+- Fixed segment key import behavior for standard segments (10k+ keys)
+    - Corrected replace_keys flag to only apply on first batch during segment key import
 
 
 3.5.4 (August 12, 2025)
@@ -479,7 +479,5 @@ This project follows semantic versioning:
 - Major version: Breaking changes
 - Minor version: New features, backward compatible
 - Patch version: Bug fixes, backward compatible
-
-For contribution guidelines, see the project repository.
 
 ================================================================================
