@@ -49,7 +49,7 @@ class TrafficTypeMicroClient:
             self._endpoint['all_items'],
             workspaceId = workspace_id
         )
-        return [TrafficType(item, self._http_client) for item in response]
+        return [TrafficType(item, workspace_id, self._http_client) for item in response]
 
     def find(self, traffic_type_name, workspace_id):
         '''
