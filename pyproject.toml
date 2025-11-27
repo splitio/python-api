@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "splitapiclient"
-version = "3.5.6"
+version = "3.5.7"
+license = "Apache-2.0"
 description = "This Python Library provides full support for Split REST Admin API, allow creating, deleting and editing Environments, Splits, Split Definitions, Segments, Segment Keys, Users, Groups, API Keys, Change Requests, Attributes and Identities"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -44,8 +45,6 @@ dev = [
     "twine >= 3.4.0",
 ]
 
-[project.license]
-text = "Apache License 2.0"
 
 [project.readme]
 file = "README.md"
@@ -54,7 +53,7 @@ content-type = "text/markdown"
 [project.urls]
 Homepage = "https://github.com/splitio/python-api"
 "Bug Tracker" = "https://github.com/splitio/python-api/issues"
-Documentation = "https://help.split.io/hc/en-us/articles/4412331052685-Python-PyPi-library-for-Split-REST-Admin-API"
+Documentation = "https://developer.harness.io/docs/feature-management-experimentation/api/wrappers/python-admin-api/"
 
 [tool.aliases]
 test = "pytest"

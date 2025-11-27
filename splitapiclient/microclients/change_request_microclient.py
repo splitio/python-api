@@ -69,22 +69,32 @@ class ChangeRequestMicroClient:
         '''
         final_list = []
         afterMarker = 0
+        
+        # Build URL templates locally without mutating self._endpoint
+        list_initial_url = self._endpoint['list_initial']['url_template']
+        list_next_url = self._endpoint['list_next']['url_template']
+        
         if(environment_id!=None):
-            self._endpoint['list_next']['url_template'] = self._endpoint['list_next']['url_template'] + "&environmentId={environmentId}"
-            self._endpoint['list_initial']['url_template'] = self._endpoint['list_initial']['url_template'] + "&environmentId={environmentId}"
+            list_initial_url = list_initial_url + "&environmentId={environmentId}"
+            list_next_url = list_next_url + "&environmentId={environmentId}"
         if(status!=None):
-            self._endpoint['list_next']['url_template'] = self._endpoint['list_next']['url_template'] + "&status={status}"
-            self._endpoint['list_initial']['url_template'] = self._endpoint['list_initial']['url_template'] + "&status={status}" 
+            list_initial_url = list_initial_url + "&status={status}"
+            list_next_url = list_next_url + "&status={status}"
+        
         while True:
             if afterMarker==0:
+                # Create a new endpoint dict with modified URL template (keeping _endpoint immutable)
+                endpoint = {**self._endpoint['list_initial'], 'url_template': list_initial_url}
                 response = self._http_client.make_request(
-                    self._endpoint['list_initial'],
+                    endpoint,
                     status=status,
                     environmentId=environment_id               
                 )
             else:
+                # Create a new endpoint dict with modified URL template (keeping _endpoint immutable)
+                endpoint = {**self._endpoint['list_next'], 'url_template': list_next_url}
                 response = self._http_client.make_request(
-                    self._endpoint['list_next'],
+                    endpoint,
                     status=status,
                     environmentId=environment_id,
                     after = afterMarker

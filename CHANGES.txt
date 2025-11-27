@@ -3,6 +3,14 @@ CHANGELOG
 
 This file tracks the version history and changes made to the Split/Harness FME Python API Client library.
 
+3.5.7 (November 26, 2025)
+-------------------------
+Bug Fixes:
+- Fixed ChangeRequestMicroClient to keep it from mutating the _endpoint
+  - This will make it so repeated api calls don't make the URL too long for HTTP requests
+- updated license in pyproject.toml
+- updated url to harness from split in readme
+
 3.5.6 (October 31, 2025)
 -------------------------
 Bug Fixes:
