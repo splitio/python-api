@@ -94,3 +94,6 @@ ENV/
 #IDE
 .idea
 .DS_Store
+
+#uv.lock
+uv.lock
