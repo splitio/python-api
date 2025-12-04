@@ -57,13 +57,18 @@ class TestRoleMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = RoleMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/authz/api/roles?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
+        
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=0
         )
         SyncHttpClient.make_request.assert_any_call(
-            RoleMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=1
         )
@@ -103,8 +108,12 @@ class TestRoleMicroClient:
         result = rmc.get('role1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = RoleMicroClient._endpoint['get_role'].copy()
+        expected_endpoint['url_template'] = '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['get_role'],
+            expected_endpoint,
             roleId='role1',
             accountIdentifier='test_account'
         )
@@ -151,8 +160,12 @@ class TestRoleMicroClient:
         result = rmc.create(role_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = RoleMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/authz/api/roles?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['create'],
+            expected_endpoint,
             body=role_data,
             accountIdentifier='test_account'
         )
@@ -198,8 +211,12 @@ class TestRoleMicroClient:
         result = rmc.update('role1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = RoleMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             roleId='role1',
             accountIdentifier='test_account'
@@ -226,8 +243,12 @@ class TestRoleMicroClient:
         result = rmc.delete('role1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = RoleMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = 'roles/{roleId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            RoleMicroClient._endpoint['delete'],
+            expected_endpoint,
             roleId='role1',
             accountIdentifier='test_account'
         )

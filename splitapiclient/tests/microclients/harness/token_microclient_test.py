@@ -71,13 +71,18 @@ class TestTokenMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = TokenMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/token/aggregate?apiKeyType=SERVICE_ACCOUNT&accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
+        
         SyncHttpClient.make_request.assert_any_call(
-            TokenMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=0
         )
         SyncHttpClient.make_request.assert_any_call(
-            TokenMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=1
         )
@@ -135,7 +140,7 @@ class TestTokenMicroClient:
         result = tmc.get('token2')
         
         # Verify the list method was called with the correct parameters
-        tmc.list.assert_called_once_with(account_identifier='test_account')
+        tmc.list.assert_called_once_with(account_identifier='test_account', org_identifier=None, project_identifier=None)
         
         # Verify the result
         assert isinstance(result, Token)
@@ -171,8 +176,12 @@ class TestTokenMicroClient:
         result = tmc.create(token_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = TokenMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/token?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['create'],
+            expected_endpoint,
             body=token_data,
             accountIdentifier='test_account'
         )
@@ -214,8 +223,12 @@ class TestTokenMicroClient:
         result = tmc.update('token1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = TokenMicroClient._endpoint['update_token'].copy()
+        expected_endpoint['url_template'] = '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['update_token'],
+            expected_endpoint,
             body=update_data,
             tokenId='token1',
             accountIdentifier='test_account'
@@ -247,8 +260,12 @@ class TestTokenMicroClient:
         result = tmc.rotate('token1', 'parent1', 'api_key1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = TokenMicroClient._endpoint['rotate_token'].copy()
+        expected_endpoint['url_template'] = '/ng/api/token/rotate/{tokenId}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}&apiKeyIdentifier={apiKeyIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['rotate_token'],
+            expected_endpoint,
             tokenId='token1',
             parentIdentifier='parent1',
             apiKeyIdentifier='api_key1',
@@ -273,8 +290,12 @@ class TestTokenMicroClient:
         result = tmc.delete('token1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = TokenMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            TokenMicroClient._endpoint['delete'],
+            expected_endpoint,
             tokenId='token1',
             accountIdentifier='test_account'
         )

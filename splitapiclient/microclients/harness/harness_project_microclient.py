@@ -14,7 +14,7 @@ class HarnessProjectMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': '/ng/api/projects?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=50',
+            'url_template': '/ng/api/projects?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&pageIndex={pageIndex}&pageSize=50',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -25,7 +25,7 @@ class HarnessProjectMicroClient:
         },
         'get': {
             'method': 'GET',
-            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -36,7 +36,7 @@ class HarnessProjectMicroClient:
         },
         'create': {
             'method': 'POST',
-            'url_template': '/ng/api/projects?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/projects?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -47,7 +47,7 @@ class HarnessProjectMicroClient:
         },
         'update': {
             'method': 'PUT',
-            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -58,7 +58,7 @@ class HarnessProjectMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -69,27 +69,33 @@ class HarnessProjectMicroClient:
         },
     }
 
-    def __init__(self, http_client, account_identifier=None):
+    def __init__(self, http_client, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Constructor
 
         :param http_client: HTTP client to use for requests
         :param account_identifier: Default account identifier to use for all requests
+        :param org_identifier: Default organization identifier to use for all requests
+        :param project_identifier: Default project identifier to use for all requests
         '''
         self._http_client = http_client
         self._account_identifier = account_identifier
+        self._org_identifier = org_identifier
+        self._project_identifier = project_identifier
 
-    def list(self, account_identifier=None):
+    def list(self, account_identifier=None, org_identifier=None):
         '''
         Returns a list of HarnessProject objects.
 
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
         :returns: list of HarnessProject objects
         :rtype: list(HarnessProject)
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
             
         page_index = 0
         final_list = []
@@ -97,11 +103,21 @@ class HarnessProjectMicroClient:
         total_projects_seen = 0
         while True:
             try:
-
+                # Conditionally modify endpoint URL template to omit optional parameters if not provided
+                endpoint = self._endpoint['all_items'].copy()
+                if org_id is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+                
+                request_kwargs = {
+                    'pageIndex': page_index,
+                    'accountIdentifier': account_id
+                }
+                if org_id is not None:
+                    request_kwargs['orgIdentifier'] = org_id
+                    
                 response = self._http_client.make_request(
-                    self._endpoint['all_items'],
-                    pageIndex=page_index,
-                    accountIdentifier=account_id
+                    endpoint,
+                    **request_kwargs
                 )
 
                 data = response.get('data', {})
@@ -149,84 +165,136 @@ class HarnessProjectMicroClient:
             
         return [HarnessProject(item, self._http_client) for item in final_list]
 
-    def get(self, project_identifier, account_identifier=None):
+    def get(self, project_identifier, account_identifier=None, org_identifier=None):
         '''
         Get a specific project by ID
 
-        :param project_identifier: ID of the project to retrieve
+        :param project_identifier: ID of the project to retrieve (path parameter)
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
         :returns: HarnessProject object
         :rtype: HarnessProject
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['get'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        
+        request_kwargs = {
+            'projectIdentifier': project_identifier,  # Path parameter - replaces {projectIdentifier} in path
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
             
         response = self._http_client.make_request(
-            self._endpoint['get'],
-            projectIdentifier=project_identifier,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return HarnessProject(response.get('data', {}).get('project', {}), self._http_client)
 
-    def create(self, project_data, account_identifier=None):
+    def create(self, project_data, account_identifier=None, org_identifier=None):
         '''
         Create a new project
 
         :param project_data: Dictionary containing project data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
         :returns: newly created project
         :rtype: HarnessProject
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['create'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        
+        request_kwargs = {
+            'body': project_data,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
             
         response = self._http_client.make_request(
-            self._endpoint['create'],
-            body=project_data,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return HarnessProject(response.get('data', {}).get('project', {}), self._http_client)
 
-    def update(self, project_identifier, project_data, account_identifier=None):
+    def update(self, project_identifier, project_data, account_identifier=None, org_identifier=None):
         ''' 
         Update an existing project
 
-        :param project_identifier: ID of the project to update
+        :param project_identifier: ID of the project to update (path parameter)
         :param project_data: Dictionary containing updated project data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
         :returns: updated project
         :rtype: HarnessProject
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['update'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        
+        request_kwargs = {
+            'projectIdentifier': project_identifier,  # Path parameter - replaces {projectIdentifier} in path
+            'accountIdentifier': account_id,
+            'body': project_data
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
             
         response = self._http_client.make_request(
-            self._endpoint['update'],
-            projectIdentifier=project_identifier,
-            accountIdentifier=account_id,
-            body=project_data
+            endpoint,
+            **request_kwargs
         )
         return HarnessProject(response.get('data', {}).get('project', {}), self._http_client)
 
-    def delete(self, project_identifier, account_identifier=None):
+    def delete(self, project_identifier, account_identifier=None, org_identifier=None):
         '''
         Delete a project
 
-        :param project_identifier: ID of the project to delete
+        :param project_identifier: ID of the project to delete (path parameter)
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
         :returns: True if successful
         :rtype: bool
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['delete'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        
+        request_kwargs = {
+            'projectIdentifier': project_identifier,  # Path parameter - replaces {projectIdentifier} in path
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
             
         self._http_client.make_request(
-            self._endpoint['delete'],
-            projectIdentifier=project_identifier,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return True

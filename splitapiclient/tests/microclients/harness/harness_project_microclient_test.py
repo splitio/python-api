@@ -79,13 +79,18 @@ class TestHarnessProjectMicroClient:
         
         # Verify the make_request calls - should only be 2 calls now since we're respecting totalPages
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessProjectMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/projects?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=50'
+        
         SyncHttpClient.make_request.assert_any_call(
-            HarnessProjectMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=0,
             accountIdentifier='test_account'
         )
         SyncHttpClient.make_request.assert_any_call(
-            HarnessProjectMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=1,
             accountIdentifier='test_account'
         )
@@ -129,8 +134,12 @@ class TestHarnessProjectMicroClient:
         result = pmc.get('project1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier query params removed)
+        expected_endpoint = HarnessProjectMicroClient._endpoint['get'].copy()
+        expected_endpoint['url_template'] = '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessProjectMicroClient._endpoint['get'],
+            expected_endpoint,
             projectIdentifier='project1',
             accountIdentifier='test_account'
         )
@@ -181,8 +190,12 @@ class TestHarnessProjectMicroClient:
         result = pmc.create(project_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier removed)
+        expected_endpoint = HarnessProjectMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/projects?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessProjectMicroClient._endpoint['create'],
+            expected_endpoint,
             body=project_data,
             accountIdentifier='test_account'
         )
@@ -230,8 +243,12 @@ class TestHarnessProjectMicroClient:
         result = pmc.update('project1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier query params removed)
+        expected_endpoint = HarnessProjectMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessProjectMicroClient._endpoint['update'],
+            expected_endpoint,
             projectIdentifier='project1',
             accountIdentifier='test_account',
             body=update_data
@@ -258,8 +275,12 @@ class TestHarnessProjectMicroClient:
         result = pmc.delete('project1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier query params removed)
+        expected_endpoint = HarnessProjectMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/projects/{projectIdentifier}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessProjectMicroClient._endpoint['delete'],
+            expected_endpoint,
             projectIdentifier='project1',
             accountIdentifier='test_account'
         )

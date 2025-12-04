@@ -45,8 +45,12 @@ class TestServiceAccountMicroClient:
         result = samc.list()
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account'
         )
         
@@ -86,8 +90,12 @@ class TestServiceAccountMicroClient:
         result = samc.get('sa1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['item'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/aggregate/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['item'],
+            expected_endpoint,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
         )
@@ -133,8 +141,12 @@ class TestServiceAccountMicroClient:
         result = samc.create(sa_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['create'],
+            expected_endpoint,
             body=sa_data,
             accountIdentifier='test_account'
         )
@@ -178,8 +190,12 @@ class TestServiceAccountMicroClient:
         result = samc.update('sa1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
@@ -206,8 +222,12 @@ class TestServiceAccountMicroClient:
         result = samc.delete('sa1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['delete'],
+            expected_endpoint,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
         )

@@ -45,8 +45,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.list('parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             parentIdentifier='parent1'
         )
@@ -78,8 +82,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.list()
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             parentIdentifier=""
         )
@@ -116,8 +124,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.get('apikey1', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['get_apikey'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/aggregate/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            expected_endpoint,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account',
             parentIdentifier='parent1'
@@ -149,8 +161,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.get('nonexistent', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['get_apikey'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/aggregate/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            expected_endpoint,
             apiKeyIdentifier='nonexistent',
             accountIdentifier='test_account',
             parentIdentifier='parent1'
@@ -196,8 +212,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.create(apikey_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['create'],
+            expected_endpoint,
             body=apikey_data,
             accountIdentifier='test_account'
         )
@@ -242,8 +262,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.add_permissions('apikey1', permissions)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['add_permissions'].copy()
+        expected_endpoint['url_template'] = '/ng/api/roleassignments?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['add_permissions'],
+            expected_endpoint,
             body=permissions,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account'
@@ -267,8 +291,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.delete('apikey1', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['delete'],
+            expected_endpoint,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account',
             parentIdentifier='parent1'

@@ -51,13 +51,18 @@ class TestHarnessGroupMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
+        
         SyncHttpClient.make_request.assert_any_call(
-            HarnessGroupMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=0,
             accountIdentifier='test_account'
         )
         SyncHttpClient.make_request.assert_any_call(
-            HarnessGroupMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=1,
             accountIdentifier='test_account'
         )
@@ -79,10 +84,12 @@ class TestHarnessGroupMicroClient:
         
         # Mock the API response
         response_data = {
-            'identifier': 'group1',
-            'name': 'Group 1',
-            'accountIdentifier': 'test_account',
-            'users': []
+            'data': {
+                'identifier': 'group1',
+                'name': 'Group 1',
+                'accountIdentifier': 'test_account',
+                'users': []
+            }
         }
         
         # Set up the mock to return the response
@@ -92,8 +99,12 @@ class TestHarnessGroupMicroClient:
         result = gmc.get('group1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['get_group'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups/{groupIdentifier}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessGroupMicroClient._endpoint['get_group'],
+            expected_endpoint,
             groupIdentifier='group1',
             accountIdentifier='test_account'
         )
@@ -141,8 +152,12 @@ class TestHarnessGroupMicroClient:
         result = gmc.create(group_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessGroupMicroClient._endpoint['create'],
+            expected_endpoint,
             body=group_data,
             accountIdentifier='test_account'
         )
@@ -187,8 +202,12 @@ class TestHarnessGroupMicroClient:
         result = gmc.update(update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessGroupMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             accountIdentifier='test_account'
         )
@@ -214,8 +233,12 @@ class TestHarnessGroupMicroClient:
         result = gmc.delete('group1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups/{groupIdentifier}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessGroupMicroClient._endpoint['delete'],
+            expected_endpoint,
             groupIdentifier='group1',
             accountIdentifier='test_account'
         )

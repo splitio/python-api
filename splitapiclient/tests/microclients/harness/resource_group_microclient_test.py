@@ -65,13 +65,18 @@ class TestResourceGroupMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ResourceGroupMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/resourcegroup/api/v2/resourcegroup?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
+        
         SyncHttpClient.make_request.assert_any_call(
-            ResourceGroupMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=0
         )
         SyncHttpClient.make_request.assert_any_call(
-            ResourceGroupMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             pageIndex=1
         )
@@ -116,8 +121,12 @@ class TestResourceGroupMicroClient:
         result = rgmc.get('rg1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ResourceGroupMicroClient._endpoint['get_resource_group'].copy()
+        expected_endpoint['url_template'] = '/resourcegroup/api/v2/resourcegroup/{resourceGroupId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ResourceGroupMicroClient._endpoint['get_resource_group'],
+            expected_endpoint,
             resourceGroupId='rg1',
             accountIdentifier='test_account'
         )
@@ -174,8 +183,12 @@ class TestResourceGroupMicroClient:
         result = rgmc.create(rg_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ResourceGroupMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/resourcegroup/api/v2/resourcegroup?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ResourceGroupMicroClient._endpoint['create'],
+            expected_endpoint,
             body=rg_data,
             accountIdentifier='test_account'
         )
@@ -227,8 +240,12 @@ class TestResourceGroupMicroClient:
         result = rgmc.update('rg1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ResourceGroupMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/resourcegroup/api/v2/resourcegroup/{resourceGroupId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ResourceGroupMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             resourceGroupId='rg1',
             accountIdentifier='test_account'
@@ -255,8 +272,12 @@ class TestResourceGroupMicroClient:
         result = rgmc.delete('rg1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ResourceGroupMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/resourcegroup/api/v2/resourcegroup/{resourceGroupId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ResourceGroupMicroClient._endpoint['delete'],
+            expected_endpoint,
             resourceGroupId='rg1',
             accountIdentifier='test_account'
         )

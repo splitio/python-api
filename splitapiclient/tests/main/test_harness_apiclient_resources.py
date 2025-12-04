@@ -326,7 +326,7 @@ class TestHarnessApiClientResources:
                 return user_detail_response
             elif '/ng/api/user-groups' in url_template and '{groupIdentifier}' not in url_template and method == 'GET':
                 return group_response
-            elif '/ng/api/user-groups/{groupIdentifier}' in url_template and method == 'GET':
+            elif '/ng/api/user-groups' in url_template and '{groupIdentifier}' in url_template and method == 'GET':
                 return group_detail_response
             elif '/authz/api/roles' in url_template and '{roleId}' not in url_template and method == 'GET':
                 return role_response
@@ -334,15 +334,15 @@ class TestHarnessApiClientResources:
                 return role_detail_response
             elif '/authz/api/resourceGroups' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
                 return resource_group_response
-            elif '/resourcegroup/api/v2/resourceGroup' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
+            elif '/resourcegroup/api/v2/resourcegroup' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
                 return resource_group_response
             elif '/authz/api/resourceGroups/{resourceGroupId}' in url_template and method == 'GET':
                 return resource_group_detail_response
-            elif '/resourcegroup/api/v2/resourceGroup/{resourceGroupId}' in url_template and method == 'GET':
+            elif '/resourcegroup/api/v2/resourcegroup/{resourceGroupId}' in url_template and method == 'GET':
                 return resource_group_detail_response
-            elif '/authz/api/roleAssignments' in url_template and '{roleAssignmentId}' not in url_template and method == 'GET':
+            elif '/authz/api/roleassignments' in url_template and '{roleAssignmentId}' not in url_template and method == 'GET':
                 return role_assignment_response
-            elif '/authz/api/roleAssignments/{roleAssignmentId}' in url_template and method == 'GET':
+            elif '/authz/api/roleassignments/{roleAssignmentId}' in url_template and method == 'GET':
                 return role_assignment_detail_response
             elif '/ng/api/projects/aggregate' in url_template and method == 'GET':
                 return project_response

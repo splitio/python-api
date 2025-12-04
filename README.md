@@ -58,6 +58,15 @@ client = get_client({
     'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
     'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
 })
+
+# Option 3: Include optional org_identifier and project_identifier
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID',
+    'org_identifier': 'YOUR_ORG_ID',        # Optional: organization identifier
+    'project_identifier': 'YOUR_PROJECT_ID' # Optional: project identifier
+})
 ```
 
 ### Working with Split Resources in Harness Mode
@@ -97,15 +106,30 @@ Basic example:
 # Account identifier is required for all Harness operations
 account_id = 'YOUR_ACCOUNT_IDENTIFIER'
 
-# List all tokens
+# List all tokens (org_identifier and project_identifier are optional)
 tokens = client.token.list(account_id)
 for token in tokens:
     print(f"Token: {token.name}, ID: {token.id}")
 
-# List service accounts
-service_accounts = client.service_account.list(account_id)
+# List service accounts with org and project identifiers
+org_id = 'YOUR_ORG_IDENTIFIER'
+project_id = 'YOUR_PROJECT_IDENTIFIER'
+service_accounts = client.service_account.list(account_id, org_identifier=org_id, project_identifier=project_id)
 for sa in service_accounts:
     print(f"Service Account: {sa.name}, ID: {sa.id}")
+
+# If org_identifier and project_identifier are set at client initialization, you can omit them
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': account_id,
+    'org_identifier': org_id,
+    'project_identifier': project_id
+})
+
+# Now you can call methods without specifying identifiers
+service_accounts = client.service_account.list()  # Uses default identifiers
+projects = client.harness_project.list()  # Uses default identifiers
 ```
 
 For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
@@ -133,21 +157,43 @@ client.harness_user.add_user_to_groups(user.id, [group.id], account_id)
 
 For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
 
-### Setting Default Account Identifier
+### Setting Default Identifiers
 
-To avoid specifying the account identifier with every request:
+To avoid specifying identifiers with every request, you can set default values when creating the client:
 
 ```python
-# Set default account identifier when creating the client
+# Set default identifiers when creating the client
 client = get_client({
     'harness_mode': True,
     'harness_token': 'YOUR_HARNESS_TOKEN',
-    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER'
+    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER',  # Required
+    'org_identifier': 'YOUR_ORG_IDENTIFIER',          # Optional
+    'project_identifier': 'YOUR_PROJECT_IDENTIFIER'   # Optional
 })
 
-# Now you can make calls without specifying account_identifier in each request
+# Now you can make calls without specifying identifiers in each request
 tokens = client.token.list()  # account_identifier is automatically included
-projects = client.harness_project.list()  # account_identifier is automatically included
+projects = client.harness_project.list()  # account_identifier and org_identifier are automatically included (project_identifier is not used for projects endpoint)
+```
+
+**Note on Optional Identifiers:**
+- `account_identifier` is **required** for all Harness operations
+- `org_identifier` and `project_identifier` are **optional** and will be omitted from API requests if not provided
+- If `org_identifier` or `project_identifier` are not set, they will not appear in the URL at all (not even as empty parameters)
+- **Important:** The `harness_project` microclient does **not** support `project_identifier` as a query parameter. The projects endpoint only uses `org_identifier` (and `account_identifier`). Other microclients (service_account, token, role, etc.) do support `project_identifier`.
+- You can override default identifiers by passing them as parameters to individual method calls:
+
+```python
+# Override default identifiers for a specific request
+# Note: project_identifier is not used for harness_project endpoints
+projects = client.harness_project.list(
+    account_identifier='DIFFERENT_ACCOUNT_ID',
+    org_identifier='DIFFERENT_ORG_ID'
+)
+
+# Use default identifiers but override only org_identifier
+# Note: project_identifier is not used for harness_project endpoints
+projects = client.harness_project.list(org_identifier='DIFFERENT_ORG_ID')
 ```
 
 ## Quick Setup

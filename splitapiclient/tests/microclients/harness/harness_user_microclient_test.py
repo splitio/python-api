@@ -57,13 +57,18 @@ class TestHarnessUserMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user/aggregate?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}'
+        
         SyncHttpClient.make_request.assert_any_call(
-            HarnessUserMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=0,
             accountIdentifier='test_account'
         )
         SyncHttpClient.make_request.assert_any_call(
-            HarnessUserMicroClient._endpoint['all_items'],
+            expected_endpoint,
             pageIndex=1,
             accountIdentifier='test_account'
         )
@@ -85,11 +90,15 @@ class TestHarnessUserMicroClient:
         
         # Mock the API response
         response_data = {
-            'uuid': 'user1',
-            'name': 'User 1',
-            'email': 'user1@example.com',
-            'accountIdentifier': 'test_account',
-            'status': 'ACTIVE'
+            'data': {
+                'user': {
+                    'uuid': 'user1',
+                    'name': 'User 1',
+                    'email': 'user1@example.com',
+                    'accountIdentifier': 'test_account',
+                    'status': 'ACTIVE'
+                }
+            }
         }
         
         # Set up the mock to return the response
@@ -99,8 +108,12 @@ class TestHarnessUserMicroClient:
         result = umc.get('user1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['get_user'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user/aggregate/{userId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessUserMicroClient._endpoint['get_user'],
+            expected_endpoint,
             userId='user1',
             accountIdentifier='test_account'
         )
@@ -140,8 +153,12 @@ class TestHarnessUserMicroClient:
         result = umc.invite(user_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['invite'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user/users?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessUserMicroClient._endpoint['invite'],
+            expected_endpoint,
             body=user_data,
             accountIdentifier='test_account'
         )
@@ -181,8 +198,12 @@ class TestHarnessUserMicroClient:
         result = umc.update('user1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user/{userId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessUserMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             userId='user1',
             accountIdentifier='test_account'
@@ -215,8 +236,12 @@ class TestHarnessUserMicroClient:
         result = umc.add_user_to_groups('user1', group_ids)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['add_user_to_groups'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user/add-user-to-groups/{userId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessUserMicroClient._endpoint['add_user_to_groups'],
+            expected_endpoint,
             body={"userGroupIdsToAdd": group_ids},
             userId='user1',
             accountIdentifier='test_account'
@@ -243,8 +268,12 @@ class TestHarnessUserMicroClient:
         result = umc.delete_pending('invite1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['delete_pending'].copy()
+        expected_endpoint['url_template'] = '/ng/api/invites/{inviteId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessUserMicroClient._endpoint['delete_pending'],
+            expected_endpoint,
             inviteId='invite1',
             accountIdentifier='test_account'
         )
@@ -295,13 +324,18 @@ class TestHarnessUserMicroClient:
         
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessUserMicroClient._endpoint['list_pending'].copy()
+        expected_endpoint['url_template'] = '/ng/api/invites/aggregate?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_any_call(
-            HarnessUserMicroClient._endpoint['list_pending'],
+            expected_endpoint,
             pageIndex=0,
             accountIdentifier='test_account'
         )
         SyncHttpClient.make_request.assert_any_call(
-            HarnessUserMicroClient._endpoint['list_pending'],
+            expected_endpoint,
             pageIndex=1,
             accountIdentifier='test_account'
         )
