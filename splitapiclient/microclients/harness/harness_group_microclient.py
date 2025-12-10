@@ -14,7 +14,7 @@ class HarnessGroupMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': '/ng/api/user-groups?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}&pageIndex={pageIndex}&pageSize=100',
+            'url_template': '/ng/api/user-groups?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}&pageIndex={pageIndex}&pageSize=100&filterType={filterType}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -83,13 +83,14 @@ class HarnessGroupMicroClient:
         self._org_identifier = org_identifier
         self._project_identifier = project_identifier
 
-    def list(self, account_identifier=None, org_identifier=None, project_identifier=None):
+    def list(self, account_identifier=None, org_identifier=None, project_identifier=None, filterType=None):
         '''
         Returns a list of HarnessGroup objects.
 
         :param account_identifier: Account identifier to use for this request, overrides the default
         :param org_identifier: Organization identifier to use for this request, overrides the default
         :param project_identifier: Project identifier to use for this request, overrides the default
+        :param filterType: Filter type to use for filtering groups
         :returns: list of HarnessGroup objects
         :rtype: list(HarnessGroup)
         '''
@@ -109,6 +110,8 @@ class HarnessGroupMicroClient:
                     endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
                 if project_id is None:
                     endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+                if filterType is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&filterType={filterType}', '')
                 
                 request_kwargs = {
                     'pageIndex': page_index,
@@ -118,6 +121,8 @@ class HarnessGroupMicroClient:
                     request_kwargs['orgIdentifier'] = org_id
                 if project_id is not None:
                     request_kwargs['projectIdentifier'] = project_id
+                if filterType is not None:
+                    request_kwargs['filterType'] = filterType
                     
                 response = self._http_client.make_request(
                     endpoint,

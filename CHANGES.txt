@@ -3,7 +3,7 @@ CHANGELOG
 
 This file tracks the version history and changes made to the Split/Harness FME Python API Client library.
 
-3.5.8 (December 4, 2025)
+3.5.8 (December 5, 2025)
 -------------------------
 Features:
 - Added optional org_identifier and project_identifier support for Harness microclients
@@ -12,6 +12,7 @@ Features:
   - When not provided, they are completely omitted from URLs rather than being passed as empty strings
   - Applies to all Harness microclients: harness_project, harness_user, harness_group, 
     harness_apikey, service_account, token, role, resource_group, and role_assignment
+Added filterType support to the group endpoint
 
 3.5.7 (November 26, 2025)
 -------------------------

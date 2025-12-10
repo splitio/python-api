@@ -154,6 +154,28 @@ new_sa = client.service_account.create(sa_data, account_id)
 client.harness_user.add_user_to_groups(user.id, [group.id], account_id)
 ```
 
+### Harness Groups
+
+The `harness_group.list()` method supports an optional `filterType` parameter to filter groups:
+
+```python
+# List all groups (default behavior)
+all_groups = client.harness_group.list()
+
+# List groups with filterType to exclude inherited groups
+groups = client.harness_group.list(filterType='EXCLUDE_INHERITED_GROUPS')
+
+# List groups with filterType and other optional parameters
+groups = client.harness_group.list(
+    account_identifier='YOUR_ACCOUNT_ID',
+    org_identifier='YOUR_ORG_ID',
+    project_identifier='YOUR_PROJECT_ID',
+    filterType='INCLUDE_INHERITED_GROUPS'
+)
+```
+
+**Note:** The `filterType` parameter is optional. When not provided (or set to `None`), it will be omitted from the API request. Valid values depend on the Harness API specification.
+
 
 For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
 

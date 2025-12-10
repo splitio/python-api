@@ -52,7 +52,7 @@ class TestHarnessGroupMicroClient:
         # Verify the make_request calls
         assert SyncHttpClient.make_request.call_count == 2
         
-        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        # Create expected endpoint with modified URL template (orgIdentifier, projectIdentifier, and filterType removed)
         expected_endpoint = HarnessGroupMicroClient._endpoint['all_items'].copy()
         expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
         
@@ -245,3 +245,169 @@ class TestHarnessGroupMicroClient:
         
         # Verify the result
         assert result is True
+
+    def test_list_with_filter_type(self, mocker):
+        '''
+        Test listing groups with filterType parameter
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
+        
+        # Mock the API response for the first page
+        first_page_data = {
+            'data': {
+                'content': [
+                    {
+                        'identifier': 'group1',
+                        'name': 'Group 1',
+                        'accountIdentifier': 'test_account',
+                        'users': []
+                    }
+                ]
+            }
+        }
+        
+        # Mock the API response for the second page (empty to end pagination)
+        second_page_data = {
+            'data': {
+                'content': []
+            }
+        }
+        
+        # Set up the mock to return different responses for different calls
+        SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
+        
+        # Call the method being tested with filterType
+        result = gmc.list(filterType='EXCLUDE_INHERITED_GROUPS')
+        
+        # Verify the make_request calls
+        assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with filterType included, but orgIdentifier and projectIdentifier removed
+        expected_endpoint = HarnessGroupMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100&filterType={filterType}'
+        
+        SyncHttpClient.make_request.assert_any_call(
+            expected_endpoint,
+            pageIndex=0,
+            accountIdentifier='test_account',
+            filterType='EXCLUDE_INHERITED_GROUPS'
+        )
+        SyncHttpClient.make_request.assert_any_call(
+            expected_endpoint,
+            pageIndex=1,
+            accountIdentifier='test_account',
+            filterType='EXCLUDE_INHERITED_GROUPS'
+        )
+        
+        # Verify the result
+        assert len(result) == 1
+        assert isinstance(result[0], HarnessGroup)
+        assert result[0]._identifier == 'group1'
+
+    def test_list_with_filter_type_and_org_identifier(self, mocker):
+        '''
+        Test listing groups with filterType and org_identifier parameters
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        gmc = HarnessGroupMicroClient(sc, 'test_account', org_identifier='test_org')
+        
+        # Mock the API response for the first page
+        first_page_data = {
+            'data': {
+                'content': [
+                    {
+                        'identifier': 'group1',
+                        'name': 'Group 1',
+                        'accountIdentifier': 'test_account',
+                        'users': []
+                    }
+                ]
+            }
+        }
+        
+        # Mock the API response for the second page (empty to end pagination)
+        second_page_data = {
+            'data': {
+                'content': []
+            }
+        }
+        
+        # Set up the mock to return different responses for different calls
+        SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
+        
+        # Call the method being tested with filterType
+        result = gmc.list(filterType='INCLUDE_INHERITED_GROUPS')
+        
+        # Verify the make_request calls
+        assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with filterType and orgIdentifier included, but projectIdentifier removed
+        expected_endpoint = HarnessGroupMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&pageIndex={pageIndex}&pageSize=100&filterType={filterType}'
+        
+        SyncHttpClient.make_request.assert_any_call(
+            expected_endpoint,
+            pageIndex=0,
+            accountIdentifier='test_account',
+            orgIdentifier='test_org',
+            filterType='INCLUDE_INHERITED_GROUPS'
+        )
+        
+        # Verify the result
+        assert len(result) == 1
+        assert isinstance(result[0], HarnessGroup)
+
+    def test_list_with_filter_type_none(self, mocker):
+        '''
+        Test listing groups with filterType=None (should be omitted from URL)
+        '''
+        mocker.patch('splitapiclient.http_clients.sync_client.SyncHttpClient.make_request')
+        sc = SyncHttpClient('abc', 'abc')
+        gmc = HarnessGroupMicroClient(sc, 'test_account')
+        
+        # Mock the API response for the first page
+        first_page_data = {
+            'data': {
+                'content': [
+                    {
+                        'identifier': 'group1',
+                        'name': 'Group 1',
+                        'accountIdentifier': 'test_account',
+                        'users': []
+                    }
+                ]
+            }
+        }
+        
+        # Mock the API response for the second page (empty to end pagination)
+        second_page_data = {
+            'data': {
+                'content': []
+            }
+        }
+        
+        # Set up the mock to return different responses for different calls
+        SyncHttpClient.make_request.side_effect = [first_page_data, second_page_data]
+        
+        # Call the method being tested with filterType=None (explicit)
+        result = gmc.list(filterType=None)
+        
+        # Verify the make_request calls
+        assert SyncHttpClient.make_request.call_count == 2
+        
+        # Create expected endpoint with filterType removed (since it's None)
+        expected_endpoint = HarnessGroupMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/user-groups?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100'
+        
+        SyncHttpClient.make_request.assert_any_call(
+            expected_endpoint,
+            pageIndex=0,
+            accountIdentifier='test_account'
+        )
+        
+        # Verify the result
+        assert len(result) == 1
+        assert isinstance(result[0], HarnessGroup)
