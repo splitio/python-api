@@ -8,18 +8,17 @@ Full documentation on this Python wrapper is available in [this link](https://he
 
 ## Using in Harness Mode
 
-Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
+Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features.
 
 For detailed information about Harness API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
 
 ### Authentication in Harness Mode
 
-The client supports multiple authentication scenarios:
+**Important:** Harness mode requires a `harness_token` (Harness API key). Split API keys (`apikey`) are **not supported** in harness mode.
 
-1. Harness-specific endpoints always use the 'x-api-key' header format
-2. Split endpoints will use the 'x-api-key' header when using the harness_token
-3. Split endpoints will use the normal 'Authorization' header when using the apikey
-4. If both harness_token and apikey are provided, the client will use the harness_token for Harness endpoints and the apikey for Split endpoints
+If your account has been migrated to Harness, you should create a new Harness API key to use with this client. The `harness_token` is used for both Split API endpoints and Harness-specific endpoints via the `x-api-key` header.
+
+For non-migrated accounts that need to use Split API keys with Bearer authentication, use the standard (non-harness) mode instead.
 
 ### Base URLs and Endpoints
 
@@ -44,22 +43,14 @@ To use the client in harness mode:
 ```python
 from splitapiclient.main import get_client
 
-# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
+# Basic harness mode setup with required harness_token
 client = get_client({
     'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
-    'apikey': 'YOUR_SPLIT_API_KEY',         # Used for existing Split endpoints
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Required: Harness API key
     'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'  # Required for Harness operations
 })
 
-# Option 2: Use harness_token for all operations (if apikey is not provided)
-client = get_client({
-    'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
-    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
-})
-
-# Option 3: Include optional org_identifier and project_identifier
+# Include optional org_identifier and project_identifier
 client = get_client({
     'harness_mode': True,
     'harness_token': 'YOUR_HARNESS_TOKEN',
