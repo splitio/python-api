@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
+import warnings
 from splitapiclient.main.apiclient import BaseApiClient
 from splitapiclient.http_clients.harness_client import HarnessHttpClient
 from splitapiclient.util.exceptions import InsufficientConfigArgumentsException
@@ -45,14 +46,18 @@ class HarnessApiClient(BaseApiClient):
         Class constructor.
 
         :param config: Dictionary containing options required to instantiate
-            the API client. Should have AT LEAST one of the following keys:
-                - 'apikey': Split API key for authentication with Split endpoints
-                - 'harness_token': Harness authentication token used for x-api-key header with Harness endpoints
-                  If harness_token is not provided, apikey will be used for all operations
+            the API client. Required keys:
+                - 'harness_token': Harness authentication token used for x-api-key header
+                  This token is used for both Split API and Harness API endpoints.
+                  Note: Split API keys (apikey) are not supported in harness mode.
+                  Migrated accounts should create new Harness API keys.
+            Optional keys:
                 - 'base_url': Base url where the Split API is hosted (optional, defaults to Split URL)
                 - 'base_url_v3': Base url where the Split API v3 is hosted (optional, defaults to Split URL)
                 - 'harness_base_url': Base url where the Harness API is hosted (optional, defaults to Harness URL)
                 - 'account_identifier': Harness account identifier to use for all Harness operations (optional)
+                - 'org_identifier': Harness organization identifier to use for all Harness operations (optional)
+                - 'project_identifier': Harness project identifier to use for all Harness operations (optional)
         '''
         # Set up Split API base URLs for existing endpoints
         if 'base_url' in config:
@@ -72,30 +77,28 @@ class HarnessApiClient(BaseApiClient):
         else:
             self._harness_base_url = self.BASE_HARNESS_URL
 
-        # Check if at least one authentication method is provided
-        if 'apikey' not in config and 'harness_token' not in config:
+        # Require harness_token in harness mode
+        if 'harness_token' not in config:
             raise InsufficientConfigArgumentsException(
-                'At least one of the following keys must be present in the config dict for harness mode: apikey, harness_token'
+                'harness_token is required in harness mode. Split API keys (apikey) are not supported by this client. '
+                'Please create a Harness API key for your migrated account and use the harness_token for authentication.'
             )
 
-        # Set up authentication tokens
-        self._apikey = config.get('apikey')
-        self._harness_token = config.get('harness_token')
+        # Use harness_token for all operations
+        self._harness_token = config['harness_token']
+        auth_token = self._harness_token
         
-        # If harness_token is not provided, use apikey for all operations
-        # If apikey is not provided, use harness_token for all operations
-        split_auth_token = self._apikey if self._apikey else self._harness_token
-        harness_auth_token = self._harness_token if self._harness_token else self._apikey
-        
-        # Store the account identifier
+        # Store the account identifier, org identifier, and project identifier
         self._account_identifier = config.get('account_identifier')
+        self._org_identifier = config.get('org_identifier')
+        self._project_identifier = config.get('project_identifier')
         
-        # Create HTTP clients for Split endpoints
-        split_http_client = HarnessHttpClient(self._base_url, split_auth_token)
-        split_http_clientv3 = HarnessHttpClient(self._base_url_v3, split_auth_token)
+        # Create HTTP clients - use same token for both Split and Harness endpoints
+        split_http_client = HarnessHttpClient(self._base_url, auth_token)
+        split_http_clientv3 = HarnessHttpClient(self._base_url_v3, auth_token)
         
         # Create HTTP client for Harness endpoints
-        harness_http_client = HarnessHttpClient(self._harness_base_url, harness_auth_token)
+        harness_http_client = HarnessHttpClient(self._harness_base_url, auth_token)
         
         # Standard microclients using Split endpoints
         self._environment_client = EnvironmentMicroClient(split_http_client)
@@ -114,15 +117,15 @@ class HarnessApiClient(BaseApiClient):
         self._flag_set_client = FlagSetMicroClient(split_http_clientv3)
         
         # Harness-specific microclients using Harness endpoints
-        self._token_client = TokenMicroClient(harness_http_client, self._account_identifier)
-        self._harness_apikey_client = HarnessApiKeyMicroClient(harness_http_client, self._account_identifier)
-        self._service_account_client = ServiceAccountMicroClient(harness_http_client, self._account_identifier)
-        self._harness_user_client = HarnessUserMicroClient(harness_http_client, self._account_identifier)
-        self._harness_group_client = HarnessGroupMicroClient(harness_http_client, self._account_identifier)
-        self._role_client = RoleMicroClient(harness_http_client, self._account_identifier)
-        self._resource_group_client = ResourceGroupMicroClient(harness_http_client, self._account_identifier)
-        self._role_assignment_client = RoleAssignmentMicroClient(harness_http_client, self._account_identifier)
-        self._harness_project_client = HarnessProjectMicroClient(harness_http_client, self._account_identifier)
+        self._token_client = TokenMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._harness_apikey_client = HarnessApiKeyMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._service_account_client = ServiceAccountMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._harness_user_client = HarnessUserMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._harness_group_client = HarnessGroupMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._role_client = RoleMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._resource_group_client = ResourceGroupMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._role_assignment_client = RoleAssignmentMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
+        self._harness_project_client = HarnessProjectMicroClient(harness_http_client, self._account_identifier, self._org_identifier, self._project_identifier)
 
     @property
     def traffic_types(self):

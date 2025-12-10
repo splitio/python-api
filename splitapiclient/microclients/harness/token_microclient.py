@@ -14,7 +14,7 @@ class TokenMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': '/ng/api/token/aggregate?apiKeyType=SERVICE_ACCOUNT&accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100',
+            'url_template': '/ng/api/token/aggregate?apiKeyType=SERVICE_ACCOUNT&accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}&pageIndex={pageIndex}&pageSize=100',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -25,7 +25,7 @@ class TokenMicroClient:
         },
         'create': {
             'method': 'POST',
-            'url_template': '/ng/api/token?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/token?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -36,7 +36,7 @@ class TokenMicroClient:
         },
         'rotate_token': {
             'method': 'POST',
-            'url_template': '/ng/api/token/rotate/{tokenId}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}&apiKeyIdentifier={apiKeyIdentifier}',
+            'url_template': '/ng/api/token/rotate/{tokenId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}&apiKeyIdentifier={apiKeyIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -47,7 +47,7 @@ class TokenMicroClient:
         },
         'update_token': {
             'method': 'PUT',
-            'url_template': '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -58,7 +58,7 @@ class TokenMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}',
+            'url_template': '/ng/api/token/{tokenId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -69,36 +69,59 @@ class TokenMicroClient:
         },
     }
 
-    def __init__(self, http_client, account_identifier=None):
+    def __init__(self, http_client, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Constructor
 
         :param http_client: HTTP client to use for requests
         :param account_identifier: Default account identifier to use for all requests
+        :param org_identifier: Default organization identifier to use for all requests
+        :param project_identifier: Default project identifier to use for all requests
         '''
         self._http_client = http_client
         self._account_identifier = account_identifier
+        self._org_identifier = org_identifier
+        self._project_identifier = project_identifier
 
-    def list(self, account_identifier=None):
+    def list(self, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Returns a list of Token objects.
 
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: list of Token objects
         :rtype: list(Token)
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
         
         page_index = 0
         final_list = []
         while True:
             try:
+                # Conditionally modify endpoint URL template to omit optional parameters if not provided
+                endpoint = self._endpoint['all_items'].copy()
+                if org_id is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+                if project_id is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+                
+                request_kwargs = {
+                    'accountIdentifier': account_id,
+                    'pageIndex': page_index
+                }
+                if org_id is not None:
+                    request_kwargs['orgIdentifier'] = org_id
+                if project_id is not None:
+                    request_kwargs['projectIdentifier'] = project_id
+                    
                 response = self._http_client.make_request(
-                    self._endpoint['all_items'],
-                    accountIdentifier=account_id,
-                    pageIndex=page_index
+                    endpoint,
+                    **request_kwargs
                 )
                 data = response.get('data', {})
                 
@@ -118,12 +141,14 @@ class TokenMicroClient:
         
         return [Token(item, self._http_client) for item in final_list]
 
-    def get(self, token_id, account_identifier=None):
+    def get(self, token_id, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Get a specific token by ID
 
         :param token_id: ID of the token to retrieve
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: Token object
         :rtype: Token
         '''
@@ -131,17 +156,21 @@ class TokenMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
             
-        tokens = self.list(account_identifier=account_id)
+        tokens = self.list(account_identifier=account_id, org_identifier=org_id, project_identifier=project_id)
         # Since tokens is already a list of Token objects, we need to check the _identifier attribute
         return next((token for token in tokens if token._identifier == token_id), None)
 
-    def create(self, token_data, account_identifier=None):
+    def create(self, token_data, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Create a new token
 
         :param token_data: Dictionary containing token data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: newly created token
         :rtype: Token
         '''
@@ -149,21 +178,40 @@ class TokenMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['create'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'body': token_data,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['create'],
-            body=token_data,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return response.get('data', "")
 
-    def update(self, token_id, update_data, account_identifier=None):
+    def update(self, token_id, update_data, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Update a token
 
         :param token_id: ID of the token to update
         :param update_data: Dictionary containing update data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: updated token
         :rtype: Token
         '''
@@ -171,17 +219,34 @@ class TokenMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['update_token'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'body': update_data,
+            'tokenId': token_id,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['update_token'],
-            body=update_data,
-            tokenId=token_id,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return Token(response.get('data', {}), self._http_client)
 
 
-    def rotate(self, token_id, parent_identifier, api_key_identifier, account_identifier=None):
+    def rotate(self, token_id, parent_identifier, api_key_identifier, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Rotate a token
 
@@ -189,6 +254,8 @@ class TokenMicroClient:
         :param parent_identifier: Parent identifier for the token
         :param api_key_identifier: API key identifier for the token
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: rotated token
         :rtype: string
         '''
@@ -196,22 +263,41 @@ class TokenMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['rotate_token'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'tokenId': token_id,
+            'parentIdentifier': parent_identifier,
+            'apiKeyIdentifier': api_key_identifier,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['rotate_token'],
-            tokenId=token_id,
-            parentIdentifier=parent_identifier,
-            apiKeyIdentifier=api_key_identifier,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return response.get('data', "")
 
-    def delete(self, token_id, account_identifier=None):
+    def delete(self, token_id, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Delete a token
 
         :param token_id: ID of the token to delete
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: True if successful
         :rtype: bool
         '''
@@ -219,10 +305,27 @@ class TokenMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['delete'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'tokenId': token_id,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         self._http_client.make_request(
-            self._endpoint['delete'],
-            tokenId=token_id,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return True

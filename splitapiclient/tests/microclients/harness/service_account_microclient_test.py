@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
+import json
 from splitapiclient.microclients.harness import ServiceAccountMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.harness_client import HarnessHttpClient
 from splitapiclient.resources.harness import ServiceAccount
+from splitapiclient.tests.microclients.harness.conftest import FakeResponse
 
 
 class TestServiceAccountMicroClient:
@@ -45,8 +48,12 @@ class TestServiceAccountMicroClient:
         result = samc.list()
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account'
         )
         
@@ -86,8 +93,12 @@ class TestServiceAccountMicroClient:
         result = samc.get('sa1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['item'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/aggregate/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['item'],
+            expected_endpoint,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
         )
@@ -133,8 +144,12 @@ class TestServiceAccountMicroClient:
         result = samc.create(sa_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['create'],
+            expected_endpoint,
             body=sa_data,
             accountIdentifier='test_account'
         )
@@ -178,8 +193,12 @@ class TestServiceAccountMicroClient:
         result = samc.update('sa1', update_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['update'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['update'],
+            expected_endpoint,
             body=update_data,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
@@ -206,11 +225,190 @@ class TestServiceAccountMicroClient:
         result = samc.delete('sa1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = ServiceAccountMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/serviceaccount/{serviceAccountId}?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            ServiceAccountMicroClient._endpoint['delete'],
+            expected_endpoint,
             serviceAccountId='sa1',
             accountIdentifier='test_account'
         )
         
         # Verify the result
         assert result is True
+
+
+class TestServiceAccountURLGeneration:
+    """
+    Tests that verify actual URL generation by mocking at the requests level.
+    These tests ensure that optional parameters (orgIdentifier, projectIdentifier)
+    are correctly included or excluded from the final URL.
+    """
+
+    # =========================================================================
+    # LIST method URL tests
+    # =========================================================================
+
+    def test_list_url_without_optional_identifiers(self, mocker):
+        """Verify list URL doesn't contain orgIdentifier/projectIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account')
+        client.list()
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_org_identifier_only(self, mocker):
+        """Verify list URL contains orgIdentifier when set, but not projectIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='org1')
+        client.list()
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_project_identifier_only(self, mocker):
+        """Verify list URL contains projectIdentifier when set, but not orgIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', project_identifier='proj1')
+        client.list()
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_list_url_with_both_identifiers(self, mocker):
+        """Verify list URL contains both orgIdentifier and projectIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='org1', project_identifier='proj1')
+        client.list()
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_list_url_with_method_override_identifiers(self, mocker):
+        """Verify list URL uses method parameters to override instance defaults"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='default_org', project_identifier='default_proj')
+        client.list(org_identifier='override_org', project_identifier='override_proj')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=override_org' in called_url
+        assert 'projectIdentifier=override_proj' in called_url
+        assert 'default_org' not in called_url
+        assert 'default_proj' not in called_url
+
+    # =========================================================================
+    # GET method URL tests
+    # =========================================================================
+
+    def test_get_url_without_optional_identifiers(self, mocker):
+        """Verify get URL doesn't contain orgIdentifier/projectIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'serviceAccount': {'identifier': 'sa1', 'name': 'SA1', 'description': '', 'email': '', 'tags': {}}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account')
+        client.get('sa1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/serviceaccount/aggregate/sa1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_get_url_with_org_identifier_only(self, mocker):
+        """Verify get URL contains orgIdentifier when set, but not projectIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'serviceAccount': {'identifier': 'sa1', 'name': 'SA1', 'description': '', 'email': '', 'tags': {}}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='org1')
+        client.get('sa1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/serviceaccount/aggregate/sa1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_get_url_with_project_identifier_only(self, mocker):
+        """Verify get URL contains projectIdentifier when set, but not orgIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'serviceAccount': {'identifier': 'sa1', 'name': 'SA1', 'description': '', 'email': '', 'tags': {}}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', project_identifier='proj1')
+        client.get('sa1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/serviceaccount/aggregate/sa1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_get_url_with_both_identifiers(self, mocker):
+        """Verify get URL contains both orgIdentifier and projectIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'serviceAccount': {'identifier': 'sa1', 'name': 'SA1', 'description': '', 'email': '', 'tags': {}}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='org1', project_identifier='proj1')
+        client.get('sa1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/serviceaccount/aggregate/sa1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_get_url_with_method_override_identifiers(self, mocker):
+        """Verify get URL uses method parameters to override instance defaults"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'serviceAccount': {'identifier': 'sa1', 'name': 'SA1', 'description': '', 'email': '', 'tags': {}}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = ServiceAccountMicroClient(hc, 'test_account', org_identifier='default_org', project_identifier='default_proj')
+        client.get('sa1', org_identifier='override_org', project_identifier='override_proj')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/serviceaccount/aggregate/sa1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=override_org' in called_url
+        assert 'projectIdentifier=override_proj' in called_url
+        assert 'default_org' not in called_url
+        assert 'default_proj' not in called_url

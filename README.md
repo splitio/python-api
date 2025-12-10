@@ -8,18 +8,17 @@ Full documentation on this Python wrapper is available in [this link](https://he
 
 ## Using in Harness Mode
 
-Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness APIs. This is required for usage in environments that have been migrated to Harness and want to use the new features. Existing API keys will continue to work with the non-deprecated endpoints after migration, but new Harness Tokens will be required for Harness mode.
+Starting with version 3.5.0, the Split API client supports operating in "harness mode" to interact with both Split and Harness APIs. This is required for usage in environments that have been migrated to Harness **and** want to use the new features. Operating not in harness mode will work as it did before with existing Split bearer tokens, but the deprecated endpoints mentioned below will not function.
 
 For detailed information about Harness API endpoints, please refer to the [official Harness API documentation](https://apidocs.harness.io/).
 
 ### Authentication in Harness Mode
 
-The client supports multiple authentication scenarios:
+**Important:** Harness mode requires a `harness_token` (Harness API key). Split API keys (`apikey`) are **not supported** in harness mode.
 
-1. Harness-specific endpoints always use the 'x-api-key' header format
-2. Split endpoints will use the 'x-api-key' header when using the harness_token
-3. Split endpoints will use the normal 'Authorization' header when using the apikey
-4. If both harness_token and apikey are provided, the client will use the harness_token for Harness endpoints and the apikey for Split endpoints
+If your account has been migrated to Harness, you should create a new Harness API key to use with this client. The `harness_token` is used for both Split API endpoints and Harness-specific endpoints via the `x-api-key` header.
+
+For non-migrated accounts that need to use Split API keys with Bearer authentication, use the standard (non-harness) mode instead.
 
 ### Base URLs and Endpoints
 
@@ -44,19 +43,20 @@ To use the client in harness mode:
 ```python
 from splitapiclient.main import get_client
 
-# Option 1: Use harness_token for Harness endpoints and apikey for Split endpoints
+# Basic harness mode setup with required harness_token
 client = get_client({
     'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for Harness-specific endpoints
-    'apikey': 'YOUR_SPLIT_API_KEY',         # Used for existing Split endpoints
+    'harness_token': 'YOUR_HARNESS_TOKEN',  # Required: Harness API key
     'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'  # Required for Harness operations
 })
 
-# Option 2: Use harness_token for all operations (if apikey is not provided)
+# Include optional org_identifier and project_identifier
 client = get_client({
     'harness_mode': True,
-    'harness_token': 'YOUR_HARNESS_TOKEN',  # Used for both Harness and Split endpoints
-    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID'
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': 'YOUR_HARNESS_ACCOUNT_ID',
+    'org_identifier': 'YOUR_ORG_ID',        # Optional: organization identifier
+    'project_identifier': 'YOUR_PROJECT_ID' # Optional: project identifier
 })
 ```
 
@@ -97,15 +97,30 @@ Basic example:
 # Account identifier is required for all Harness operations
 account_id = 'YOUR_ACCOUNT_IDENTIFIER'
 
-# List all tokens
+# List all tokens (org_identifier and project_identifier are optional)
 tokens = client.token.list(account_id)
 for token in tokens:
     print(f"Token: {token.name}, ID: {token.id}")
 
-# List service accounts
-service_accounts = client.service_account.list(account_id)
+# List service accounts with org and project identifiers
+org_id = 'YOUR_ORG_IDENTIFIER'
+project_id = 'YOUR_PROJECT_IDENTIFIER'
+service_accounts = client.service_account.list(account_id, org_identifier=org_id, project_identifier=project_id)
 for sa in service_accounts:
     print(f"Service Account: {sa.name}, ID: {sa.id}")
+
+# If org_identifier and project_identifier are set at client initialization, you can omit them
+client = get_client({
+    'harness_mode': True,
+    'harness_token': 'YOUR_HARNESS_TOKEN',
+    'account_identifier': account_id,
+    'org_identifier': org_id,
+    'project_identifier': project_id
+})
+
+# Now you can call methods without specifying identifiers
+service_accounts = client.service_account.list()  # Uses default identifiers
+projects = client.harness_project.list()  # Uses default identifiers
 ```
 
 For most creation, update, and delete endpoints for harness specific resources, you will need to pass through the JSON body directly. 
@@ -130,24 +145,68 @@ new_sa = client.service_account.create(sa_data, account_id)
 client.harness_user.add_user_to_groups(user.id, [group.id], account_id)
 ```
 
+### Harness Groups
+
+The `harness_group.list()` method supports an optional `filterType` parameter to filter groups:
+
+```python
+# List all groups (default behavior)
+all_groups = client.harness_group.list()
+
+# List groups with filterType to exclude inherited groups
+groups = client.harness_group.list(filterType='EXCLUDE_INHERITED_GROUPS')
+
+# List groups with filterType and other optional parameters
+groups = client.harness_group.list(
+    account_identifier='YOUR_ACCOUNT_ID',
+    org_identifier='YOUR_ORG_ID',
+    project_identifier='YOUR_PROJECT_ID',
+    filterType='INCLUDE_INHERITED_GROUPS'
+)
+```
+
+**Note:** The `filterType` parameter is optional. When not provided (or set to `None`), it will be omitted from the API request. Valid values depend on the Harness API specification.
+
 
 For detailed examples and API specifications for each resource, please refer to the [Harness API documentation](https://apidocs.harness.io/).
 
-### Setting Default Account Identifier
+### Setting Default Identifiers
 
-To avoid specifying the account identifier with every request:
+To avoid specifying identifiers with every request, you can set default values when creating the client:
 
 ```python
-# Set default account identifier when creating the client
+# Set default identifiers when creating the client
 client = get_client({
     'harness_mode': True,
     'harness_token': 'YOUR_HARNESS_TOKEN',
-    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER'
+    'account_identifier': 'YOUR_ACCOUNT_IDENTIFIER',  # Required
+    'org_identifier': 'YOUR_ORG_IDENTIFIER',          # Optional
+    'project_identifier': 'YOUR_PROJECT_IDENTIFIER'   # Optional
 })
 
-# Now you can make calls without specifying account_identifier in each request
+# Now you can make calls without specifying identifiers in each request
 tokens = client.token.list()  # account_identifier is automatically included
-projects = client.harness_project.list()  # account_identifier is automatically included
+projects = client.harness_project.list()  # account_identifier and org_identifier are automatically included (project_identifier is not used for projects endpoint)
+```
+
+**Note on Optional Identifiers:**
+- `account_identifier` is **required** for all Harness operations
+- `org_identifier` and `project_identifier` are **optional** and will be omitted from API requests if not provided
+- If `org_identifier` or `project_identifier` are not set, they will not appear in the URL at all (not even as empty parameters)
+- **Important:** The `harness_project` microclient does **not** support `project_identifier` as a query parameter. The projects endpoint only uses `org_identifier` (and `account_identifier`). Other microclients (service_account, token, role, etc.) do support `project_identifier`.
+- You can override default identifiers by passing them as parameters to individual method calls:
+
+```python
+# Override default identifiers for a specific request
+# Note: project_identifier is not used for harness_project endpoints
+projects = client.harness_project.list(
+    account_identifier='DIFFERENT_ACCOUNT_ID',
+    org_identifier='DIFFERENT_ORG_ID'
+)
+
+# Use default identifiers but override only org_identifier
+# Note: project_identifier is not used for harness_project endpoints
+projects = client.harness_project.list(org_identifier='DIFFERENT_ORG_ID')
 ```
 
 ## Quick Setup

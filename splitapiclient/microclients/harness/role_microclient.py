@@ -14,7 +14,7 @@ class RoleMicroClient:
     _endpoint = {
         'all_items': {
             'method': 'GET',
-            'url_template': '/authz/api/roles?accountIdentifier={accountIdentifier}&pageIndex={pageIndex}&pageSize=100',
+            'url_template': '/authz/api/roles?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}&pageIndex={pageIndex}&pageSize=100',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -25,7 +25,7 @@ class RoleMicroClient:
         },
         'get_role': {
             'method': 'GET',
-            'url_template': '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}',
+            'url_template': '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -36,7 +36,7 @@ class RoleMicroClient:
         },
         'create': {
             'method': 'POST',
-            'url_template': '/authz/api/roles?accountIdentifier={accountIdentifier}',
+            'url_template': '/authz/api/roles?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -47,7 +47,7 @@ class RoleMicroClient:
         },
         'update': {
             'method': 'PUT',
-            'url_template': '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}',
+            'url_template': '/authz/api/roles/{roleId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -58,7 +58,7 @@ class RoleMicroClient:
         },
         'delete': {
             'method': 'DELETE',
-            'url_template': 'roles/{roleId}?accountIdentifier={accountIdentifier}',
+            'url_template': 'roles/{roleId}?accountIdentifier={accountIdentifier}&orgIdentifier={orgIdentifier}&projectIdentifier={projectIdentifier}',
             'headers': [{
                 'name': 'x-api-key',
                 'template': '{value}',
@@ -69,36 +69,59 @@ class RoleMicroClient:
         },
     }
 
-    def __init__(self, http_client, account_identifier=None):
+    def __init__(self, http_client, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Constructor
 
         :param http_client: HTTP client to use for requests
         :param account_identifier: Default account identifier to use for all requests
+        :param org_identifier: Default organization identifier to use for all requests
+        :param project_identifier: Default project identifier to use for all requests
         '''
         self._http_client = http_client
         self._account_identifier = account_identifier
+        self._org_identifier = org_identifier
+        self._project_identifier = project_identifier
 
-    def list(self, account_identifier=None):
+    def list(self, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Returns a list of Role objects.
 
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: list of Role objects
         :rtype: list(Role)
         '''
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
             
         page_index = 0
         final_list = []
         while True:
             try:
+                # Conditionally modify endpoint URL template to omit optional parameters if not provided
+                endpoint = self._endpoint['all_items'].copy()
+                if org_id is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+                if project_id is None:
+                    endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+                
+                request_kwargs = {
+                    'accountIdentifier': account_id,
+                    'pageIndex': page_index
+                }
+                if org_id is not None:
+                    request_kwargs['orgIdentifier'] = org_id
+                if project_id is not None:
+                    request_kwargs['projectIdentifier'] = project_id
+                    
                 response = self._http_client.make_request(
-                    self._endpoint['all_items'],
-                    accountIdentifier=account_id,
-                    pageIndex=page_index
+                    endpoint,
+                    **request_kwargs
                 )
                 data = response.get('data', {})
                 content_obj = data.get('content', []) if isinstance(data.get('content'), list) else []
@@ -117,12 +140,14 @@ class RoleMicroClient:
             
         return [Role(item, self._http_client) for item in final_list]
 
-    def get(self, role_id, account_identifier=None):
+    def get(self, role_id, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Get a specific role by ID
 
         :param role_id: ID of the role to retrieve
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: Role object
         :rtype: Role
         '''
@@ -130,20 +155,39 @@ class RoleMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['get_role'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'roleId': role_id,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['get_role'],
-            roleId=role_id,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return Role(response.get('data', {}).get('role', {}), self._http_client)
 
-    def create(self, role_data, account_identifier=None):
+    def create(self, role_data, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Create a new role
 
         :param role_data: Dictionary containing role data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: newly created role
         :rtype: Role
         '''
@@ -151,21 +195,40 @@ class RoleMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['create'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'body': role_data,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['create'],
-            body=role_data,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return Role(response.get('data', {}).get('role', {}), self._http_client)
 
-    def update(self, role_id, update_data, account_identifier=None):
+    def update(self, role_id, update_data, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Update a role
 
         :param role_id: ID of the role to update
         :param update_data: Dictionary containing update data
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: updated role
         :rtype: Role
         '''
@@ -173,21 +236,40 @@ class RoleMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['update'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'body': update_data,
+            'roleId': role_id,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         response = self._http_client.make_request(
-            self._endpoint['update'],
-            body=update_data,
-            roleId=role_id,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return Role(response.get('data', {}).get('role', {}), self._http_client)
 
-    def delete(self, role_id, account_identifier=None):
+    def delete(self, role_id, account_identifier=None, org_identifier=None, project_identifier=None):
         '''
         Delete a role
 
         :param role_id: ID of the role to delete
         :param account_identifier: Account identifier to use for this request, overrides the default
+        :param org_identifier: Organization identifier to use for this request, overrides the default
+        :param project_identifier: Project identifier to use for this request, overrides the default
         :returns: True if successful
         :rtype: bool
         '''
@@ -195,10 +277,27 @@ class RoleMicroClient:
         account_id = account_identifier if account_identifier is not None else self._account_identifier
         if account_id is None:
             raise ValueError("account_identifier must be provided either at client initialization or method call")
+        org_id = org_identifier if org_identifier is not None else self._org_identifier
+        project_id = project_identifier if project_identifier is not None else self._project_identifier
+            
+        # Conditionally modify endpoint URL template to omit optional parameters if not provided
+        endpoint = self._endpoint['delete'].copy()
+        if org_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&orgIdentifier={orgIdentifier}', '')
+        if project_id is None:
+            endpoint['url_template'] = endpoint['url_template'].replace('&projectIdentifier={projectIdentifier}', '')
+        
+        request_kwargs = {
+            'roleId': role_id,
+            'accountIdentifier': account_id
+        }
+        if org_id is not None:
+            request_kwargs['orgIdentifier'] = org_id
+        if project_id is not None:
+            request_kwargs['projectIdentifier'] = project_id
             
         self._http_client.make_request(
-            self._endpoint['delete'],
-            roleId=role_id,
-            accountIdentifier=account_id
+            endpoint,
+            **request_kwargs
         )
         return True

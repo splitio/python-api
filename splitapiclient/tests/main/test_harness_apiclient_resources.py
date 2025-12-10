@@ -24,7 +24,6 @@ class TestHarnessApiClientResources:
         
         # Create a HarnessApiClient with minimal config
         client = HarnessApiClient({
-            'apikey': 'test-apikey',
             'harness_token': 'test-harness-token'
         })
         
@@ -49,7 +48,6 @@ class TestHarnessApiClientResources:
         
         # Create a HarnessApiClient with minimal config
         client = HarnessApiClient({
-            'apikey': 'test-apikey',
             'harness_token': 'test-harness-token',
             'account_identifier': 'test-account-identifier'
         })
@@ -326,7 +324,7 @@ class TestHarnessApiClientResources:
                 return user_detail_response
             elif '/ng/api/user-groups' in url_template and '{groupIdentifier}' not in url_template and method == 'GET':
                 return group_response
-            elif '/ng/api/user-groups/{groupIdentifier}' in url_template and method == 'GET':
+            elif '/ng/api/user-groups' in url_template and '{groupIdentifier}' in url_template and method == 'GET':
                 return group_detail_response
             elif '/authz/api/roles' in url_template and '{roleId}' not in url_template and method == 'GET':
                 return role_response
@@ -334,15 +332,15 @@ class TestHarnessApiClientResources:
                 return role_detail_response
             elif '/authz/api/resourceGroups' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
                 return resource_group_response
-            elif '/resourcegroup/api/v2/resourceGroup' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
+            elif '/resourcegroup/api/v2/resourcegroup' in url_template and '{resourceGroupId}' not in url_template and method == 'GET':
                 return resource_group_response
             elif '/authz/api/resourceGroups/{resourceGroupId}' in url_template and method == 'GET':
                 return resource_group_detail_response
-            elif '/resourcegroup/api/v2/resourceGroup/{resourceGroupId}' in url_template and method == 'GET':
+            elif '/resourcegroup/api/v2/resourcegroup/{resourceGroupId}' in url_template and method == 'GET':
                 return resource_group_detail_response
-            elif '/authz/api/roleAssignments' in url_template and '{roleAssignmentId}' not in url_template and method == 'GET':
+            elif '/authz/api/roleassignments' in url_template and '{roleAssignmentId}' not in url_template and method == 'GET':
                 return role_assignment_response
-            elif '/authz/api/roleAssignments/{roleAssignmentId}' in url_template and method == 'GET':
+            elif '/authz/api/roleassignments/{roleAssignmentId}' in url_template and method == 'GET':
                 return role_assignment_detail_response
             elif '/ng/api/projects/aggregate' in url_template and method == 'GET':
                 return project_response
@@ -446,7 +444,6 @@ class TestHarnessApiClientResources:
         # Create a HarnessApiClient with mocked HTTP client
         client = HarnessApiClient({
             'harness_token': 'test-harness-token',
-            'apikey': 'test-apikey',
             'base_url': 'test-host',
             'harness_base_url': 'test-harness-host',
             'account_identifier': 'test-account-identifier'
@@ -534,50 +531,51 @@ class TestHarnessApiClientResources:
     
     def test_harness_authentication_modes(self, mocker):
         '''
-        Test that the HarnessApiClient properly handles different authentication modes
+        Test that the HarnessApiClient properly handles authentication requirements
         '''
         # Mock the HTTP client initialization to avoid actual HTTP requests
         mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.__init__', return_value=None)
         
-        # Test with both apikey and harness_token
-        client1 = HarnessApiClient({
-            'apikey': 'test-apikey',
+        # Test with harness_token - should work
+        client = HarnessApiClient({
             'harness_token': 'test-harness-token'
         })
         
-        # Verify that the HTTP client was initialized correctly for client1
+        # Verify that the HTTP client was initialized correctly
         from splitapiclient.http_clients.harness_client import HarnessHttpClient
         
-        # For client1, harness_token should be used for Harness endpoints
-        harness_client1_calls = [
+        # harness_token should be used for all endpoints (both Harness and Split)
+        harness_client_calls = [
             call for call in HarnessHttpClient.__init__.call_args_list 
-            if call[0][0] == 'https://app.harness.io/' and call[0][1] == 'test-harness-token'
+            if call[0][1] == 'test-harness-token'
         ]
-        assert len(harness_client1_calls) > 0
+        # Should be called 3 times: Split v2, Split v3, and Harness endpoints
+        assert len(harness_client_calls) == 3
         
-        # Reset the mock before creating client2
-        HarnessHttpClient.__init__.reset_mock()
+        # Verify that the client has all the Harness resource properties
+        assert hasattr(client, 'token')
+        assert hasattr(client, 'harness_apikey')
+        assert hasattr(client, 'service_account')
+        assert hasattr(client, 'harness_user')
+        assert hasattr(client, 'harness_group')
+        assert hasattr(client, 'role')
+        assert hasattr(client, 'resource_group')
+        assert hasattr(client, 'role_assignment')
+        assert hasattr(client, 'harness_project')
     
-        # Test with only apikey
-        client2 = HarnessApiClient({
-            'apikey': 'test-apikey'
-        })
+    def test_harness_mode_requires_harness_token(self, mocker):
+        '''
+        Test that harness_token is required and apikey alone raises an error
+        '''
+        from splitapiclient.util.exceptions import InsufficientConfigArgumentsException
         
-        # Verify that both clients have all the Harness resource properties
-        for client in [client1, client2]:
-            assert hasattr(client, 'token')
-            assert hasattr(client, 'harness_apikey')
-            assert hasattr(client, 'service_account')
-            assert hasattr(client, 'harness_user')
-            assert hasattr(client, 'harness_group')
-            assert hasattr(client, 'role')
-            assert hasattr(client, 'resource_group')
-            assert hasattr(client, 'role_assignment')
-            assert hasattr(client, 'harness_project')
+        # Mock the HTTP client initialization to avoid actual HTTP requests
+        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.__init__', return_value=None)
         
-        # For client2, apikey should be used for Harness endpoints
-        harness_client2_calls = [
-            call for call in HarnessHttpClient.__init__.call_args_list 
-            if call[0][0] == 'https://app.harness.io/' and call[0][1] == 'test-apikey'
-        ]
-        assert len(harness_client2_calls) > 0
+        # Test with only apikey - should raise an error
+        with pytest.raises(InsufficientConfigArgumentsException) as excinfo:
+            HarnessApiClient({
+                'apikey': 'test-apikey'
+            })
+        
+        assert 'harness_token is required' in str(excinfo.value)

@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
+import json
 from splitapiclient.microclients.harness import HarnessApiKeyMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.harness_client import HarnessHttpClient
 from splitapiclient.resources.harness import HarnessApiKey
+from splitapiclient.tests.microclients.harness.conftest import FakeResponse
 
 
 class TestHarnessApiKeyMicroClient:
@@ -45,8 +48,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.list('parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             parentIdentifier='parent1'
         )
@@ -78,8 +85,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.list()
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['all_items'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['all_items'],
+            expected_endpoint,
             accountIdentifier='test_account',
             parentIdentifier=""
         )
@@ -116,8 +127,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.get('apikey1', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['get_apikey'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/aggregate/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            expected_endpoint,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account',
             parentIdentifier='parent1'
@@ -149,8 +164,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.get('nonexistent', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['get_apikey'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/aggregate/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['get_apikey'],
+            expected_endpoint,
             apiKeyIdentifier='nonexistent',
             accountIdentifier='test_account',
             parentIdentifier='parent1'
@@ -196,8 +215,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.create(apikey_data)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['create'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['create'],
+            expected_endpoint,
             body=apikey_data,
             accountIdentifier='test_account'
         )
@@ -242,8 +265,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.add_permissions('apikey1', permissions)
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['add_permissions'].copy()
+        expected_endpoint['url_template'] = '/ng/api/roleassignments?accountIdentifier={accountIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['add_permissions'],
+            expected_endpoint,
             body=permissions,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account'
@@ -267,8 +294,12 @@ class TestHarnessApiKeyMicroClient:
         result = akmc.delete('apikey1', 'parent1')
         
         # Verify the make_request call
+        # Create expected endpoint with modified URL template (orgIdentifier and projectIdentifier removed)
+        expected_endpoint = HarnessApiKeyMicroClient._endpoint['delete'].copy()
+        expected_endpoint['url_template'] = '/ng/api/apikey/{apiKeyIdentifier}?accountIdentifier={accountIdentifier}&apiKeyType=SERVICE_ACCOUNT&parentIdentifier={parentIdentifier}'
+        
         SyncHttpClient.make_request.assert_called_once_with(
-            HarnessApiKeyMicroClient._endpoint['delete'],
+            expected_endpoint,
             apiKeyIdentifier='apikey1',
             accountIdentifier='test_account',
             parentIdentifier='parent1'
@@ -276,3 +307,149 @@ class TestHarnessApiKeyMicroClient:
         
         # Verify the result
         assert result is True
+
+
+class TestHarnessApiKeyURLGeneration:
+    """
+    Tests that verify actual URL generation by mocking at the requests level.
+    These tests ensure that optional parameters (orgIdentifier, projectIdentifier)
+    are correctly included or excluded from the final URL.
+    """
+
+    # =========================================================================
+    # LIST method URL tests
+    # =========================================================================
+
+    def test_list_url_without_optional_identifiers(self, mocker):
+        """Verify list URL doesn't contain orgIdentifier/projectIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account')
+        client.list('parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_org_identifier_only(self, mocker):
+        """Verify list URL contains orgIdentifier when set, but not projectIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', org_identifier='org1')
+        client.list('parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_project_identifier_only(self, mocker):
+        """Verify list URL contains projectIdentifier when set, but not orgIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', project_identifier='proj1')
+        client.list('parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_list_url_with_both_identifiers(self, mocker):
+        """Verify list URL contains both orgIdentifier and projectIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', org_identifier='org1', project_identifier='proj1')
+        client.list('parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier=proj1' in called_url
+
+    def test_list_url_with_method_override_identifiers(self, mocker):
+        """Verify list URL uses method parameters to override instance defaults"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({'data': []}))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', org_identifier='default_org', project_identifier='default_proj')
+        client.list('parent1', org_identifier='override_org', project_identifier='override_proj')
+
+        called_url = mock_get.call_args[0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=override_org' in called_url
+        assert 'projectIdentifier=override_proj' in called_url
+        assert 'default_org' not in called_url
+        assert 'default_proj' not in called_url
+
+    # =========================================================================
+    # GET method URL tests
+    # =========================================================================
+
+    def test_get_url_without_optional_identifiers(self, mocker):
+        """Verify get URL doesn't contain orgIdentifier/projectIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'apiKey': {'identifier': 'ak1', 'name': 'AK1', 'description': '', 'parentIdentifier': 'parent1', 'apiKeyType': 'SERVICE_ACCOUNT'}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account')
+        client.get('ak1', 'parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/apikey/aggregate/ak1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier' not in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_get_url_with_org_identifier_only(self, mocker):
+        """Verify get URL contains orgIdentifier when set, but not projectIdentifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'apiKey': {'identifier': 'ak1', 'name': 'AK1', 'description': '', 'parentIdentifier': 'parent1', 'apiKeyType': 'SERVICE_ACCOUNT'}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', org_identifier='org1')
+        client.get('ak1', 'parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/apikey/aggregate/ak1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier' not in called_url
+
+    def test_get_url_with_both_identifiers(self, mocker):
+        """Verify get URL contains both orgIdentifier and projectIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'apiKey': {'identifier': 'ak1', 'name': 'AK1', 'description': '', 'parentIdentifier': 'parent1', 'apiKeyType': 'SERVICE_ACCOUNT'}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessApiKeyMicroClient(hc, 'test_account', org_identifier='org1', project_identifier='proj1')
+        client.get('ak1', 'parent1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/apikey/aggregate/ak1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'parentIdentifier=parent1' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        assert 'projectIdentifier=proj1' in called_url

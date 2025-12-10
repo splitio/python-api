@@ -24,7 +24,6 @@ class TestDeprecatedEndpoints:
         
         # Create a HarnessApiClient
         client = HarnessApiClient({
-            'apikey': 'abc',
             'harness_token': 'abc'
         })
         
@@ -138,7 +137,7 @@ class TestAuthenticationInHarnessMode:
     
     def test_harness_token_used_for_harness_endpoints(self, mocker):
         """
-        Test that harness_token is used for Harness endpoints and apikey for Split endpoints
+        Test that harness_token is used for all endpoints (both Harness and Split)
         """
         # Create a custom HTTP client class for testing
         class TestHttpClient(HarnessHttpClient):
@@ -147,13 +146,7 @@ class TestAuthenticationInHarnessMode:
                 self.auth_token = auth_token
                 # Initialize with empty config
                 self.config = {'base_args': {}}
-                
-                # For Harness HTTP client, set x-api-key in base_args
-                if 'harness' in baseurl:
-                    self.config['base_args'] = {'x-api-key': auth_token}
-                else:
-                    # For Split HTTP client, we'll check Authorization header in make_request
-                    pass
+                self.config['base_args'] = {'x-api-key': auth_token}
                     
             def make_request(self, endpoint, body=None, **kwargs):
                 # Just return a successful response without making actual requests
@@ -168,57 +161,28 @@ class TestAuthenticationInHarnessMode:
         mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request', 
                     TestHttpClient.make_request)
         
-        # Create client with both harness_token and apikey
+        # Create client with harness_token only
         client = HarnessApiClient({
-            'harness_token': 'harness_token_value',
-            'apikey': 'api_key_value'
+            'harness_token': 'harness_token_value'
         })
         
-        # Check that the Harness HTTP client was initialized with harness_token
+        # Check that all HTTP clients were initialized with harness_token
         assert client._token_client._http_client.auth_token == 'harness_token_value'
-        
-        # Check that the Split HTTP client was initialized with apikey
-        assert client._split_client._http_client.auth_token == 'api_key_value'
+        assert client._split_client._http_client.auth_token == 'harness_token_value'
 
     def test_apikey_fallback_when_no_harness_token(self, mocker):
         """
-        Test that apikey is used for all operations when harness_token is not provided
+        Test that harness_token is required and apikey alone raises an error
         """
-        # Create a custom HTTP client class for testing
-        class TestHttpClient(HarnessHttpClient):
-            def __init__(self, baseurl, auth_token):
-                self.baseurl = baseurl
-                self.auth_token = auth_token
-                # Initialize with empty config
-                self.config = {'base_args': {}}
-                
-                # For Harness HTTP client, set x-api-key in base_args
-                if 'harness' in baseurl:
-                    self.config['base_args'] = {'x-api-key': auth_token}
-                else:
-                    # For Split HTTP client, we'll check Authorization header in make_request
-                    pass
-                    
-            def make_request(self, endpoint, body=None, **kwargs):
-                # Just return a successful response without making actual requests
-                mock_response = mocker.Mock()
-                mock_response.status_code = 200
-                mock_response.text = '{}'
-                return {}
+        from splitapiclient.util.exceptions import InsufficientConfigArgumentsException
         
-        # Patch the HarnessHttpClient constructor to use our test class
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.__init__', 
-                    TestHttpClient.__init__)
-        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.make_request', 
-                    TestHttpClient.make_request)
+        # Patch the HarnessHttpClient constructor to avoid actual HTTP requests
+        mocker.patch('splitapiclient.http_clients.harness_client.HarnessHttpClient.__init__', return_value=None)
         
-        # Create client with only apikey
-        client = HarnessApiClient({
-            'apikey': 'api_key_value'
-        })
+        # Create client with only apikey should raise an error
+        with pytest.raises(InsufficientConfigArgumentsException) as excinfo:
+            client = HarnessApiClient({
+                'apikey': 'api_key_value'
+            })
         
-        # Check that the Harness HTTP client was initialized with apikey as fallback
-        assert client._token_client._http_client.auth_token == 'api_key_value'
-        
-        # Check that the Split HTTP client was initialized with apikey
-        assert client._split_client._http_client.auth_token == 'api_key_value'
+        assert 'harness_token is required' in str(excinfo.value)
