@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
+import json
 from splitapiclient.microclients.harness import HarnessProjectMicroClient
 from splitapiclient.http_clients.sync_client import SyncHttpClient
+from splitapiclient.http_clients.harness_client import HarnessHttpClient
 from splitapiclient.resources.harness import HarnessProject
+from splitapiclient.tests.microclients.harness.conftest import FakeResponse
 
 
 class TestHarnessProjectMicroClient:
@@ -287,3 +290,127 @@ class TestHarnessProjectMicroClient:
         
         # Verify the result
         assert result is True
+
+
+class TestHarnessProjectURLGeneration:
+    """
+    Tests that verify actual URL generation by mocking at the requests level.
+    These tests ensure that optional orgIdentifier is correctly included or
+    excluded from the final URL.
+    
+    NOTE: The projects endpoint does NOT support projectIdentifier as a query parameter.
+    """
+
+    # =========================================================================
+    # LIST method URL tests
+    # =========================================================================
+
+    def test_list_url_without_org_identifier(self, mocker):
+        """Verify list URL doesn't contain orgIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        # First call returns data, second call returns data to trigger second page, third returns empty
+        mock_get.side_effect = [
+            FakeResponse(200, json.dumps({
+                'data': {'content': [], 'totalPages': 1}
+            })),
+        ]
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account')
+        client.list()
+
+        called_url = mock_get.call_args_list[0][0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+        # Verify projectIdentifier is not in URL (projects endpoint doesn't support it)
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_org_identifier(self, mocker):
+        """Verify list URL contains orgIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.side_effect = [
+            FakeResponse(200, json.dumps({
+                'data': {'content': [], 'totalPages': 1}
+            })),
+        ]
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account', org_identifier='org1')
+        client.list()
+
+        called_url = mock_get.call_args_list[0][0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+        # Verify projectIdentifier is not in URL
+        assert 'projectIdentifier' not in called_url
+
+    def test_list_url_with_method_override_org_identifier(self, mocker):
+        """Verify list URL uses method parameters to override instance org_identifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.side_effect = [
+            FakeResponse(200, json.dumps({
+                'data': {'content': [], 'totalPages': 1}
+            })),
+        ]
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account', org_identifier='default_org')
+        client.list(org_identifier='override_org')
+
+        called_url = mock_get.call_args_list[0][0][0]
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=override_org' in called_url
+        assert 'default_org' not in called_url
+
+    # =========================================================================
+    # GET method URL tests
+    # =========================================================================
+
+    def test_get_url_without_org_identifier(self, mocker):
+        """Verify get URL doesn't contain orgIdentifier when not set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'project': {'identifier': 'proj1', 'name': 'Project 1', 'description': '', 'orgIdentifier': 'org1', 'color': '', 'modules': []}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account')
+        client.get('proj1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/projects/proj1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier' not in called_url
+
+    def test_get_url_with_org_identifier(self, mocker):
+        """Verify get URL contains orgIdentifier when set"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'project': {'identifier': 'proj1', 'name': 'Project 1', 'description': '', 'orgIdentifier': 'org1', 'color': '', 'modules': []}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account', org_identifier='org1')
+        client.get('proj1')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/projects/proj1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=org1' in called_url
+
+    def test_get_url_with_method_override_org_identifier(self, mocker):
+        """Verify get URL uses method parameters to override instance org_identifier"""
+        mock_get = mocker.patch('splitapiclient.http_clients.harness_client.requests.get')
+        mock_get.return_value = FakeResponse(200, json.dumps({
+            'data': {'project': {'identifier': 'proj1', 'name': 'Project 1', 'description': '', 'orgIdentifier': 'override_org', 'color': '', 'modules': []}}
+        }))
+
+        hc = HarnessHttpClient('https://app.harness.io', 'test_token')
+        client = HarnessProjectMicroClient(hc, 'test_account', org_identifier='default_org')
+        client.get('proj1', org_identifier='override_org')
+
+        called_url = mock_get.call_args[0][0]
+        assert '/projects/proj1' in called_url
+        assert 'accountIdentifier=test_account' in called_url
+        assert 'orgIdentifier=override_org' in called_url
+        assert 'default_org' not in called_url
