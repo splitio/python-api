@@ -10,6 +10,8 @@ from splitapiclient.microclients import SplitMicroClient
 from splitapiclient.microclients import SplitDefinitionMicroClient
 from splitapiclient.microclients import SegmentMicroClient
 from splitapiclient.microclients import SegmentDefinitionMicroClient
+from splitapiclient.microclients import RuleBasedSegmentMicroClient
+from splitapiclient.microclients import RuleBasedSegmentDefinitionMicroClient
 from splitapiclient.microclients import WorkspaceMicroClient
 from splitapiclient.microclients import IdentityMicroClient
 from splitapiclient.microclients import AttributeMicroClient
@@ -106,6 +108,8 @@ class HarnessApiClient(BaseApiClient):
         self._split_definition_client = SplitDefinitionMicroClient(split_http_client)
         self._segment_client = SegmentMicroClient(split_http_client)
         self._segment_definition_client = SegmentDefinitionMicroClient(split_http_client)
+        self._rule_based_segment_client = RuleBasedSegmentMicroClient(split_http_client)
+        self._rule_based_segment_definition_client = RuleBasedSegmentDefinitionMicroClient(split_http_client)
         self._large_segment_client = LargeSegmentMicroClient(split_http_client)
         self._large_segment_definition_client = LargeSegmentDefinitionMicroClient(split_http_client)
         self._workspace_client = WorkspaceMicroClient(split_http_client)
@@ -150,6 +154,14 @@ class HarnessApiClient(BaseApiClient):
     @property
     def segment_definitions(self):
         return self._segment_definition_client
+
+    @property
+    def rule_based_segments(self):
+        return self._rule_based_segment_client
+
+    @property
+    def rule_based_segment_definitions(self):
+        return self._rule_based_segment_definition_client
     
     @property
     def large_segments(self):

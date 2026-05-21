@@ -3,6 +3,14 @@ CHANGELOG
 
 This file tracks the version history and changes made to the Split/Harness FME Python API Client library.
 
+3.5.9 (May 21, 2026)
+--------------------
+Bug Fixes:
+- Added rule-based segment support in Harness mode
+  - HarnessApiClient now exposes rule_based_segments and rule_based_segment_definitions
+  - These use the existing RuleBasedSegment and RuleBasedSegmentDefinition microclients with Harness x-api-key authentication
+  - Added Harness mode coverage for the rule-based segment client properties
+
 3.5.8 (December 10, 2025)
 -------------------------
 Features:

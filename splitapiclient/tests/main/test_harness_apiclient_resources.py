@@ -8,6 +8,7 @@ from splitapiclient.resources.harness import HarnessGroup, Role, ResourceGroup, 
 from splitapiclient.microclients.harness import TokenMicroClient, HarnessApiKeyMicroClient, ServiceAccountMicroClient
 from splitapiclient.microclients.harness import HarnessUserMicroClient, HarnessGroupMicroClient, RoleMicroClient
 from splitapiclient.microclients.harness import ResourceGroupMicroClient, RoleAssignmentMicroClient, HarnessProjectMicroClient
+from splitapiclient.microclients import RuleBasedSegmentMicroClient, RuleBasedSegmentDefinitionMicroClient
 
 
 class TestHarnessApiClientResources:
@@ -37,6 +38,8 @@ class TestHarnessApiClientResources:
         assert isinstance(client.resource_group, ResourceGroupMicroClient)
         assert isinstance(client.role_assignment, RoleAssignmentMicroClient)
         assert isinstance(client.harness_project, HarnessProjectMicroClient)
+        assert isinstance(client.rule_based_segments, RuleBasedSegmentMicroClient)
+        assert isinstance(client.rule_based_segment_definitions, RuleBasedSegmentDefinitionMicroClient)
     
     def test_harness_resource_operations(self, mocker):
         '''
@@ -562,6 +565,8 @@ class TestHarnessApiClientResources:
         assert hasattr(client, 'resource_group')
         assert hasattr(client, 'role_assignment')
         assert hasattr(client, 'harness_project')
+        assert hasattr(client, 'rule_based_segments')
+        assert hasattr(client, 'rule_based_segment_definitions')
     
     def test_harness_mode_requires_harness_token(self, mocker):
         '''
